@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { language, setLanguage, t } = useLanguage()
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-200">
@@ -19,33 +21,37 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link href="#features" className="text-gray-700 hover:text-primary-600 transition">
-              Features
+              {t.header.features}
             </Link>
             <Link href="#testimonials" className="text-gray-700 hover:text-primary-600 transition">
-              Testimonials
+              {t.header.testimonials}
             </Link>
             <Link href="#pricing" className="text-gray-700 hover:text-primary-600 transition">
-              Pricing
+              {t.header.pricing}
             </Link>
             <Link href="#faq" className="text-gray-700 hover:text-primary-600 transition">
-              FAQ
+              {t.header.faq}
             </Link>
             <Link href="#tools" className="text-gray-700 hover:text-primary-600 transition">
-              Get Started
+              {t.header.getStarted}
             </Link>
           </nav>
 
           {/* Language Selector & Sign In */}
           <div className="hidden md:flex items-center space-x-4">
-            <select className="text-sm text-gray-700 border border-gray-300 rounded px-2 py-1">
-              <option>English</option>
-              <option>中文</option>
+            <select 
+              className="text-sm text-gray-700 border border-gray-300 rounded px-2 py-1 cursor-pointer"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'en' | 'zh')}
+            >
+              <option value="en">English</option>
+              <option value="zh">中文</option>
             </select>
             <Link
               href="#tools"
               className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition"
             >
-              Start Free
+              {t.header.startFree}
             </Link>
           </div>
 
@@ -62,31 +68,45 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-4">
-              <Link href="#features" className="text-gray-700 hover:text-primary-600 transition">
-                Features
+              <Link href="#features" className="text-gray-700 hover:text-primary-600 transition" onClick={() => setIsMenuOpen(false)}>
+                {t.header.features}
               </Link>
-              <Link href="#testimonials" className="text-gray-700 hover:text-primary-600 transition">
-                Testimonials
+              <Link href="#testimonials" className="text-gray-700 hover:text-primary-600 transition" onClick={() => setIsMenuOpen(false)}>
+                {t.header.testimonials}
               </Link>
-              <Link href="#pricing" className="text-gray-700 hover:text-primary-600 transition">
-                Pricing
+              <Link href="#pricing" className="text-gray-700 hover:text-primary-600 transition" onClick={() => setIsMenuOpen(false)}>
+                {t.header.pricing}
               </Link>
-              <Link href="#faq" className="text-gray-700 hover:text-primary-600 transition">
-                FAQ
+              <Link href="#faq" className="text-gray-700 hover:text-primary-600 transition" onClick={() => setIsMenuOpen(false)}>
+                {t.header.faq}
               </Link>
               <Link 
                 href="#tools" 
                 className="text-gray-700 hover:text-primary-600 transition"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Get Started
+                {t.header.getStarted}
               </Link>
+              
+              {/* Mobile Language Selector */}
+              <select 
+                className="text-sm text-gray-700 border border-gray-300 rounded px-2 py-1 cursor-pointer"
+                value={language}
+                onChange={(e) => {
+                  setLanguage(e.target.value as 'en' | 'zh')
+                  setIsMenuOpen(false)
+                }}
+              >
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+              </select>
+              
               <Link
                 href="#tools"
                 className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition text-center"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Start Free
+                {t.header.startFree}
               </Link>
             </nav>
           </div>
