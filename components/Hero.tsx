@@ -8,60 +8,82 @@ export default function Hero() {
   const { t } = useLanguage()
   
   return (
-    <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 to-white">
+    <section className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto text-center">
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 animate-fade-in">
+        {/* Main Heading */}
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
           {t.hero.title1}
           <br />
-          <span className="text-primary-600">{t.hero.title2}</span>
+          <span className="relative inline-block text-blue-600">
+            {t.hero.title2}
+            {/* Wavy Underline SVG */}
+            <svg 
+              className="absolute left-0 right-0 -bottom-2 w-full" 
+              viewBox="0 0 400 12" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              preserveAspectRatio="none"
+            >
+              <path 
+                d="M0 6C20 2, 40 10, 60 6C80 2, 100 10, 120 6C140 2, 160 10, 180 6C200 2, 220 10, 240 6C260 2, 280 10, 300 6C320 2, 340 10, 360 6C380 2, 400 10, 400 6" 
+                stroke="#93C5FD" 
+                strokeWidth="3" 
+                strokeLinecap="round"
+                className="animate-wave"
+              />
+            </svg>
+          </span>
         </h1>
         
-        <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-          {t.hero.subtitle}{' '}
-          <span className="font-bold text-green-600">{t.hero.free}</span>
+        {/* Subtitle */}
+        <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+          {t.hero.subtitle}
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
           <Link
             href="#tools"
-            className="bg-primary-600 text-white px-8 py-4 rounded-lg hover:bg-primary-700 transition text-lg font-semibold flex items-center gap-2"
+            className="group bg-gray-900 text-white px-8 py-4 rounded-xl hover:bg-gray-800 transition-all text-lg font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             {t.hero.findSources}
-            <ArrowRight size={20} />
           </Link>
           <Link
             href="#tools"
-            className="bg-white text-primary-600 border-2 border-primary-600 px-8 py-4 rounded-lg hover:bg-primary-50 transition text-lg font-semibold flex items-center gap-2"
+            className="group bg-white text-gray-900 border-2 border-gray-200 px-8 py-4 rounded-xl hover:border-gray-300 hover:shadow-md transition-all text-lg font-semibold flex items-center gap-2"
           >
             {t.hero.checkCitations}
-            <ArrowRight size={20} />
           </Link>
         </div>
 
+        {/* Watch Demo */}
         <button 
           onClick={() => {
             const toolsSection = document.getElementById('tools')
             toolsSection?.scrollIntoView({ behavior: 'smooth' })
           }}
-          className="text-primary-600 hover:text-primary-700 transition flex items-center gap-2 mx-auto cursor-pointer"
+          className="text-gray-600 hover:text-gray-900 transition flex items-center gap-2 mx-auto group mb-16"
         >
-          <Play size={24} className="fill-current" />
-          <span className="text-lg">{t.hero.watchDemo}</span>
+          <div className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center group-hover:bg-gray-100 transition">
+            <Play size={14} className="fill-current ml-0.5" />
+          </div>
+          <span className="text-base font-medium">{t.hero.watchDemo}</span>
         </button>
 
-        {/* Database Integration Icons */}
+        {/* Database Integration */}
         <div className="mt-16">
-          <p className="text-gray-500 mb-6">{t.hero.databases}</p>
-          <div className="flex flex-wrap justify-center items-center gap-8">
-            <div className="text-gray-400 font-semibold">arXiv</div>
-            <div className="text-gray-400 font-semibold">CrossRef</div>
-            <div className="text-gray-400 font-semibold">OpenAlex</div>
-            <div className="text-gray-400 font-semibold">PubMed</div>
-            <div className="text-gray-400 font-semibold">Semantic Scholar</div>
+          <p className="text-sm text-gray-500 mb-6 uppercase tracking-wider font-medium">
+            {t.hero.databases}
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">arXiv</div>
+            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">CrossRef</div>
+            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">OpenAlex</div>
+            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">PubMed</div>
+            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">Semantic Scholar</div>
           </div>
         </div>
       </div>
     </section>
   )
 }
-

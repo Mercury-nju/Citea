@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const faqs = [
   [
@@ -52,37 +53,37 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-4 text-left bg-white hover:bg-gray-50 transition flex justify-between items-center"
+        className="w-full px-6 py-5 text-left hover:bg-gray-50 transition flex justify-between items-center group"
       >
-        <span className="font-semibold text-gray-900">{question}</span>
-        {isOpen ? (
-          <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
-        )}
+        <span className="font-semibold text-gray-900 text-lg pr-4">{question}</span>
+        <ChevronDown 
+          className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
-      {isOpen && (
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-          <p className="text-gray-700">{answer}</p>
+      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
+        <div className="px-6 py-5 bg-gray-50 border-t border-gray-200">
+          <p className="text-gray-700 leading-relaxed">{answer}</p>
         </div>
-      )}
+      </div>
     </div>
   )
 }
 
 export default function FAQ() {
+  const { t } = useLanguage()
+
   return (
-    <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Frequently asked questions
+            {t.faq.title}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Have questions about citation verification? Find answers to common questions about Citea's research tools.
+            {t.faq.subtitle}
           </p>
         </div>
 
@@ -99,4 +100,3 @@ export default function FAQ() {
     </section>
   )
 }
-

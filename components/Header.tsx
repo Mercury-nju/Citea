@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Globe } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import Logo from './Logo'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -14,8 +15,8 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-primary-600">
-            Citea
+          <Link href="/" className="flex items-center">
+            <Logo />
           </Link>
 
           {/* Desktop Navigation */}
@@ -39,17 +40,20 @@ export default function Header() {
 
           {/* Language Selector & Sign In */}
           <div className="hidden md:flex items-center space-x-4">
-            <select 
-              className="text-sm text-gray-700 border border-gray-300 rounded px-2 py-1 cursor-pointer"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as 'en' | 'zh')}
-            >
-              <option value="en">English</option>
-              <option value="zh">中文</option>
-            </select>
+            <div className="relative">
+              <select 
+                className="appearance-none text-sm text-gray-600 bg-transparent border-none cursor-pointer pr-6 py-2 focus:outline-none flex items-center gap-1"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as 'en' | 'zh')}
+              >
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+              </select>
+              <Globe size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
             <Link
               href="#tools"
-              className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition"
+              className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all shadow-sm hover:shadow-md font-medium"
             >
               {t.header.startFree}
             </Link>

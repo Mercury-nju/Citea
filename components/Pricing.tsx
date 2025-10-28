@@ -1,67 +1,79 @@
 'use client'
 
 import { Check } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Pricing() {
+  const { t } = useLanguage()
+
+  const features = [
+    t.pricing.features.unlimited,
+    t.pricing.features.sourceFinding,
+    t.pricing.features.aiVerification,
+    t.pricing.features.databases,
+    t.pricing.features.chatAssistant,
+    t.pricing.features.formats,
+    t.pricing.features.realtime,
+    t.pricing.features.export,
+    t.pricing.features.support,
+    t.pricing.features.noLimits,
+    t.pricing.features.noRestrictions,
+  ]
+
   return (
-    <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+    <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Get your research to a new level with{' '}
-            <span className="text-green-600">Free Access</span>, for everyone.
+            {t.pricing.title}{' '}
+            <span className="text-green-600">{t.pricing.freeAccess}</span>
+            {' '}{t.pricing.forEveryone}
           </h2>
         </div>
 
         <div className="max-w-2xl mx-auto">
-          <div className="bg-gradient-to-br from-green-50 to-blue-50 p-8 rounded-2xl border-4 border-green-400 shadow-2xl transform hover:scale-105 transition-all duration-300">
-            <div className="text-center mb-6">
-              <div className="inline-block bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold mb-4">
-                🎉 COMPLETELY FREE FOREVER
+          <div className="relative bg-white p-10 rounded-3xl border-2 border-gray-200 shadow-xl hover:shadow-2xl transition-all duration-300">
+            {/* Badge */}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                🎉 {t.pricing.freeAccess.toUpperCase()}
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">Free for Everyone</h3>
-              <div className="text-5xl font-bold text-green-600 mb-2">$0</div>
-              <p className="text-gray-600">No credit card required. No hidden fees.</p>
             </div>
 
-            <ul className="space-y-4 mb-8">
-              {[
-                'Unlimited citation checks',
-                'Unlimited source finding',
-                'Advanced AI verification',
-                'Access to all academic databases',
-                'AI Research Assistant chat',
-                'All citation formats (APA, MLA, Chicago, etc.)',
-                'Real-time verification',
-                'Citation export functionality',
-                'Email support',
-                'No character limits',
-                'No usage restrictions'
-              ].map((feature, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <Check className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">{feature}</span>
+            <div className="text-center mb-8 mt-4">
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">{t.pricing.planTitle}</h3>
+              <div className="text-6xl font-bold text-gray-900 mb-2">{t.pricing.price}</div>
+              <p className="text-gray-600 text-lg">{t.pricing.subtitle}</p>
+            </div>
+
+            <ul className="space-y-4 mb-10">
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-start gap-3 group">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition">
+                    <Check className="w-4 h-4 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 text-lg">{feature}</span>
                 </li>
               ))}
             </ul>
 
             <a
               href="#tools"
-              className="block w-full bg-green-600 text-white text-center px-8 py-4 rounded-lg hover:bg-green-700 transition text-lg font-semibold"
+              className="block w-full bg-gray-900 text-white text-center px-8 py-5 rounded-xl hover:bg-gray-800 transition-all text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              Start Using Citea Free
+              {t.pricing.cta}
             </a>
 
-            <p className="text-center text-gray-600 mt-6">
-              ✨ No registration required to start
+            <p className="text-center text-gray-600 mt-6 text-sm">
+              {t.pricing.noRegistration}
             </p>
           </div>
         </div>
 
         <div className="text-center mt-12">
           <p className="text-gray-600">
-            Questions about our free service? Contact us at{' '}
-            <a href="mailto:support@citea.com" className="text-primary-600 hover:underline">
+            {t.pricing.contact}{' '}
+            <a href="mailto:support@citea.com" className="text-blue-600 hover:underline font-medium">
               support@citea.com
             </a>
           </p>
@@ -70,4 +82,3 @@ export default function Pricing() {
     </section>
   )
 }
-
