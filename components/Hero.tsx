@@ -36,7 +36,13 @@ export default function Hero() {
           </Link>
         </div>
 
-        <button className="text-primary-600 hover:text-primary-700 transition flex items-center gap-2 mx-auto">
+        <button 
+          onClick={() => {
+            const toolsSection = document.getElementById('tools')
+            toolsSection?.scrollIntoView({ behavior: 'smooth' })
+          }}
+          className="text-primary-600 hover:text-primary-700 transition flex items-center gap-2 mx-auto cursor-pointer"
+        >
           <Play size={24} className="fill-current" />
           <span className="text-lg">Watch Demo</span>
         </button>

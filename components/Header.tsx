@@ -30,8 +30,8 @@ export default function Header() {
             <Link href="#faq" className="text-gray-700 hover:text-primary-600 transition">
               FAQ
             </Link>
-            <Link href="#" className="text-gray-700 hover:text-primary-600 transition">
-              Blog
+            <Link href="#tools" className="text-gray-700 hover:text-primary-600 transition">
+              Get Started
             </Link>
           </nav>
 
@@ -42,7 +42,7 @@ export default function Header() {
               <option>中文</option>
             </select>
             <Link
-              href="#"
+              href="#tools"
               className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition"
             >
               Start Free
@@ -74,12 +74,17 @@ export default function Header() {
               <Link href="#faq" className="text-gray-700 hover:text-primary-600 transition">
                 FAQ
               </Link>
-              <Link href="#" className="text-gray-700 hover:text-primary-600 transition">
-                Blog
+              <Link 
+                href="#tools" 
+                className="text-gray-700 hover:text-primary-600 transition"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Get Started
               </Link>
               <Link
-                href="#"
+                href="#tools"
                 className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition text-center"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Start Free
               </Link>

@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 
 export default function Footer() {
@@ -17,61 +19,69 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">Product</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  Refund Policy
+                <Link href="#features" className="text-gray-400 hover:text-white transition">
+                  Features
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  Terms of Service
+                <Link href="#pricing" className="text-gray-400 hover:text-white transition">
+                  Pricing (Free!)
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  Privacy Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  Reviews
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  Updates
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  Affiliate Program
+                <Link href="#faq" className="text-gray-400 hover:text-white transition">
+                  FAQ
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-lg font-semibold mb-4">Friends of Citea</h4>
+            <h4 className="text-lg font-semibold mb-4">Tools</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  CiteSnap
+                <Link href="#tools" className="text-gray-400 hover:text-white transition">
+                  Source Finder
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition">
-                  NNScholar
+                <Link href="#tools" className="text-gray-400 hover:text-white transition">
+                  Citation Checker
                 </Link>
+              </li>
+              <li>
+                <Link href="#tools" className="text-gray-400 hover:text-white transition">
+                  AI Assistant
+                </Link>
+              </li>
+              <li>
+                <Link href="#testimonials" className="text-gray-400 hover:text-white transition">
+                  Testimonials
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Contact</h4>
+            <ul className="space-y-2">
+              <li>
+                <a href="mailto:support@citea.com" className="text-gray-400 hover:text-white transition">
+                  support@citea.com
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/Mercury-nju/Citea" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition">
+                  GitHub
+                </a>
+              </li>
+              <li>
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="text-gray-400 hover:text-white transition text-left"
+                >
+                  Back to Top ↑
+                </button>
               </li>
             </ul>
           </div>
