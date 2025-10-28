@@ -2,7 +2,7 @@ import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
 import DetailedFeatures from '@/components/DetailedFeatures'
-import Tools from '@/components/Tools'
+import ToolsPreview from '@/components/ToolsPreview'
 import Testimonials from '@/components/Testimonials'
 import Pricing from '@/components/Pricing'
 import FAQ from '@/components/FAQ'
@@ -15,7 +15,7 @@ export default function Home() {
       <Hero />
       <Features />
       <DetailedFeatures />
-      <Tools />
+      <ToolsPreview />
       <Testimonials />
       <Pricing />
       <FAQ />

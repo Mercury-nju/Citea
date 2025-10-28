@@ -43,14 +43,14 @@ export default function Hero() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
           <Link
-            href="#tools"
-            className="group bg-gray-900 text-white px-8 py-4 rounded-xl hover:bg-gray-800 transition-all text-lg font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            href="/auth/signin"
+            className="group bg-gray-900 text-white px-10 py-4 rounded-xl hover:bg-gray-800 transition-all text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             {t.hero.findSources}
           </Link>
           <Link
-            href="#tools"
-            className="group bg-white text-gray-900 border-2 border-gray-200 px-8 py-4 rounded-xl hover:border-gray-300 hover:shadow-md transition-all text-lg font-semibold flex items-center gap-2"
+            href="/auth/signin"
+            className="group bg-white text-gray-900 border-2 border-gray-200 px-10 py-4 rounded-xl hover:border-gray-300 hover:shadow-md transition-all text-lg font-semibold"
           >
             {t.hero.checkCitations}
           </Link>

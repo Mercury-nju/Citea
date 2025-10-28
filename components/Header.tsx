@@ -40,19 +40,22 @@ export default function Header() {
 
           {/* Language Selector & Sign In */}
           <div className="hidden md:flex items-center space-x-4">
-            <div className="relative">
+            <div className="relative inline-flex items-center gap-2 group">
+              <Globe size={18} className="text-gray-500" />
               <select 
-                className="appearance-none text-sm text-gray-600 bg-transparent border-none cursor-pointer pr-6 py-2 focus:outline-none flex items-center gap-1"
+                className="appearance-none text-sm text-gray-700 bg-white border border-gray-200 rounded-lg cursor-pointer pl-3 pr-8 py-2 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as 'en' | 'zh')}
               >
                 <option value="en">English</option>
                 <option value="zh">中文</option>
               </select>
-              <Globe size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
             <Link
-              href="#tools"
+              href="/auth/signin"
               className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all shadow-sm hover:shadow-md font-medium"
             >
               {t.header.startFree}
@@ -93,17 +96,20 @@ export default function Header() {
               </Link>
               
               {/* Mobile Language Selector */}
-              <select 
-                className="text-sm text-gray-700 border border-gray-300 rounded px-2 py-1 cursor-pointer"
-                value={language}
-                onChange={(e) => {
-                  setLanguage(e.target.value as 'en' | 'zh')
-                  setIsMenuOpen(false)
-                }}
-              >
-                <option value="en">English</option>
-                <option value="zh">中文</option>
-              </select>
+              <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg">
+                <Globe size={18} className="text-gray-500" />
+                <select 
+                  className="flex-1 text-sm text-gray-700 bg-transparent border-none cursor-pointer focus:outline-none"
+                  value={language}
+                  onChange={(e) => {
+                    setLanguage(e.target.value as 'en' | 'zh')
+                    setIsMenuOpen(false)
+                  }}
+                >
+                  <option value="en">🇺🇸 English</option>
+                  <option value="zh">🇨🇳 中文</option>
+                </select>
+              </div>
               
               <Link
                 href="#tools"
