@@ -5,9 +5,28 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Citea - Find Sources in Seconds. Cite Only What\'s Real.',
-  description: 'AI citation checker and source finder tool. Check fake citations, verify references, and find original sources — completely free.',
-  keywords: 'citation checker, source finder, academic research, AI citation verification, fake citation detector',
+  title: 'Citea - Free AI Citation Checker & Source Finder | Verify Academic References',
+  description: 'Free AI-powered citation verification tool. Check fake citations, find academic sources from CrossRef, PubMed, arXiv & Semantic Scholar. No limits, no registration required.',
+  keywords: 'citation checker, source finder, academic research, AI citation verification, fake citation detector, reference verification, academic integrity, research tool, CrossRef, PubMed, free citation tool',
+  authors: [{ name: 'Citea Team' }],
+  creator: 'Citea',
+  publisher: 'Citea',
+  robots: 'index, follow',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://citea.vercel.app',
+    title: 'Citea - Free AI Citation Checker & Source Finder',
+    description: 'Verify academic citations and find credible sources instantly. 100% free, unlimited usage, no registration.',
+    siteName: 'Citea',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Citea - Free AI Citation Checker',
+    description: 'Verify citations, find sources, maintain academic integrity. Completely free.',
+  },
+  viewport: 'width=device-width, initial-scale=1',
+  themeColor: '#0ea5e9',
 }
 
 export default function RootLayout({

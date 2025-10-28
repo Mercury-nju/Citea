@@ -25,6 +25,7 @@ interface Citation {
 export default function Tools() {
   const [activeTab, setActiveTab] = useState<ToolType>('finder')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string>('')
   
   // Source Finder states
   const [searchQuery, setSearchQuery] = useState('')
@@ -37,42 +38,80 @@ export default function Tools() {
   // AI Assistant states
   const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([])
   const [userMessage, setUserMessage] = useState('')
+  
+  // Example queries for demonstration
+  const exampleQueries = {
+    finder: ['machine learning in healthcare', 'climate change impacts', 'quantum computing applications'],
+    checker: 'Recent studies have shown significant progress (Smith et al., 2023). Machine learning algorithms improve accuracy (Johnson & Brown, 2022).',
+    assistant: ['How do I cite a website in APA format?', 'What is the difference between primary and secondary sources?', '如何判断期刊是否正规？']
+  }
 
   const handleFindSources = async () => {
-    if (!searchQuery.trim()) return
+    if (!searchQuery.trim()) {
+      setError('Please enter a search query')
+      return
+    }
     
     setLoading(true)
+    setError('')
+    setSources([])
+    
     try {
       const response = await fetch('/api/find-sources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchQuery })
       })
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch sources')
+      }
+      
       const data = await response.json()
       setSources(data.sources || [])
+      
+      if (!data.sources || data.sources.length === 0) {
+        setError('No sources found. Try different keywords or check your spelling.')
+      }
     } catch (error) {
       console.error('Error finding sources:', error)
-      alert('Error finding sources. Please try again.')
+      setError('Unable to search sources. Please check your internet connection and try again.')
     } finally {
       setLoading(false)
     }
   }
 
   const handleCheckCitations = async () => {
-    if (!citationText.trim()) return
+    if (!citationText.trim()) {
+      setError('Please paste text containing citations')
+      return
+    }
     
     setLoading(true)
+    setError('')
+    setCheckedCitations([])
+    
     try {
       const response = await fetch('/api/check-citations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: citationText })
       })
+      
+      if (!response.ok) {
+        throw new Error('Failed to check citations')
+      }
+      
       const data = await response.json()
-      setCheckedCitations(data.citations || [])
+      
+      if (data.message) {
+        setError(data.message)
+      } else {
+        setCheckedCitations(data.citations || [])
+      }
     } catch (error) {
       console.error('Error checking citations:', error)
-      alert('Error checking citations. Please try again.')
+      setError('Unable to verify citations. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -85,6 +124,7 @@ export default function Tools() {
     setMessages(newMessages)
     setUserMessage('')
     setLoading(true)
+    setError('')
     
     try {
       const response = await fetch('/api/chat', {
@@ -92,11 +132,18 @@ export default function Tools() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages })
       })
+      
+      if (!response.ok) {
+        throw new Error('Failed to get AI response')
+      }
+      
       const data = await response.json()
       setMessages([...newMessages, { role: 'assistant', content: data.response }])
     } catch (error) {
       console.error('Error sending message:', error)
-      alert('Error communicating with assistant. Please try again.')
+      setError('Unable to reach AI assistant. Please try again.')
+      // Remove the user message if AI failed
+      setMessages(messages)
     } finally {
       setLoading(false)
     }
@@ -181,7 +228,7 @@ export default function Tools() {
                 Enter your research topic or keywords to find credible academic sources from major databases.
               </p>
               
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-2 mb-4">
                 <input
                   type="text"
                   value={searchQuery}
@@ -199,6 +246,29 @@ export default function Tools() {
                   Search
                 </button>
               </div>
+              
+              {/* Example queries */}
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">Try these examples:</p>
+                <div className="flex flex-wrap gap-2">
+                  {exampleQueries.finder.map((example, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSearchQuery(example)}
+                      className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100 transition"
+                    >
+                      {example}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Error display */}
+              {error && activeTab === 'finder' && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                  {error}
+                </div>
+              )}
 
               <div className="space-y-4">
                 {sources.map((source, index) => (
@@ -258,14 +328,31 @@ export default function Tools() {
                 className="w-full h-40 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4"
               />
               
+              {/* Example button */}
+              <div className="mb-4">
+                <button
+                  onClick={() => setCitationText(exampleQueries.checker)}
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  Load example text
+                </button>
+              </div>
+              
               <button
                 onClick={handleCheckCitations}
                 disabled={loading}
-                className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition disabled:opacity-50 flex items-center gap-2"
+                className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition disabled:opacity-50 flex items-center gap-2 mb-4"
               >
                 {loading ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle size={20} />}
                 Verify Citations
               </button>
+
+              {/* Error display */}
+              {error && activeTab === 'checker' && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                  {error}
+                </div>
+              )}
 
               <div className="mt-6 space-y-3">
                 {checkedCitations.map((citation, index) => (
@@ -311,7 +398,21 @@ export default function Tools() {
                 {messages.length === 0 ? (
                   <div className="text-center text-gray-500 mt-8">
                     <MessageSquare size={48} className="mx-auto mb-4 text-gray-300" />
-                    <p>Start a conversation! Ask me about citations, sources, or research questions.</p>
+                    <p className="mb-4">Start a conversation! Ask me about citations, sources, or research questions.</p>
+                    <div className="text-left max-w-md mx-auto">
+                      <p className="text-sm font-semibold text-gray-700 mb-2">Try these questions:</p>
+                      <div className="space-y-2">
+                        {exampleQueries.assistant.map((example, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setUserMessage(example)}
+                            className="w-full text-left text-sm bg-blue-50 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-100 transition"
+                          >
+                            💬 {example}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -334,6 +435,13 @@ export default function Tools() {
                   </div>
                 )}
               </div>
+              
+              {/* Error display */}
+              {error && activeTab === 'assistant' && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                  {error}
+                </div>
+              )}
               
               <div className="flex gap-2">
                 <input
