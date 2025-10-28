@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const TONGYI_API_KEY = 'sk-9bf19547ddbd4be1a87a7a43cf251097'
 
-async function extractCitations(text: string) {
+function extractCitations(text: string): string[] {
   // Simple citation extraction (looks for patterns like Author et al., Year)
   const citationPattern = /([A-Z][a-z]+(?:\s+(?:et\s+al\.|and\s+[A-Z][a-z]+))?,?\s+\d{4})|(\([A-Z][a-z]+(?:\s+(?:et\s+al\.|&\s+[A-Z][a-z]+))?,?\s+\d{4}\))/g
   const matches = text.match(citationPattern) || []
-  return [...new Set(matches)]
+  return Array.from(new Set(matches))
 }
 
 async function verifyCitationWithAI(citation: string) {
