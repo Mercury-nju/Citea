@@ -175,48 +175,83 @@ export default function SourceFinderInterface() {
                     支撑文献（{sources.length} 篇）
                   </p>
 
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <div className="flex items-center gap-2 mb-3">
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    {/* Header with Badge and Actions */}
+                    <div className="flex items-center gap-2 mb-4">
                       {source.verified && (
-                        <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                        <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs font-bold">
                           <CheckCircle size={14} />
-                          {source.source} Verified
+                          {source.source}验证
                         </span>
                       )}
-                      <button className="ml-auto flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm">
-                        <ExternalLink size={16} />
-                        Access
-                      </button>
-                      <button 
-                        onClick={() => copyToClipboard(`${source.authors} (${source.year}). ${source.title}. ${source.journal}.`)}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm"
-                      >
-                        <Copy size={16} />
-                        Copy
-                      </button>
+                      <div className="ml-auto flex items-center gap-2">
+                        <button 
+                          onClick={() => window.open(source.doi ? `https://doi.org/${source.doi}` : '#', '_blank')}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                        >
+                          <ExternalLink size={16} />
+                          访问
+                        </button>
+                        <button 
+                          onClick={() => copyToClipboard(`${source.authors} (${source.year}). ${source.title}. ${source.journal}. DOI: ${source.doi || 'N/A'}`)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                        >
+                          <Copy size={16} />
+                          复制
+                        </button>
+                      </div>
                     </div>
 
-                    <h5 className="font-semibold text-gray-900 mb-2">
+                    {/* Citation Title */}
+                    <h5 className="text-lg font-semibold text-gray-900 mb-4 leading-tight">
                       {source.title}
                     </h5>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p>👤 {source.authors}</p>
-                      <p>📚 {source.journal} • 📅 {source.year}</p>
-                      {source.doi && (
-                        <p className="text-xs text-gray-500">DOI: {source.doi}</p>
-                      )}
+
+                    {/* Citation Metadata - Citely Style */}
+                    <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <span className="text-gray-400">👤</span>
+                        <span>{source.authors}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <span className="text-gray-400">📚</span>
+                        <span className="italic">{source.journal}</span>
+                        <span>•</span>
+                        <span className="text-gray-400">📅</span>
+                        <span>{source.year}</span>
+                      </div>
                     </div>
 
-                    <div className="mt-4 bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-                      <p className="text-xs font-semibold text-blue-900 mb-1">
+                    {/* DOI Section */}
+                    {source.doi && (
+                      <div className="mb-4">
+                        <div className="flex items-start gap-2">
+                          <span className="text-xs font-semibold text-gray-500 uppercase mt-0.5">DOI:</span>
+                          <a 
+                            href={`https://doi.org/${source.doi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:text-blue-800 hover:underline break-all"
+                          >
+                            {source.doi}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Reference Explanation */}
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                      <p className="text-xs font-semibold text-blue-900 mb-2">
                         参考文献说明
                       </p>
-                      <p className="text-sm text-blue-800">
-                        该文献通过{source.source}数据库验证，提供了关于主要观点的权威支持。
+                      <p className="text-sm text-blue-800 leading-relaxed">
+                        该文献通过 {source.source} 数据库验证，提供了关于主要观点的权威支持。所有元数据均来自官方学术数据库API。
                       </p>
-                      <p className="text-xs text-blue-700 mt-2">
-                        证据强度: <span className="font-semibold">Strong</span>
-                      </p>
+                      <div className="mt-3 pt-3 border-t border-blue-200">
+                        <p className="text-xs text-blue-700">
+                          证据强度: <span className="font-bold">Strong</span>
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
