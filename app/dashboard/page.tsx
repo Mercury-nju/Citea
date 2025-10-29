@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
+import CitationCheckerInterface from '@/components/CitationCheckerInterface'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -249,10 +250,12 @@ export default function DashboardPage() {
 
             {/* Main Input Area */}
             {activeTab === 'finder' && <SourceFinderInterface />}
+            
+            {activeTab === 'checker' && <CitationCheckerInterface />}
 
-            {activeTab !== 'finder' && (
+            {activeTab === 'assistant' && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                {activeTab === 'checker' && (
+                {activeTab === 'assistant' && (
                 <div className="p-6">
                   <textarea
                     value={query}
@@ -273,10 +276,15 @@ export default function DashboardPage() {
                       <ArrowUp size={18} />
                     </button>
                   </div>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
+            )}
 
-              {activeTab === 'assistant' && (
+            {/* Example Prompts - Only show for assistant */}
+            {activeTab === 'assistant' && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                {activeTab === 'assistant' && (
                 <div className="p-6">
                   <div className="h-64 flex items-center justify-center text-gray-400">
                     <div className="text-center">

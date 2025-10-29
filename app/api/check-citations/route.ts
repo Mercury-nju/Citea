@@ -1,161 +1,167 @@
 import { NextRequest, NextResponse } from 'next/server'
+import axios from 'axios'
 
-const TONGYI_API_KEY = 'sk-9bf19547ddbd4be1a87a7a43cf251097'
+const TONGYI_API_KEY = process.env.TONGYI_API_KEY || 'sk-9bf19547ddbd4be1a87a7a43cf251097'
+const TONGYI_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
 
+interface Citation {
+  id: string
+  text: string
+  verified: boolean
+  status: 'valid' | 'invalid' | 'uncertain'
+  doi?: string
+  pmid?: string
+  source?: string
+  reason?: string
+  confidence?: number
+}
+
+// Extract citations from text
 function extractCitations(text: string): string[] {
-  // Simple citation extraction (looks for patterns like Author et al., Year)
-  const citationPattern = /([A-Z][a-z]+(?:\s+(?:et\s+al\.|and\s+[A-Z][a-z]+))?,?\s+\d{4})|(\([A-Z][a-z]+(?:\s+(?:et\s+al\.|&\s+[A-Z][a-z]+))?,?\s+\d{4}\))/g
-  const matches = text.match(citationPattern) || []
+  // Match common citation patterns
+  const patterns = [
+    // Author et al. (Year)
+    /[A-Z][a-z]+(?:,?\s+[A-Z]\.?)?\s+(?:et al\.)?\s*\(\d{4}\)/g,
+    // Author, A. (Year). Title. Journal, Volume(Issue), Pages.
+    /[A-Z][a-z]+,\s+[A-Z]\.\s*\(\d{4}\)\..*?\.\s+[A-Za-z\s&]+,\s+\d+\(\d+\),\s+\d+-\d+\./g,
+    // Full APA style citations
+    /[A-Z][a-z]+,\s+[A-Z]\.\s*(?:&\s+[A-Z][a-z]+,\s+[A-Z]\.)?\s*\(\d{4}\)\..*?\./g,
+  ]
+  
+  const matches: string[] = []
+  patterns.forEach(pattern => {
+    const found = text.match(pattern)
+    if (found) {
+      matches.push(...found)
+    }
+  })
+  
   return Array.from(new Set(matches))
 }
 
-async function verifyCitationWithAI(citation: string) {
+// Verify citation using LLM and databases
+async function verifyCitation(citation: string): Promise<Citation> {
   try {
-    const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TONGYI_API_KEY}`
+    // Use LLM to extract structured information
+    const prompt = `
+Analyze this academic citation and extract key information. Determine if it looks like a legitimate academic citation.
+
+Citation: "${citation}"
+
+Provide a JSON response with:
+{
+  "authors": "author names",
+  "year": "publication year",
+  "title": "paper title if available",
+  "journal": "journal name if available",
+  "isLegitimate": true/false,
+  "reason": "brief explanation",
+  "confidence": 0.0-1.0
+}
+`
+
+    const response = await axios.post(TONGYI_API_URL, {
+      model: 'qwen-turbo',
+      input: {
+        messages: [{ role: 'user', content: prompt }],
       },
-      body: JSON.stringify({
-        model: 'qwen-turbo',
-        input: {
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a citation verification expert. Analyze if a citation appears to be legitimate or potentially fabricated. Respond with a JSON object containing: isValid (boolean), confidence (0-1), and details (string explanation).'
-            },
-            {
-              role: 'user',
-              content: `Analyze this citation: "${citation}". Is it likely to be a real, legitimate academic citation? Consider the format, author names, and year.`
-            }
-          ]
-        },
-        parameters: {
-          max_tokens: 200,
-          result_format: 'message'
-        }
-      })
+      parameters: {
+        result_format: 'message',
+        temperature: 0.3,
+      },
+    }, {
+      headers: {
+        'Authorization': `Bearer ${TONGYI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
     })
-    
-    const data = await response.json()
-    const aiResponse = data.output?.choices?.[0]?.message?.content || data.output?.text || ''
-    
-    // Try to parse JSON response
-    try {
-      const parsed = JSON.parse(aiResponse)
-      return parsed
-    } catch {
-      // If not JSON, provide default analysis
-      const isValid = !aiResponse.toLowerCase().includes('fake') && 
-                     !aiResponse.toLowerCase().includes('fabricated') &&
-                     !aiResponse.toLowerCase().includes('invalid')
-      
-      return {
-        isValid,
-        confidence: isValid ? 0.7 : 0.3,
-        details: aiResponse
+
+    const content = response.data.output.choices[0].message.content
+    const analysis = JSON.parse(content)
+
+    // Try to verify in databases
+    let verified = false
+    let source = undefined
+    let doi = undefined
+
+    // Search CrossRef if we have enough info
+    if (analysis.authors && analysis.year) {
+      try {
+        const searchQuery = `${analysis.authors} ${analysis.year} ${analysis.title || ''}`
+        const crossrefResponse = await axios.get(
+          `https://api.crossref.org/works?query=${encodeURIComponent(searchQuery)}&rows=1`
+        )
+        
+        if (crossrefResponse.data.message.items.length > 0) {
+          const item = crossrefResponse.data.message.items[0]
+          verified = true
+          source = 'CrossRef'
+          doi = item.DOI
+        }
+      } catch (err) {
+        console.log('CrossRef search failed:', err)
       }
     }
-  } catch (error) {
-    console.error('AI verification error:', error)
+
     return {
-      isValid: true,
-      confidence: 0.5,
-      details: 'Unable to verify with AI. Manual verification recommended.'
-    }
-  }
-}
-
-async function verifyCitationWithDatabase(citation: string) {
-  // Extract author and year from citation
-  const yearMatch = citation.match(/\d{4}/)
-  const year = yearMatch ? yearMatch[0] : ''
-  
-  const authorMatch = citation.match(/([A-Z][a-z]+)/)
-  const author = authorMatch ? authorMatch[1] : ''
-  
-  if (!author || !year) {
-    return null
-  }
-
-  try {
-    // Search CrossRef
-    const response = await fetch(
-      `https://api.crossref.org/works?query.author=${encodeURIComponent(author)}&filter=from-pub-date:${year},until-pub-date:${year}&rows=1`,
-      { headers: { 'User-Agent': 'Citea/1.0 (mailto:support@citea.com)' } }
-    )
-    const data = await response.json()
-    
-    if (data.message?.items?.length > 0) {
-      return {
-        found: true,
-        source: 'CrossRef',
-        title: data.message.items[0].title?.[0]
-      }
+      id: Math.random().toString(36).substr(2, 9),
+      text: citation,
+      verified,
+      status: verified ? 'valid' : (analysis.confidence > 0.5 ? 'uncertain' : 'invalid'),
+      doi,
+      source,
+      reason: analysis.reason,
+      confidence: analysis.confidence,
     }
   } catch (error) {
-    console.error('Database verification error:', error)
+    console.error('Citation verification error:', error)
+    return {
+      id: Math.random().toString(36).substr(2, 9),
+      text: citation,
+      verified: false,
+      status: 'uncertain',
+      reason: 'Unable to verify automatically',
+      confidence: 0.5,
+    }
   }
-  
-  return null
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { text } = await request.json()
-    
-    if (!text) {
-      return NextResponse.json({ error: 'Text is required' }, { status: 400 })
-    }
+export async function POST(req: NextRequest) {
+  const { text } = await req.json()
 
-    // Extract citations from text
-    const extractedCitations = extractCitations(text)
+  if (!text) {
+    return NextResponse.json({ error: 'Text is required' }, { status: 400 })
+  }
+
+  try {
+    // Extract citations
+    const citations = extractCitations(text)
     
-    if (extractedCitations.length === 0) {
+    if (citations.length === 0) {
       return NextResponse.json({ 
+        error: 'No citations found in the text',
         citations: [],
-        message: 'No citations found in the text. Try including citations in formats like "Smith et al., 2020" or "(Johnson, 2019)"'
+        totalFound: 0,
+        verified: 0
       })
     }
 
     // Verify each citation
-    const verificationPromises = extractedCitations.map(async (citation) => {
-      // Check with database
-      const dbResult = await verifyCitationWithDatabase(citation)
-      
-      // Check with AI
-      const aiResult = await verifyCitationWithAI(citation)
-      
-      // Combine results
-      let isValid = aiResult.isValid
-      let confidence = aiResult.confidence
-      let details = aiResult.details
-      
-      if (dbResult?.found) {
-        isValid = true
-        confidence = Math.max(confidence, 0.9)
-        details = `Verified in ${dbResult.source}: ${dbResult.title}`
-      }
-      
-      return {
-        text: citation,
-        isValid,
-        confidence,
-        details
-      }
-    })
+    const results = await Promise.all(
+      citations.map(citation => verifyCitation(citation))
+    )
 
-    const citations = await Promise.all(verificationPromises)
+    const verifiedCount = results.filter(r => r.verified).length
+    const verificationRate = Math.round((verifiedCount / results.length) * 100)
 
-    return NextResponse.json({ 
-      citations,
-      total: citations.length,
-      verified: citations.filter(c => c.isValid).length
+    return NextResponse.json({
+      citations: results,
+      totalFound: results.length,
+      verified: verifiedCount,
+      verificationRate,
     })
   } catch (error) {
-    console.error('Error in check-citations:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error in check-citations API:', error)
+    return NextResponse.json({ error: 'Failed to check citations' }, { status: 500 })
   }
 }
-
