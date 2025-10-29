@@ -3,6 +3,7 @@
 import { ArrowRight, Play } from 'lucide-react'
 import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
+import DatabaseLogos from './DatabaseLogos'
 
 export default function Hero() {
   const { t } = useLanguage()
