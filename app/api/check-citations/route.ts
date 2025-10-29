@@ -8,56 +8,51 @@ interface Citation {
   id: string
   text: string
   verified: boolean
-  status: 'valid' | 'invalid' | 'uncertain'
-  doi?: string
-  pmid?: string
-  source?: string
-  reason?: string
-  confidence?: number
+  titleSimilarity: number
+  authorsSimilarity: number
+  dateSimilarity: number
+  bestMatch?: {
+    title: string
+    authors: string
+    date: string
+    link: string
+  }
 }
 
 // Extract citations from text
 function extractCitations(text: string): string[] {
-  // Match common citation patterns
-  const patterns = [
-    // Author et al. (Year)
-    /[A-Z][a-z]+(?:,?\s+[A-Z]\.?)?\s+(?:et al\.)?\s*\(\d{4}\)/g,
-    // Author, A. (Year). Title. Journal, Volume(Issue), Pages.
-    /[A-Z][a-z]+,\s+[A-Z]\.\s*\(\d{4}\)\..*?\.\s+[A-Za-z\s&]+,\s+\d+\(\d+\),\s+\d+-\d+\./g,
-    // Full APA style citations
-    /[A-Z][a-z]+,\s+[A-Z]\.\s*(?:&\s+[A-Z][a-z]+,\s+[A-Z]\.)?\s*\(\d{4}\)\..*?\./g,
-  ]
+  const lines = text.split('\n').filter(line => line.trim())
+  const citations: string[] = []
   
-  const matches: string[] = []
-  patterns.forEach(pattern => {
-    const found = text.match(pattern)
-    if (found) {
-      matches.push(...found)
+  lines.forEach(line => {
+    // Match citation patterns like [57], [58], etc.
+    if (line.match(/^\[\d+\]/)) {
+      citations.push(line.trim())
     }
   })
   
-  return Array.from(new Set(matches))
+  return citations.length > 0 ? citations : [text]
 }
 
-// Verify citation using LLM and databases
-async function verifyCitation(citation: string): Promise<Citation> {
+// Parse citation using AI
+async function parseCitation(citation: string) {
   try {
-    // Use LLM to extract structured information
     const prompt = `
-Analyze this academic citation and extract key information. Determine if it looks like a legitimate academic citation.
+Parse this academic citation and extract key information in JSON format:
 
 Citation: "${citation}"
 
-Provide a JSON response with:
+Return ONLY a JSON object with these fields:
 {
+  "title": "paper title",
   "authors": "author names",
+  "journal": "journal or publication name",
   "year": "publication year",
-  "title": "paper title if available",
-  "journal": "journal name if available",
-  "isLegitimate": true/false,
-  "reason": "brief explanation",
-  "confidence": 0.0-1.0
+  "volume": "volume number if available",
+  "pages": "page numbers if available"
 }
+
+If a field is not found, use null.
 `
 
     const response = await axios.post(TONGYI_API_URL, {
@@ -67,62 +62,155 @@ Provide a JSON response with:
       },
       parameters: {
         result_format: 'message',
-        temperature: 0.3,
+        temperature: 0.1,
       },
     }, {
       headers: {
         'Authorization': `Bearer ${TONGYI_API_KEY}`,
         'Content-Type': 'application/json',
       },
+      timeout: 15000,
     })
 
     const content = response.data.output.choices[0].message.content
-    const analysis = JSON.parse(content)
+    // Extract JSON from response
+    const jsonMatch = content.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+    return null
+  } catch (error) {
+    console.error('Error parsing citation:', error)
+    return null
+  }
+}
 
-    // Try to verify in databases
-    let verified = false
-    let source = undefined
-    let doi = undefined
+// Search for citation in databases
+async function searchCitation(parsed: any) {
+  if (!parsed || !parsed.title) return null
 
-    // Search CrossRef if we have enough info
-    if (analysis.authors && analysis.year) {
-      try {
-        const searchQuery = `${analysis.authors} ${analysis.year} ${analysis.title || ''}`
-        const crossrefResponse = await axios.get(
-          `https://api.crossref.org/works?query=${encodeURIComponent(searchQuery)}&rows=1`
-        )
-        
-        if (crossrefResponse.data.message.items.length > 0) {
-          const item = crossrefResponse.data.message.items[0]
-          verified = true
-          source = 'CrossRef'
-          doi = item.DOI
-        }
-      } catch (err) {
-        console.log('CrossRef search failed:', err)
+  try {
+    // Search CrossRef
+    const query = `${parsed.title || ''} ${parsed.authors || ''} ${parsed.year || ''}`
+    const response = await axios.get(
+      `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=1`,
+      { timeout: 10000 }
+    )
+
+    if (response.data.message.items.length > 0) {
+      const item = response.data.message.items[0]
+      return {
+        title: item.title ? item.title[0] : '',
+        authors: item.author ? item.author.map((a: any) => `${a.given || ''} ${a.family || ''}`).join(', ') : '',
+        year: item['published-print'] ? item['published-print']['date-parts'][0][0].toString() : 
+              (item.issued ? item.issued['date-parts'][0][0].toString() : ''),
+        doi: item.DOI,
+        link: item.DOI ? `https://doi.org/${item.DOI}` : '',
       }
     }
+  } catch (error) {
+    console.error('Error searching citation:', error)
+  }
 
-    return {
-      id: Math.random().toString(36).substr(2, 9),
-      text: citation,
-      verified,
-      status: verified ? 'valid' : (analysis.confidence > 0.5 ? 'uncertain' : 'invalid'),
-      doi,
-      source,
-      reason: analysis.reason,
-      confidence: analysis.confidence,
+  // Try Semantic Scholar as backup
+  try {
+    const query = parsed.title || ''
+    const response = await axios.get(
+      `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&fields=title,authors,year,externalIds&limit=1`,
+      { timeout: 10000 }
+    )
+
+    if (response.data.data && response.data.data.length > 0) {
+      const item = response.data.data[0]
+      return {
+        title: item.title || '',
+        authors: item.authors ? item.authors.map((a: any) => a.name).join(', ') : '',
+        year: item.year ? item.year.toString() : '',
+        doi: item.externalIds?.DOI || '',
+        link: item.externalIds?.DOI ? `https://doi.org/${item.externalIds.DOI}` : 
+              `https://www.semanticscholar.org/paper/${item.paperId}`,
+      }
     }
   } catch (error) {
-    console.error('Citation verification error:', error)
+    console.error('Error searching Semantic Scholar:', error)
+  }
+
+  return null
+}
+
+// Calculate similarity percentage
+function calculateSimilarity(str1: string, str2: string): number {
+  if (!str1 || !str2) return 0
+  
+  const s1 = str1.toLowerCase().trim()
+  const s2 = str2.toLowerCase().trim()
+  
+  if (s1 === s2) return 100
+  
+  // Simple word-based similarity
+  const words1 = new Set(s1.split(/\s+/))
+  const words2 = new Set(s2.split(/\s+/))
+  
+  const intersection = new Set([...words1].filter(x => words2.has(x)))
+  const union = new Set([...words1, ...words2])
+  
+  return Math.round((intersection.size / union.size) * 100)
+}
+
+// Verify single citation
+async function verifyCitation(citation: string): Promise<Citation> {
+  const id = Math.random().toString(36).substr(2, 9)
+  
+  // Parse citation
+  const parsed = await parseCitation(citation)
+  if (!parsed) {
     return {
-      id: Math.random().toString(36).substr(2, 9),
+      id,
       text: citation,
       verified: false,
-      status: 'uncertain',
-      reason: 'Unable to verify automatically',
-      confidence: 0.5,
+      titleSimilarity: 0,
+      authorsSimilarity: 0,
+      dateSimilarity: 0,
     }
+  }
+
+  // Search for matches
+  const match = await searchCitation(parsed)
+  
+  if (!match) {
+    return {
+      id,
+      text: citation,
+      verified: false,
+      titleSimilarity: 0,
+      authorsSimilarity: 0,
+      dateSimilarity: 0,
+    }
+  }
+
+  // Calculate similarities
+  const titleSim = calculateSimilarity(parsed.title || '', match.title)
+  const authorsSim = calculateSimilarity(parsed.authors || '', match.authors)
+  
+  let dateSim = 0
+  if (parsed.year && match.year) {
+    const yearDiff = Math.abs(parseInt(parsed.year) - parseInt(match.year))
+    dateSim = yearDiff === 0 ? 100 : yearDiff <= 1 ? 80 : yearDiff <= 3 ? 60 : 0
+  }
+
+  return {
+    id,
+    text: citation,
+    verified: titleSim > 30 || authorsSim > 50,
+    titleSimilarity: titleSim,
+    authorsSimilarity: authorsSim,
+    dateSimilarity: dateSim,
+    bestMatch: {
+      title: match.title,
+      authors: match.authors,
+      date: match.year,
+      link: match.link,
+    },
   }
 }
 
@@ -146,10 +234,14 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Verify each citation
-    const results = await Promise.all(
-      citations.map(citation => verifyCitation(citation))
-    )
+    // Verify each citation (with some delay to avoid rate limits)
+    const results: Citation[] = []
+    for (const citation of citations) {
+      const result = await verifyCitation(citation)
+      results.push(result)
+      // Small delay between requests
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
 
     const verifiedCount = results.filter(r => r.verified).length
     const verificationRate = Math.round((verifiedCount / results.length) * 100)
