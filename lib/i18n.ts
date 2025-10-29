@@ -156,6 +156,25 @@ export const translations = {
   },
   
   zh: {
+    detailedFeatures: {
+      title1: '可靠研究所需的',
+      title2: '一切工具',
+      subtitle: '全面的引用验证和来源确认工具，确保您的学术工作达到最高标准。',
+      aiPowered: 'AI 驱动',
+      realTime: '实时验证',
+      sourceFinder: '文献查找器',
+      sourceFinderDesc: '自动查找可信的学术资源。先进的搜索算法帮助您从可信的学术数据库中发现相关的、经过同行评审的来源。',
+      startSearching: '开始搜索',
+      citationChecker: '引用验证器',
+      citationCheckerDesc: '即时验证学术参考文献和引用的真实性。我们的AI系统会将引用与权威学术数据库进行交叉引用。',
+      verifyCitations: '验证引用',
+      verified: '已验证',
+      notFound: '未找到',
+      checking: '检查中...',
+      researchAssistant: 'AI 研究助手',
+      researchAssistantDesc: 'AI驱动的聊天助手，用于引用验证和来源分析。询问有关您的参考文献的问题，获取实时指导。',
+      chatWithAI: '与AI对话',
+    },
     // Header
     header: {
       features: '功能特性',
