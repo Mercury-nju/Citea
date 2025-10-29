@@ -17,6 +17,7 @@ import {
   ArrowUp
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import SourceFinderInterface from '@/components/SourceFinderInterface'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -247,30 +248,33 @@ export default function DashboardPage() {
             </div>
 
             {/* Main Input Area */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-              {activeTab === 'finder' && (
-                <div className="p-6">
-                  <textarea
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="输入您的研究查询..."
-                    className="w-full h-64 p-4 border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400"
-                    maxLength={300}
-                  />
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <span className="text-sm text-gray-500">
-                      {query.length}/300 字
-                    </span>
-                    <button
-                      onClick={() => setLoading(true)}
-                      disabled={!query.trim()}
-                      className="bg-gray-900 text-white px-6 py-2.5 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                    >
-                      <ArrowUp size={18} />
-                    </button>
+            {activeTab === 'finder' && <SourceFinderInterface />}
+
+            {activeTab !== 'finder' && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                {activeTab === 'finder' && (
+                  <div className="p-6">
+                    <textarea
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="输入您的研究查询..."
+                      className="w-full h-64 p-4 border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400"
+                      maxLength={300}
+                    />
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <span className="text-sm text-gray-500">
+                        {query.length}/300 字
+                      </span>
+                      <button
+                        onClick={() => setLoading(true)}
+                        disabled={!query.trim()}
+                        className="bg-gray-900 text-white px-6 py-2.5 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                      >
+                        <ArrowUp size={18} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {activeTab === 'checker' && (
                 <div className="p-6">
@@ -323,9 +327,11 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )}
-            </div>
+              </div>
+            )}
 
-            {/* Example Prompts */}
+            {/* Example Prompts - Only show for checker and assistant */}
+            {activeTab !== 'finder' && (
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="text-yellow-500" size={18} />
@@ -369,6 +375,7 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+            )}
           </div>
         </div>
       </main>
