@@ -34,26 +34,22 @@ function extractCitations(text: string): string[] {
   return citations.length > 0 ? citations : [text]
 }
 
-// Parse citation using AI
+// Parse citation using AI with better error handling
 async function parseCitation(citation: string) {
   try {
-    const prompt = `
-Parse this academic citation and extract key information in JSON format:
+    const prompt = `Parse this academic citation and extract key information. Return ONLY a valid JSON object:
 
 Citation: "${citation}"
 
-Return ONLY a JSON object with these fields:
+JSON format:
 {
-  "title": "paper title",
-  "authors": "author names",
-  "journal": "journal or publication name",
-  "year": "publication year",
-  "volume": "volume number if available",
-  "pages": "page numbers if available"
+  "title": "paper title or null",
+  "authors": "author names or null",
+  "journal": "journal name or null",
+  "year": "publication year or null"
 }
 
-If a field is not found, use null.
-`
+Return ONLY the JSON object, no other text.`
 
     const response = await axios.post(TONGYI_API_URL, {
       model: 'qwen-turbo',
@@ -69,47 +65,66 @@ If a field is not found, use null.
         'Authorization': `Bearer ${TONGYI_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      timeout: 15000,
+      timeout: 20000,
     })
 
     const content = response.data.output.choices[0].message.content
-    // Extract JSON from response
-    const jsonMatch = content.match(/\{[\s\S]*\}/)
+    
+    // Try to extract JSON from response
+    const jsonMatch = content.match(/\{[\s\S]*?\}/)
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
+      try {
+        const parsed = JSON.parse(jsonMatch[0])
+        return parsed
+      } catch (e) {
+        console.error('JSON parse error:', e)
+        return null
+      }
     }
+    
     return null
-  } catch (error) {
-    console.error('Error parsing citation:', error)
-    return null
+  } catch (error: any) {
+    console.error('Error parsing citation:', error.message)
+    // Return a basic fallback
+    return {
+      title: citation.substring(0, 100),
+      authors: null,
+      journal: null,
+      year: null
+    }
   }
 }
 
-// Search for citation in databases
+// Search for citation in databases with timeout and error handling
 async function searchCitation(parsed: any) {
   if (!parsed || !parsed.title) return null
 
   try {
-    // Search CrossRef
+    // Search CrossRef with timeout
     const query = `${parsed.title || ''} ${parsed.authors || ''} ${parsed.year || ''}`
     const response = await axios.get(
       `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=1`,
-      { timeout: 10000 }
+      { 
+        timeout: 8000,
+        headers: {
+          'User-Agent': 'Citea/1.0 (mailto:support@citea.app)'
+        }
+      }
     )
 
-    if (response.data.message.items.length > 0) {
+    if (response.data.message.items && response.data.message.items.length > 0) {
       const item = response.data.message.items[0]
       return {
         title: item.title ? item.title[0] : '',
-        authors: item.author ? item.author.map((a: any) => `${a.given || ''} ${a.family || ''}`).join(', ') : '',
+        authors: item.author ? item.author.slice(0, 3).map((a: any) => `${a.given || ''} ${a.family || ''}`).join(', ') : '',
         year: item['published-print'] ? item['published-print']['date-parts'][0][0].toString() : 
               (item.issued ? item.issued['date-parts'][0][0].toString() : ''),
         doi: item.DOI,
         link: item.DOI ? `https://doi.org/${item.DOI}` : '',
       }
     }
-  } catch (error) {
-    console.error('Error searching citation:', error)
+  } catch (error: any) {
+    console.error('CrossRef error:', error.message)
   }
 
   // Try Semantic Scholar as backup
@@ -117,22 +132,27 @@ async function searchCitation(parsed: any) {
     const query = parsed.title || ''
     const response = await axios.get(
       `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&fields=title,authors,year,externalIds&limit=1`,
-      { timeout: 10000 }
+      { 
+        timeout: 8000,
+        headers: {
+          'User-Agent': 'Citea/1.0'
+        }
+      }
     )
 
     if (response.data.data && response.data.data.length > 0) {
       const item = response.data.data[0]
       return {
         title: item.title || '',
-        authors: item.authors ? item.authors.map((a: any) => a.name).join(', ') : '',
+        authors: item.authors ? item.authors.slice(0, 3).map((a: any) => a.name).join(', ') : '',
         year: item.year ? item.year.toString() : '',
         doi: item.externalIds?.DOI || '',
         link: item.externalIds?.DOI ? `https://doi.org/${item.externalIds.DOI}` : 
               `https://www.semanticscholar.org/paper/${item.paperId}`,
       }
     }
-  } catch (error) {
-    console.error('Error searching Semantic Scholar:', error)
+  } catch (error: any) {
+    console.error('Semantic Scholar error:', error.message)
   }
 
   return null
@@ -157,13 +177,75 @@ function calculateSimilarity(str1: string, str2: string): number {
   return Math.round((intersection.size / union.size) * 100)
 }
 
-// Verify single citation
+// Verify single citation with comprehensive error handling
 async function verifyCitation(citation: string): Promise<Citation> {
   const id = Math.random().toString(36).substr(2, 9)
   
-  // Parse citation
-  const parsed = await parseCitation(citation)
-  if (!parsed) {
+  try {
+    // Parse citation with timeout protection
+    const parsed = await Promise.race([
+      parseCitation(citation),
+      new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error('Parse timeout')), 15000)
+      )
+    ]).catch(() => null)
+
+    if (!parsed) {
+      return {
+        id,
+        text: citation,
+        verified: false,
+        titleSimilarity: 0,
+        authorsSimilarity: 0,
+        dateSimilarity: 0,
+      }
+    }
+
+    // Search for matches with timeout protection
+    const match = await Promise.race([
+      searchCitation(parsed),
+      new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error('Search timeout')), 15000)
+      )
+    ]).catch(() => null)
+    
+    if (!match) {
+      return {
+        id,
+        text: citation,
+        verified: false,
+        titleSimilarity: 0,
+        authorsSimilarity: 0,
+        dateSimilarity: 0,
+      }
+    }
+
+    // Calculate similarities
+    const titleSim = calculateSimilarity(parsed.title || '', match.title)
+    const authorsSim = calculateSimilarity(parsed.authors || '', match.authors)
+    
+    let dateSim = 0
+    if (parsed.year && match.year) {
+      const yearDiff = Math.abs(parseInt(parsed.year) - parseInt(match.year))
+      dateSim = yearDiff === 0 ? 100 : yearDiff <= 1 ? 80 : yearDiff <= 3 ? 60 : 0
+    }
+
+    return {
+      id,
+      text: citation,
+      verified: titleSim > 30 || authorsSim > 50,
+      titleSimilarity: titleSim,
+      authorsSimilarity: authorsSim,
+      dateSimilarity: dateSim,
+      bestMatch: {
+        title: match.title,
+        authors: match.authors,
+        date: match.year,
+        link: match.link,
+      },
+    }
+  } catch (error: any) {
+    console.error('Verification error:', error.message)
     return {
       id,
       text: citation,
@@ -172,56 +254,17 @@ async function verifyCitation(citation: string): Promise<Citation> {
       authorsSimilarity: 0,
       dateSimilarity: 0,
     }
-  }
-
-  // Search for matches
-  const match = await searchCitation(parsed)
-  
-  if (!match) {
-    return {
-      id,
-      text: citation,
-      verified: false,
-      titleSimilarity: 0,
-      authorsSimilarity: 0,
-      dateSimilarity: 0,
-    }
-  }
-
-  // Calculate similarities
-  const titleSim = calculateSimilarity(parsed.title || '', match.title)
-  const authorsSim = calculateSimilarity(parsed.authors || '', match.authors)
-  
-  let dateSim = 0
-  if (parsed.year && match.year) {
-    const yearDiff = Math.abs(parseInt(parsed.year) - parseInt(match.year))
-    dateSim = yearDiff === 0 ? 100 : yearDiff <= 1 ? 80 : yearDiff <= 3 ? 60 : 0
-  }
-
-  return {
-    id,
-    text: citation,
-    verified: titleSim > 30 || authorsSim > 50,
-    titleSimilarity: titleSim,
-    authorsSimilarity: authorsSim,
-    dateSimilarity: dateSim,
-    bestMatch: {
-      title: match.title,
-      authors: match.authors,
-      date: match.year,
-      link: match.link,
-    },
   }
 }
 
 export async function POST(req: NextRequest) {
-  const { text } = await req.json()
-
-  if (!text) {
-    return NextResponse.json({ error: 'Text is required' }, { status: 400 })
-  }
-
   try {
+    const { text } = await req.json()
+
+    if (!text) {
+      return NextResponse.json({ error: 'Text is required' }, { status: 400 })
+    }
+
     // Extract citations
     const citations = extractCitations(text)
     
@@ -234,13 +277,29 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Verify each citation (with some delay to avoid rate limits)
+    // Limit to first 10 citations to prevent timeout
+    const limitedCitations = citations.slice(0, 10)
+
+    // Verify each citation with delay
     const results: Citation[] = []
-    for (const citation of citations) {
-      const result = await verifyCitation(citation)
-      results.push(result)
-      // Small delay between requests
-      await new Promise(resolve => setTimeout(resolve, 500))
+    for (const citation of limitedCitations) {
+      try {
+        const result = await verifyCitation(citation)
+        results.push(result)
+        // Delay between requests to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      } catch (error) {
+        console.error('Error verifying citation:', error)
+        // Add failed citation
+        results.push({
+          id: Math.random().toString(36).substr(2, 9),
+          text: citation,
+          verified: false,
+          titleSimilarity: 0,
+          authorsSimilarity: 0,
+          dateSimilarity: 0,
+        })
+      }
     }
 
     const verifiedCount = results.filter(r => r.verified).length
@@ -252,8 +311,11 @@ export async function POST(req: NextRequest) {
       verified: verifiedCount,
       verificationRate,
     })
-  } catch (error) {
-    console.error('Error in check-citations API:', error)
-    return NextResponse.json({ error: 'Failed to check citations' }, { status: 500 })
+  } catch (error: any) {
+    console.error('Error in check-citations API:', error.message)
+    return NextResponse.json({ 
+      error: 'Failed to check citations. Please try again.',
+      details: error.message 
+    }, { status: 500 })
   }
 }
