@@ -29,40 +29,49 @@ export default function CitationCheckerInterface() {
   const [result, setResult] = useState<CheckResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const detectionSteps = [
+  type StepStatus = 'pending' | 'processing' | 'completed'
+
+  interface DetectionStep {
+    id: number
+    title: string
+    subtitle: string
+    status: StepStatus
+  }
+
+  const detectionSteps: DetectionStep[] = [
     {
       id: 1,
       title: 'AI Content Detection',
       subtitle: 'Analyzing content authenticity',
-      status: 'pending' as const
+      status: 'pending'
     },
     {
       id: 2,
       title: 'Analyzing content patterns',
       subtitle: 'Detecting linguistic and structural signatures',
-      status: 'pending' as const
+      status: 'pending'
     },
     {
       id: 3,
       title: 'Running AI detection algorithms',
       subtitle: 'Comparing against known AI-generated patterns',
-      status: 'pending' as const
+      status: 'pending'
     },
     {
       id: 4,
       title: 'Cross-referencing writing styles',
       subtitle: 'Analyzing consistency and human markers',
-      status: 'pending' as const
+      status: 'pending'
     },
     {
       id: 5,
       title: 'Finalizing authenticity score',
       subtitle: 'Generating comprehensive analysis report',
-      status: 'pending' as const
+      status: 'pending'
     }
   ]
 
-  const [steps, setSteps] = useState(detectionSteps)
+  const [steps, setSteps] = useState<DetectionStep[]>(detectionSteps)
 
   const handleCheck = async () => {
     if (!text.trim()) {
@@ -74,7 +83,7 @@ export default function CitationCheckerInterface() {
     setError(null)
     setResult(null)
     setCurrentStep(0)
-    setSteps(detectionSteps.map(s => ({ ...s, status: 'pending' as const })))
+    setSteps(detectionSteps.map(s => ({ ...s, status: 'pending' as StepStatus })))
 
     try {
       // Animate through steps
@@ -82,13 +91,13 @@ export default function CitationCheckerInterface() {
         setCurrentStep(i)
         setSteps(prev => prev.map((step, idx) => ({
           ...step,
-          status: idx === i ? 'processing' as const : idx < i ? 'completed' as const : 'pending' as const
+          status: (idx === i ? 'processing' : idx < i ? 'completed' : 'pending') as StepStatus
         })))
         await new Promise(resolve => setTimeout(resolve, 800))
       }
 
       // Complete all steps
-      setSteps(prev => prev.map(step => ({ ...step, status: 'completed' as const })))
+      setSteps(prev => prev.map(step => ({ ...step, status: 'completed' as StepStatus })))
 
       // Make API call
       const response = await fetch('/api/check-citations', {
