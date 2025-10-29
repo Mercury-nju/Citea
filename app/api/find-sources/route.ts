@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const TONGYI_API_KEY = 'sk-9bf19547ddbd4be1a87a7a43cf251097'
 
-interface SearchStep {
-  id: number
-  title: string
-  description: string
-  status: 'pending' | 'processing' | 'completed'
-  icon: string
+interface SearchStrategy {
+  keywords: string[]
+  searchType: 'medical' | 'science' | 'technology' | 'social' | 'general'
+  databases: string[]
+  reasoning: string
 }
 
 export async function POST(request: NextRequest) {
@@ -21,15 +20,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Step 1: Extract key concepts using LLM
-    const keywords = await extractKeywords(text)
+    // Step 1: 智能分析用户意图，确定搜索策略
+    const strategy = await analyzeUserIntent(text)
 
-    // Step 2-5: Search multiple databases
-    const sources = await searchDatabases(keywords)
+    // Step 2-5: 根据策略智能搜索相应数据库
+    const sources = await intelligentSearch(strategy)
 
     return NextResponse.json({
       success: true,
-      keywords,
+      strategy,
       sources,
       totalFound: sources.length
     })
@@ -42,7 +41,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function extractKeywords(text: string): Promise<string[]> {
+/**
+ * 智能分析用户输入，理解用户真正想要找什么类型的文献
+ */
+async function analyzeUserIntent(text: string): Promise<SearchStrategy> {
   try {
     const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
       method: 'POST',
@@ -56,45 +58,146 @@ async function extractKeywords(text: string): Promise<string[]> {
           messages: [
             {
               role: 'system',
-              content: 'You are a research assistant. Extract 3-5 key academic keywords or phrases from the given text for literature search. Return only the keywords, comma-separated.'
+              content: `You are an intelligent research assistant. Analyze the user's text and determine:
+1. What type of research they need (medical/science/technology/social/general)
+2. Extract 3-5 key search keywords
+3. Which databases would be most relevant (CrossRef for general academic, PubMed for medical, Semantic Scholar for citations)
+4. Provide reasoning for your choices
+
+Respond in JSON format:
+{
+  "searchType": "medical|science|technology|social|general",
+  "keywords": ["keyword1", "keyword2", ...],
+  "databases": ["CrossRef", "PubMed", "Semantic Scholar"],
+  "reasoning": "explanation in Chinese"
+}`
             },
             {
               role: 'user',
-              content: text
+              content: `分析这段文本，用户想要找什么类型的文献？\n\n${text}`
             }
           ]
         },
         parameters: {
-          max_tokens: 100
+          result_format: 'message',
+          max_tokens: 500
         }
       })
     })
 
     if (!response.ok) {
-      throw new Error('Failed to extract keywords')
+      throw new Error('LLM analysis failed')
     }
 
     const data = await response.json()
-    const keywordsText = data.output?.text || ''
-    return keywordsText.split(',').map((k: string) => k.trim()).filter(Boolean)
+    const content = data.output?.choices?.[0]?.message?.content || data.output?.text || ''
+    
+    // 尝试解析 JSON
+    try {
+      const parsed = JSON.parse(content)
+      return {
+        keywords: parsed.keywords || [],
+        searchType: parsed.searchType || 'general',
+        databases: parsed.databases || ['CrossRef', 'Semantic Scholar'],
+        reasoning: parsed.reasoning || '通用学术搜索'
+      }
+    } catch (e) {
+      // 如果无法解析JSON，使用智能提取
+      return await fallbackExtraction(text)
+    }
   } catch (error) {
-    console.error('Error extracting keywords:', error)
-    // Fallback: simple keyword extraction
-    const words = text.split(/\s+/).filter(w => w.length > 3)
-    return words.slice(0, 5)
+    console.error('Error in analyzeUserIntent:', error)
+    return await fallbackExtraction(text)
   }
 }
 
-async function searchDatabases(keywords: string[]): Promise<any[]> {
-  const results = await Promise.all([
-    searchCrossRef(keywords),
-    searchPubMed(keywords),
-    searchSemanticScholar(keywords)
-  ])
+/**
+ * 备用方案：基于关键词的智能提取
+ */
+async function fallbackExtraction(text: string): Promise<SearchStrategy> {
+  const lowerText = text.toLowerCase()
+  
+  // 智能判断领域
+  let searchType: SearchStrategy['searchType'] = 'general'
+  let databases = ['CrossRef', 'Semantic Scholar']
+  
+  if (lowerText.includes('医学') || lowerText.includes('medical') || 
+      lowerText.includes('病') || lowerText.includes('药') ||
+      lowerText.includes('health') || lowerText.includes('clinical')) {
+    searchType = 'medical'
+    databases = ['PubMed', 'CrossRef', 'Semantic Scholar']
+  } else if (lowerText.includes('计算机') || lowerText.includes('computer') ||
+             lowerText.includes('算法') || lowerText.includes('algorithm') ||
+             lowerText.includes('machine learning') || lowerText.includes('AI')) {
+    searchType = 'technology'
+    databases = ['CrossRef', 'Semantic Scholar']
+  } else if (lowerText.includes('物理') || lowerText.includes('physics') ||
+             lowerText.includes('化学') || lowerText.includes('chemistry') ||
+             lowerText.includes('生物') || lowerText.includes('biology')) {
+    searchType = 'science'
+    databases = ['CrossRef', 'PubMed', 'Semantic Scholar']
+  } else if (lowerText.includes('社会') || lowerText.includes('social') ||
+             lowerText.includes('经济') || lowerText.includes('economic') ||
+             lowerText.includes('心理') || lowerText.includes('psychology')) {
+    searchType = 'social'
+    databases = ['CrossRef', 'Semantic Scholar']
+  }
 
-  // Combine and deduplicate results
+  // 提取关键词
+  const words = text.split(/\s+/).filter(w => w.length > 3)
+  const keywords = words.slice(0, 5)
+
+  return {
+    keywords,
+    searchType,
+    databases,
+    reasoning: `基于内容分析，这是${searchType}领域的研究查询`
+  }
+}
+
+/**
+ * 智能搜索：根据策略选择性搜索数据库
+ */
+async function intelligentSearch(strategy: SearchStrategy): Promise<any[]> {
+  const searchPromises: Promise<any[]>[] = []
+
+  // 根据策略智能选择数据库
+  if (strategy.databases.includes('CrossRef')) {
+    searchPromises.push(searchCrossRef(strategy.keywords))
+  }
+  
+  if (strategy.databases.includes('PubMed')) {
+    searchPromises.push(searchPubMed(strategy.keywords))
+  }
+  
+  if (strategy.databases.includes('Semantic Scholar')) {
+    searchPromises.push(searchSemanticScholar(strategy.keywords))
+  }
+
+  const results = await Promise.all(searchPromises)
   const allSources = results.flat()
-  return allSources.slice(0, 10) // Limit to top 10 results
+  
+  // 去重和排序
+  const uniqueSources = deduplicateSources(allSources)
+  return uniqueSources.slice(0, 10)
+}
+
+/**
+ * 去重：基于 DOI 或标题相似度
+ */
+function deduplicateSources(sources: any[]): any[] {
+  const seen = new Set<string>()
+  const unique: any[] = []
+
+  for (const source of sources) {
+    const key = source.doi || source.title.toLowerCase().slice(0, 50)
+    if (!seen.has(key)) {
+      seen.add(key)
+      unique.push(source)
+    }
+  }
+
+  return unique
 }
 
 async function searchCrossRef(keywords: string[]): Promise<any[]> {
@@ -132,7 +235,6 @@ async function searchPubMed(keywords: string[]): Promise<any[]> {
   try {
     const query = keywords.join('+')
     
-    // Step 1: Search for PMIDs
     const searchResponse = await fetch(
       `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=3&retmode=json`
     )
@@ -144,7 +246,6 @@ async function searchPubMed(keywords: string[]): Promise<any[]> {
 
     if (pmids.length === 0) return []
 
-    // Step 2: Fetch article details
     const summaryResponse = await fetch(
       `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${pmids.join(',')}&retmode=json`
     )
