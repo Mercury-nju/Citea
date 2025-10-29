@@ -75,13 +75,7 @@ export default function Hero() {
           <p className="text-sm text-gray-500 mb-6 uppercase tracking-wider font-medium">
             {t.hero.databases}
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">arXiv</div>
-            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">CrossRef</div>
-            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">OpenAlex</div>
-            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">PubMed</div>
-            <div className="text-gray-400 font-semibold text-lg hover:text-gray-600 transition cursor-default">Semantic Scholar</div>
-          </div>
+          <DatabaseLogos />
         </div>
       </div>
     </section>
