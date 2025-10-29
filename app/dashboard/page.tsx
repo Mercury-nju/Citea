@@ -314,20 +314,6 @@ export default function DashboardPage() {
                 <span className="text-sm font-medium text-gray-700">示例：</span>
               </div>
               
-              {activeTab === 'finder' && (
-                <div className="space-y-2">
-                  {examplePrompts.finder.map((prompt, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setQuery(prompt)}
-                      className="block w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all text-sm text-gray-700"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              )}
-
               {activeTab === 'checker' && (
                 <button
                   onClick={() => setQuery(examplePrompts.checker)}
