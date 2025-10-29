@@ -2,8 +2,11 @@
 
 import { Search, CheckCircle, MessageSquare, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function DetailedFeatures() {
+  const { t } = useLanguage()
+  
   return (
     <section className="py-32 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
       {/* Background Decoration */}
@@ -14,13 +17,13 @@ export default function DetailedFeatures() {
         {/* Header */}
         <div className="text-center mb-24">
           <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Everything you need for<br />
+            {t.detailedFeatures?.title1 || 'Everything you need for'}<br />
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              reliable research
+              {t.detailedFeatures?.title2 || 'reliable research'}
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Comprehensive citation verification and source validation tools to ensure your academic work meets the highest standards.
+            {t.detailedFeatures?.subtitle || 'Comprehensive citation verification and source validation tools to ensure your academic work meets the highest standards.'}
           </p>
         </div>
 
@@ -33,7 +36,7 @@ export default function DetailedFeatures() {
                 {/* Floating Badge */}
                 <div className="absolute -top-4 -left-4 z-10">
                   <div className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                    AI Powered
+                    {t.detailedFeatures?.aiPowered || 'AI Powered'}
                   </div>
                 </div>
                 
@@ -82,16 +85,16 @@ export default function DetailedFeatures() {
                 <Search className="text-white" size={32} />
               </div>
               <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Source Finder
+                {t.detailedFeatures?.sourceFinder || 'Source Finder'}
               </h3>
               <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                Find credible academic sources for your research topics automatically. Advanced search algorithms help you discover relevant, peer-reviewed sources from trusted academic databases.
+                {t.detailedFeatures?.sourceFinderDesc || 'Find credible academic sources for your research topics automatically. Advanced search algorithms help you discover relevant, peer-reviewed sources from trusted academic databases.'}
               </p>
               <Link 
                 href="/auth/signin"
                 className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:gap-3 transition-all group"
               >
-                Start searching
+                {t.detailedFeatures?.startSearching || 'Start searching'}
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
@@ -104,16 +107,16 @@ export default function DetailedFeatures() {
                 <CheckCircle className="text-white" size={32} />
               </div>
               <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Citation Checker
+                {t.detailedFeatures?.citationChecker || 'Citation Checker'}
               </h3>
               <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                Instantly verify the authenticity of academic references and citations. Our AI-powered system cross-references citations against authoritative academic databases.
+                {t.detailedFeatures?.citationCheckerDesc || 'Instantly verify the authenticity of academic references and citations. Our AI-powered system cross-references citations against authoritative academic databases.'}
               </p>
               <Link 
                 href="/auth/signin"
                 className="inline-flex items-center gap-2 text-green-600 font-semibold hover:gap-3 transition-all group"
               >
-                Verify citations
+                {t.detailedFeatures?.verifyCitations || 'Verify citations'}
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
@@ -123,7 +126,7 @@ export default function DetailedFeatures() {
                 {/* Floating Badge */}
                 <div className="absolute -top-4 -right-4 z-10">
                   <div className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                    Real-time
+                    {t.detailedFeatures?.realTime || 'Real-time'}
                   </div>
                 </div>
                 
@@ -134,7 +137,7 @@ export default function DetailedFeatures() {
                     <div className="border-l-4 border-green-500 bg-white rounded-r-xl p-4 shadow-sm">
                       <div className="flex items-center gap-2 mb-2">
                         <CheckCircle size={16} className="text-green-600" />
-                        <span className="text-xs font-bold text-green-900">已验证</span>
+                        <span className="text-xs font-bold text-green-900">{t.detailedFeatures?.verified || '已验证'}</span>
                       </div>
                       <p className="text-xs text-gray-700">Smith, J. (2020)...</p>
                     </div>
@@ -145,7 +148,7 @@ export default function DetailedFeatures() {
                         <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
                           <span className="text-white text-[10px] font-bold">!</span>
                         </div>
-                        <span className="text-xs font-bold text-red-900">未找到</span>
+                        <span className="text-xs font-bold text-red-900">{t.detailedFeatures?.notFound || '未找到'}</span>
                       </div>
                       <p className="text-xs text-gray-700">Brown, A. (2023)...</p>
                     </div>
@@ -154,7 +157,7 @@ export default function DetailedFeatures() {
                     <div className="border-l-4 border-gray-300 bg-white rounded-r-xl p-4 shadow-sm">
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin" />
-                        <span className="text-xs text-gray-600">检查中...</span>
+                        <span className="text-xs text-gray-600">{t.detailedFeatures?.checking || '检查中...'}</span>
                       </div>
                     </div>
                   </div>
@@ -213,16 +216,16 @@ export default function DetailedFeatures() {
                 <MessageSquare className="text-white" size={32} />
               </div>
               <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Research Assistant
+                {t.detailedFeatures?.researchAssistant || 'Research Assistant'}
               </h3>
               <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                AI-powered chat assistant for citation verification and source analysis. Ask questions about your references and get real-time guidance on source authenticity.
+                {t.detailedFeatures?.researchAssistantDesc || 'AI-powered chat assistant for citation verification and source analysis. Ask questions about your references and get real-time guidance on source authenticity.'}
               </p>
               <Link 
                 href="/auth/signin"
                 className="inline-flex items-center gap-2 text-purple-600 font-semibold hover:gap-3 transition-all group"
               >
-                Chat with AI
+                {t.detailedFeatures?.chatWithAI || 'Chat with AI'}
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>

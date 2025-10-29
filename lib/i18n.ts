@@ -4,6 +4,25 @@ export type Language = 'en' | 'zh'
 
 export const translations = {
   en: {
+    detailedFeatures: {
+      title1: 'Everything you need for',
+      title2: 'reliable research',
+      subtitle: 'Comprehensive citation verification and source validation tools to ensure your academic work meets the highest standards.',
+      aiPowered: 'AI Powered',
+      realTime: 'Real-time',
+      sourceFinder: 'Source Finder',
+      sourceFinderDesc: 'Find credible academic sources for your research topics automatically. Advanced search algorithms help you discover relevant, peer-reviewed sources from trusted academic databases.',
+      startSearching: 'Start searching',
+      citationChecker: 'Citation Checker',
+      citationCheckerDesc: 'Instantly verify the authenticity of academic references and citations. Our AI-powered system cross-references citations against authoritative academic databases.',
+      verifyCitations: 'Verify citations',
+      verified: 'Verified',
+      notFound: 'Not Found',
+      checking: 'Checking...',
+      researchAssistant: 'Research Assistant',
+      researchAssistantDesc: 'AI-powered chat assistant for citation verification and source analysis. Ask questions about your references and get real-time guidance on source authenticity.',
+      chatWithAI: 'Chat with AI',
+    },
     // Header
     header: {
       features: 'Features',
