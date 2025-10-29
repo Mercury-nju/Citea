@@ -97,7 +97,7 @@ export default function SourceFinderInterface() {
         })))
         
         // Wait for animation
-        await new Promise(resolve => setTimeout(resolve, 800))
+        await new Promise(resolve => setTimeout(resolve, 1000))
       }
 
       // Mark last step as completed
@@ -118,6 +118,9 @@ export default function SourceFinderInterface() {
 
       const data = await response.json()
       setSources(data.sources || [])
+      
+      // Wait a moment before showing results
+      await new Promise(resolve => setTimeout(resolve, 500))
       setShowResults(true)
     } catch (error) {
       console.error('Search error:', error)
@@ -134,20 +137,20 @@ export default function SourceFinderInterface() {
 
   if (showResults) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Original Text */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200">
-          <div className="flex items-start justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">原始文本</h3>
+        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
+          <div className="flex items-start justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-900">原始文本</h3>
             <p className="text-sm text-gray-500">
               点击引用编号跳转到对应文献
             </p>
           </div>
-          <p className="text-gray-700 leading-relaxed">
+          <p className="text-gray-700 leading-relaxed text-lg">
             {originalText}
             {sources.slice(0, 3).map((_, idx) => (
               <sup key={idx} className="inline-block mx-1">
-                <button className="text-blue-600 font-semibold hover:underline">
+                <button className="text-blue-600 font-semibold hover:underline text-base">
                   [{idx + 1}]
                 </button>
               </sup>
@@ -155,104 +158,117 @@ export default function SourceFinderInterface() {
           </p>
         </div>
 
-        {/* Claims and Supporting References */}
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold text-gray-900">
-            观点与支撑文献
+        {/* Claims Section Header */}
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            建议您可以尝试：
           </h3>
+          <p className="text-gray-600">
+            {sources.length} papers found
+          </p>
+        </div>
 
+        {/* Sources List */}
+        <div className="space-y-6">
           {sources.map((source, idx) => (
-            <div key={source.id} className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center">
-                  {idx + 1}
+            <div key={source.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+              {/* Header */}
+              <div className="px-8 py-6 border-b border-gray-100">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-lg">
+                    {idx + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-600 mb-2">
+                      Bardeen-Cooper-Schrieffer (BCS) theory, where electrons form Cooper pairs through phonon interactions.
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      支撑文献（1 papers）
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 mb-2">
-                    {source.title}
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    支撑文献（{sources.length} 篇）
+              </div>
+
+              {/* Citation Details */}
+              <div className="px-8 py-6">
+                {/* Badge and Actions */}
+                <div className="flex items-center gap-3 mb-6">
+                  {source.verified && (
+                    <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-bold">
+                      <CheckCircle size={16} />
+                      {source.source}验证
+                    </span>
+                  )}
+                  <div className="ml-auto flex items-center gap-2">
+                    <button 
+                      onClick={() => {
+                        const url = source.doi ? `https://doi.org/${source.doi}` : '#'
+                        window.open(url, '_blank', 'noopener,noreferrer')
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition border border-gray-200"
+                    >
+                      <ExternalLink size={16} />
+                      访问
+                    </button>
+                    <button 
+                      onClick={() => copyToClipboard(`${source.authors} (${source.year}). ${source.title}. ${source.journal}. DOI: ${source.doi || 'N/A'}`)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition border border-gray-200"
+                    >
+                      <Copy size={16} />
+                      复制
+                    </button>
+                  </div>
+                </div>
+
+                {/* Title */}
+                <h4 className="text-xl font-bold text-gray-900 mb-6 leading-tight">
+                  {source.title}
+                </h4>
+
+                {/* Metadata */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3 text-base text-gray-600">
+                    <span className="text-gray-400">👤</span>
+                    <span>{source.authors}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-base text-gray-600">
+                    <span className="text-gray-400">📚</span>
+                    <span className="italic">{source.journal}</span>
+                    <span className="mx-2">•</span>
+                    <span className="text-gray-400">📅</span>
+                    <span>{source.year}</span>
+                  </div>
+                </div>
+
+                {/* DOI */}
+                {source.doi && (
+                  <div className="mb-6 pb-6 border-b border-gray-100">
+                    <div className="flex items-start gap-3">
+                      <span className="text-sm font-bold text-gray-500 uppercase">DOI:</span>
+                      <a 
+                        href={`https://doi.org/${source.doi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-base text-blue-600 hover:text-blue-800 hover:underline break-all"
+                      >
+                        {source.doi}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reference Explanation */}
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-lg">
+                  <p className="text-sm font-bold text-blue-900 mb-3">
+                    参考文献说明
                   </p>
-
-                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                    {/* Header with Badge and Actions */}
-                    <div className="flex items-center gap-2 mb-4">
-                      {source.verified && (
-                        <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs font-bold">
-                          <CheckCircle size={14} />
-                          {source.source}验证
-                        </span>
-                      )}
-                      <div className="ml-auto flex items-center gap-2">
-                        <button 
-                          onClick={() => window.open(source.doi ? `https://doi.org/${source.doi}` : '#', '_blank')}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
-                        >
-                          <ExternalLink size={16} />
-                          访问
-                        </button>
-                        <button 
-                          onClick={() => copyToClipboard(`${source.authors} (${source.year}). ${source.title}. ${source.journal}. DOI: ${source.doi || 'N/A'}`)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
-                        >
-                          <Copy size={16} />
-                          复制
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Citation Title */}
-                    <h5 className="text-lg font-semibold text-gray-900 mb-4 leading-tight">
-                      {source.title}
-                    </h5>
-
-                    {/* Citation Metadata - Citely Style */}
-                    <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span className="text-gray-400">👤</span>
-                        <span>{source.authors}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span className="text-gray-400">📚</span>
-                        <span className="italic">{source.journal}</span>
-                        <span>•</span>
-                        <span className="text-gray-400">📅</span>
-                        <span>{source.year}</span>
-                      </div>
-                    </div>
-
-                    {/* DOI Section */}
-                    {source.doi && (
-                      <div className="mb-4">
-                        <div className="flex items-start gap-2">
-                          <span className="text-xs font-semibold text-gray-500 uppercase mt-0.5">DOI:</span>
-                          <a 
-                            href={`https://doi.org/${source.doi}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-600 hover:text-blue-800 hover:underline break-all"
-                          >
-                            {source.doi}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Reference Explanation */}
-                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-                      <p className="text-xs font-semibold text-blue-900 mb-2">
-                        参考文献说明
-                      </p>
-                      <p className="text-sm text-blue-800 leading-relaxed">
-                        该文献通过 {source.source} 数据库验证，提供了关于主要观点的权威支持。所有元数据均来自官方学术数据库API。
-                      </p>
-                      <div className="mt-3 pt-3 border-t border-blue-200">
-                        <p className="text-xs text-blue-700">
-                          证据强度: <span className="font-bold">Strong</span>
-                        </p>
-                      </div>
-                    </div>
+                  <p className="text-base text-blue-800 leading-relaxed mb-4">
+                    该文献通过 {source.source} 数据库验证，提供了关于主要观点的权威支持。所有元数据均来自官方学术数据库API。
+                  </p>
+                  <div className="pt-3 border-t border-blue-200">
+                    <p className="text-sm text-blue-700">
+                      证据强度: <span className="font-bold">Strong</span>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -266,7 +282,7 @@ export default function SourceFinderInterface() {
             setShowResults(false)
             setQuery('')
           }}
-          className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition-all font-medium"
+          className="w-full bg-gray-100 text-gray-700 px-6 py-4 rounded-xl hover:bg-gray-200 transition-all font-medium text-lg"
         >
           新的搜索
         </button>
@@ -276,73 +292,69 @@ export default function SourceFinderInterface() {
 
   if (isSearching) {
     return (
-      <div className="space-y-6">
-        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <Sparkles className="text-blue-600" size={20} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900">
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="w-full max-w-3xl">
+          {/* Loading Circle at Top */}
+          <div className="flex flex-col items-center mb-12">
+            <div className="w-16 h-16 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
               Literature Source Verification
             </h3>
+            <p className="text-gray-600">
+              Tracing and validating academic sources
+            </p>
           </div>
-          <p className="text-gray-600 mb-8">
-            Tracing and validating academic sources
-          </p>
 
-          <div className="space-y-4">
-            {steps.map((step, idx) => (
+          {/* Progress Steps */}
+          <div className="space-y-4 mb-8">
+            {steps.map((step) => (
               <div
                 key={step.id}
-                className={`flex items-center gap-4 p-4 rounded-xl transition-all ${
+                className={`p-6 rounded-xl transition-all ${
                   step.status === 'completed'
                     ? 'bg-green-50 border-2 border-green-200'
                     : step.status === 'processing'
-                    ? 'bg-blue-50 border-2 border-blue-200 animate-pulse'
+                    ? 'bg-blue-50 border-2 border-blue-200'
                     : 'bg-white border border-gray-200'
                 }`}
               >
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    step.status === 'completed'
-                      ? 'bg-green-500'
-                      : step.status === 'processing'
-                      ? 'bg-blue-500'
-                      : 'bg-gray-200'
-                  }`}
-                >
-                  {step.status === 'completed' ? (
-                    <CheckCircle className="text-white" size={24} />
-                  ) : step.status === 'processing' ? (
-                    <Loader className="text-white animate-spin" size={24} />
-                  ) : (
-                    <span className="text-gray-400 text-xl">{step.icon}</span>
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      step.status === 'completed'
+                        ? 'bg-green-500'
+                        : step.status === 'processing'
+                        ? 'bg-blue-500'
+                        : 'bg-gray-200'
+                    }`}
+                  >
+                    {step.status === 'completed' ? (
+                      <CheckCircle className="text-white" size={24} />
+                    ) : step.status === 'processing' ? (
+                      <Loader className="text-white animate-spin" size={24} />
+                    ) : (
+                      <span className="text-gray-400 text-xl">{step.icon}</span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900 text-lg mb-1">{step.title}</h4>
+                    <p className="text-sm text-gray-600">{step.description}</p>
+                  </div>
+                  {step.status === 'processing' && (
+                    <div className="w-3 h-3 rounded-full bg-blue-500" />
                   )}
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">{step.title}</h4>
-                  <p className="text-sm text-gray-600">{step.description}</p>
-                </div>
-                {step.status === 'processing' && (
-                  <div className="flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-                  </div>
-                )}
               </div>
             ))}
           </div>
 
-          <div className="mt-6 flex items-center gap-2 text-sm text-gray-600">
+          {/* Bottom Progress Indicator */}
+          <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
             <span>Processing step {currentStep + 1} of {steps.length}</span>
-            <div className="flex gap-1">
-              {steps.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`w-2 h-2 rounded-full ${
-                    idx <= currentStep ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
+            <div className="flex gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         </div>
@@ -359,7 +371,7 @@ export default function SourceFinderInterface() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="输入您想要查找支撑文献的文本..."
-            className="w-full h-64 p-4 border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400"
+            className="w-full h-64 p-4 border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400 text-base"
             maxLength={300}
           />
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
@@ -369,7 +381,7 @@ export default function SourceFinderInterface() {
             <button
               onClick={handleSearch}
               disabled={!query.trim() || isSearching}
-              className="bg-gray-900 text-white px-6 py-2.5 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+              className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
             >
               <ArrowUp size={18} />
             </button>
@@ -398,4 +410,3 @@ export default function SourceFinderInterface() {
     </div>
   )
 }
-
