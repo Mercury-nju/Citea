@@ -196,25 +196,25 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-8 py-6">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <header className="bg-white border-b border-gray-200 px-8 py-8">
+          <div className="max-w-5xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1.5">
               研究助手
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm text-gray-600">
               快速查找支持文章或验证引文真实性
             </p>
           </div>
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 px-8 py-6">
-          <div className="max-w-4xl mx-auto">
+        <div className="flex-1 overflow-y-auto bg-gray-50 px-8 py-8">
+          <div className="max-w-5xl mx-auto">
             {/* Tabs */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-1 mb-8">
               <button
                 onClick={() => setActiveTab('finder')}
-                className={`px-6 py-3 rounded-xl font-medium transition-all ${
+                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   activeTab === 'finder'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
@@ -224,7 +224,7 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setActiveTab('checker')}
-                className={`px-6 py-3 rounded-xl font-medium transition-all ${
+                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   activeTab === 'checker'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
@@ -234,14 +234,14 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setActiveTab('assistant')}
-                className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
+                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
                   activeTab === 'assistant'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                 }`}
               >
                 对话
-                <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-semibold">
+                <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold">
                   BETA
                 </span>
               </button>
