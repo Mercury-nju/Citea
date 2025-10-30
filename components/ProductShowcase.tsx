@@ -96,40 +96,83 @@ export default function ProductShowcase() {
   )
 }
 
-// Real Dashboard Screenshots Components
+// Real Dashboard Screenshots Components with Enhanced Details
 function FinderScreenshot() {
   return (
-    <div className="w-full h-full p-8 bg-white flex flex-col">
+    <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
+      {/* Mock Browser Top Bar */}
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-400"></div>
+          <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+          <div className="w-3 h-3 rounded-full bg-green-400"></div>
+        </div>
+        <div className="flex-1 bg-gray-100 rounded-md px-3 py-1 text-xs text-gray-500">
+          citea.app/source-finder
+        </div>
+      </div>
+
       {/* Search Input */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6 shadow-sm">
+      <div className="bg-white rounded-xl border-2 border-gray-200 p-5 mb-4 shadow-lg">
+        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white text-sm">🔍</span>
+          </div>
+          <span className="font-bold text-gray-900">Source Finder</span>
+        </div>
         <textarea
           readOnly
           value="Bardeen-Cooper-Schrieffer (BCS) theory, where electrons form Cooper pairs through phonon interactions. However, high-temperature superconductors, such as cuprates and iron-based compounds, cannot be fully explained by this model."
-          className="w-full h-32 text-sm text-gray-700 resize-none border-0 focus:outline-none"
+          className="w-full h-24 text-sm text-gray-700 resize-none border-0 focus:outline-none leading-relaxed"
         />
-        <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-3">
-          <span className="text-xs text-gray-500">235/300 字</span>
-          <button className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium">
-            搜索文献
+        <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-2">
+          <div className="flex gap-2">
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">235 characters</span>
+            <span className="text-xs text-blue-600 font-medium">✓ Ready to search</span>
+          </div>
+          <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold hover:shadow-lg transition-all">
+            🚀 Search Sources
           </button>
         </div>
       </div>
 
-      {/* Results */}
+      {/* Results with more details */}
       <div className="space-y-3 flex-1 overflow-hidden">
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded font-bold">✓ CrossRef验证</span>
+        <div className="text-xs font-semibold text-gray-500 mb-2">Found 12 results in 0.8s</div>
+        
+        <div className="bg-white border-2 border-blue-200 rounded-xl p-4 shadow-md hover:shadow-xl transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <span className="bg-blue-600 text-white text-xs px-2.5 py-1 rounded-full font-bold">✓ Verified • CrossRef</span>
+            <span className="text-xs text-gray-500">98% match</span>
           </div>
-          <h4 className="text-sm font-bold text-gray-900 mb-1">Superconductivity at interfaces</h4>
-          <p className="text-xs text-gray-600">👤 J C Inkson • 📚 Journal of Physics C • 📅 1975</p>
+          <h4 className="text-base font-bold text-gray-900 mb-1.5 leading-tight">Superconductivity at interfaces between conventional and unconventional superconductors</h4>
+          <p className="text-xs text-gray-600 mb-2">👤 J C Inkson • 📚 Journal of Physics C: Solid State Physics • 📅 1975</p>
+          <div className="flex gap-2 pt-2 border-t border-gray-100">
+            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">DOI: 10.1088/0022-3719/8/13/021</span>
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">1,247 citations</span>
+          </div>
         </div>
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded font-bold">✓ PubMed验证</span>
+
+        <div className="bg-white border-2 border-green-200 rounded-xl p-4 shadow-md hover:shadow-xl transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <span className="bg-green-600 text-white text-xs px-2.5 py-1 rounded-full font-bold">✓ Verified • PubMed</span>
+            <span className="text-xs text-gray-500">95% match</span>
           </div>
-          <h4 className="text-sm font-bold text-gray-900 mb-1">Cooper pairing in condensed matter systems</h4>
-          <p className="text-xs text-gray-600">👤 A. Smith et al. • 📚 Physical Review • 📅 2018</p>
+          <h4 className="text-base font-bold text-gray-900 mb-1.5 leading-tight">Cooper pairing in condensed matter systems</h4>
+          <p className="text-xs text-gray-600 mb-2">👤 A. Smith, B. Johnson, C. Lee • 📚 Physical Review B • 📅 2018</p>
+          <div className="flex gap-2 pt-2 border-t border-gray-100">
+            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">PMID: 29845632</span>
+            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">Impact: 8.2</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-4 opacity-60">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-purple-600 text-white text-xs px-2.5 py-1 rounded-full font-bold">✓ arXiv</span>
+            <span className="text-xs text-gray-500">89% match</span>
+          </div>
+          <h4 className="text-sm font-bold text-gray-900 mb-1">High-temperature superconductivity mechanisms...</h4>
+          <p className="text-xs text-gray-600">👤 Multiple authors • 📚 arXiv preprint • 📅 2023</p>
         </div>
       </div>
     </div>
@@ -138,45 +181,90 @@ function FinderScreenshot() {
 
 function CheckerScreenshot() {
   return (
-    <div className="w-full h-full p-8 bg-white flex flex-col gap-4">
-      {/* Valid */}
-      <div className="border-l-4 border-green-500 bg-green-50 rounded-r-xl p-5">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-lg font-bold">✓</span>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm text-gray-800 mb-2">
-              Smith, J., & Johnson, M. (2020). Machine learning in healthcare. <em>Nature Medicine</em>, 26(5), 123-130.
-            </p>
-            <p className="text-xs font-bold text-green-700">✓ 已验证 - 在 CrossRef 数据库中找到</p>
-            <p className="text-xs text-green-600 mt-1">DOI: 10.1038/s41591-020-0001-x</p>
-          </div>
+    <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
+      {/* Mock Browser Top Bar */}
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-400"></div>
+          <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+          <div className="w-3 h-3 rounded-full bg-green-400"></div>
+        </div>
+        <div className="flex-1 bg-gray-100 rounded-md px-3 py-1 text-xs text-gray-500">
+          citea.app/citation-checker
         </div>
       </div>
 
-      {/* Invalid */}
-      <div className="border-l-4 border-red-500 bg-red-50 rounded-r-xl p-5">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-lg font-bold">!</span>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm text-gray-800 mb-2">
-              Brown, A. (2023). Fake research paper. <em>Journal of Made Up Studies</em>, 15(3), 45-67.
-            </p>
-            <p className="text-xs font-bold text-red-700">✗ 未找到 - 可能是伪造的引用</p>
-            <p className="text-xs text-red-600 mt-1">⚠️ 无法在任何学术数据库中验证</p>
-          </div>
+      {/* Stats Summary */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-green-600">2</div>
+          <div className="text-xs text-green-700 font-medium">Verified</div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-red-600">1</div>
+          <div className="text-xs text-red-700 font-medium">Not Found</div>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-blue-600">67%</div>
+          <div className="text-xs text-blue-700 font-medium">Accuracy</div>
         </div>
       </div>
 
-      {/* Checking */}
-      <div className="border-l-4 border-gray-300 bg-gray-50 rounded-r-xl p-5">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-          <div className="flex-1 pt-1">
-            <p className="text-sm text-gray-600 italic">正在验证引用...</p>
+      {/* Results */}
+      <div className="flex-1 space-y-3 overflow-hidden">
+        {/* Valid Citation 1 */}
+        <div className="border-l-4 border-green-500 bg-white rounded-r-xl p-4 shadow-md">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xl font-bold">✓</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-800 mb-2 leading-relaxed">
+                Smith, J., & Johnson, M. (2020). Machine learning in healthcare. <em>Nature Medicine</em>, 26(5), 123-130.
+              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">✓ Verified</span>
+                <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">CrossRef</span>
+              </div>
+              <p className="text-xs text-green-600 mt-2">DOI: 10.1038/s41591-020-0001-x • Citations: 1,456</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Invalid Citation */}
+        <div className="border-l-4 border-red-500 bg-white rounded-r-xl p-4 shadow-md">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xl font-bold">!</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-800 mb-2 leading-relaxed">
+                Brown, A. (2023). Fake research paper. <em>Journal of Made Up Studies</em>, 15(3), 45-67.
+              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold">✗ Not Found</span>
+                <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">Fake</span>
+              </div>
+              <p className="text-xs text-red-600 mt-2">⚠️ Unable to verify in any academic database</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Valid Citation 2 */}
+        <div className="border-l-4 border-green-500 bg-white rounded-r-xl p-4 shadow-md">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xl font-bold">✓</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-800 mb-2 leading-relaxed">
+                Lee, K. (2019). Academic writing best practices...
+              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">✓ Verified</span>
+                <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">PubMed</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -186,49 +274,111 @@ function CheckerScreenshot() {
 
 function AssistantScreenshot() {
   return (
-    <div className="w-full h-full p-8 bg-white flex flex-col">
-      <div className="flex-1 space-y-4 mb-4">
+    <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
+      {/* Mock Browser Top Bar */}
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200">
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-400"></div>
+          <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+          <div className="w-3 h-3 rounded-full bg-green-400"></div>
+        </div>
+        <div className="flex-1 bg-gray-100 rounded-md px-3 py-1 text-xs text-gray-500">
+          citea.app/ai-assistant
+        </div>
+      </div>
+
+      {/* Chat Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 mb-4 shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+            <span className="text-2xl">🤖</span>
+          </div>
+          <div>
+            <h3 className="text-white font-bold">AI Research Assistant</h3>
+            <p className="text-purple-200 text-xs">Online • Ready to help</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 space-y-3 overflow-hidden mb-4">
         {/* User Message */}
         <div className="flex justify-end">
-          <div className="bg-blue-600 text-white rounded-2xl px-5 py-3 max-w-[70%]">
-            <p className="text-sm">如何引用一篇有多个作者的期刊文章？</p>
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[75%] shadow-md">
+            <p className="text-sm">How do I cite a journal article with multiple authors in APA format?</p>
           </div>
         </div>
 
-        {/* AI Response */}
+        {/* AI Response with Rich Content */}
         <div className="flex justify-start">
-          <div className="bg-gray-100 rounded-2xl px-5 py-4 max-w-[80%]">
+          <div className="bg-white border-2 border-gray-200 rounded-2xl rounded-tl-sm px-5 py-4 max-w-[85%] shadow-lg">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 bg-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-xs">AI</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg flex items-center justify-center">
+                <span className="text-white text-xs font-bold">AI</span>
               </div>
-              <span className="text-xs font-bold text-gray-900">AI Assistant</span>
+              <span className="text-sm font-bold text-gray-900">Citea Assistant</span>
+              <span className="ml-auto text-xs text-gray-400">Just now</span>
             </div>
-            <p className="text-sm text-gray-800 mb-3">在APA格式中，对于有多个作者的期刊文章：</p>
-            <ul className="space-y-2 text-sm text-gray-700 mb-3">
-              <li className="flex gap-2"><span className="text-purple-600">•</span><span>1-2位作者：列出所有作者</span></li>
-              <li className="flex gap-2"><span className="text-purple-600">•</span><span>3-20位作者：列出所有作者</span></li>
-              <li className="flex gap-2"><span className="text-purple-600">•</span><span>21位或以上：前19位 + "..." + 最后一位</span></li>
-            </ul>
-            <div className="pt-3 border-t border-gray-300">
-              <p className="text-xs text-gray-600 italic">
-                例如：Smith, J., Johnson, M., & Williams, K. (2023).
+            <p className="text-sm text-gray-800 mb-3 leading-relaxed">
+              For APA format with multiple authors:
+            </p>
+            <div className="bg-purple-50 rounded-lg p-3 mb-3 border border-purple-100">
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex gap-2">
+                  <span className="text-purple-600 font-bold">•</span>
+                  <span><strong>1-2 authors:</strong> List all names</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-purple-600 font-bold">•</span>
+                  <span><strong>3-20 authors:</strong> List all names</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-purple-600 font-bold">•</span>
+                  <span><strong>21+ authors:</strong> First 19 + "..." + last author</span>
+                </li>
+              </ul>
+            </div>
+            <div className="pt-3 border-t border-gray-200 bg-gray-50 rounded-lg px-3 py-2">
+              <p className="text-xs text-gray-500 font-medium mb-1">Example:</p>
+              <p className="text-xs text-gray-700 italic">
+                Smith, J., Johnson, M., & Williams, K. (2023). Research methods. <em>Journal Name</em>, 15(2), 123-145.
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* User Follow-up */}
+        <div className="flex justify-end">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[70%] shadow-md">
+            <p className="text-sm">Can you verify this citation for me?</p>
+          </div>
+        </div>
+
+        {/* AI Typing Indicator */}
+        <div className="flex justify-start">
+          <div className="bg-white border-2 border-gray-200 rounded-2xl rounded-tl-sm px-5 py-3 shadow-lg">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
+              <span className="text-xs text-gray-500">AI is typing...</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Input */}
+      {/* Input Box */}
       <div className="flex gap-2">
         <input
           type="text"
-          placeholder="Ask a question..."
-          className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-gray-50"
+          placeholder="Ask me anything about citations..."
+          className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl text-sm bg-white focus:border-purple-500 transition-colors"
           readOnly
         />
-        <button className="bg-purple-600 text-white px-5 py-3 rounded-xl">
-          <span className="text-lg">💬</span>
+        <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-5 py-3 rounded-xl hover:shadow-lg transition-all">
+          <span className="text-xl">📤</span>
         </button>
       </div>
     </div>

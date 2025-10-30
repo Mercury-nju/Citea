@@ -24,8 +24,8 @@ export default function DetailedFeatures() {
           </p>
         </div>
 
-        {/* Features Grid - 更紧凑的3列布局 */}
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-3 gap-12">
           {/* Source Finder */}
           <div className="group relative">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300">

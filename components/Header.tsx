@@ -4,6 +4,62 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Logo from './Logo'
+import { ChevronDown, Globe } from 'lucide-react'
+import type { Language } from '@/lib/i18n'
+
+// Language Dropdown Component
+function LanguageDropdown({ language, setLanguage }: { language: Language; setLanguage: (lang: Language) => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const languages = [
+    { code: 'en' as Language, name: 'English', flag: '🇺🇸' },
+    { code: 'zh' as Language, name: '中文', flag: '🇨🇳' },
+    { code: 'es' as Language, name: 'Español', flag: '🇪🇸' },
+    { code: 'fr' as Language, name: 'Français', flag: '🇫🇷' },
+    { code: 'de' as Language, name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'ja' as Language, name: '日本語', flag: '🇯🇵' },
+  ]
+
+  const currentLang = languages.find(l => l.code === language) || languages[0]
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+        className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all text-sm font-medium text-gray-700"
+      >
+        <Globe size={16} />
+        <span>{currentLang.flag}</span>
+        <span className="hidden sm:inline">{currentLang.name}</span>
+        <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => {
+                setLanguage(lang.code)
+                setIsOpen(false)
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors ${
+                language === lang.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+              }`}
+            >
+              <span className="text-xl">{lang.flag}</span>
+              <span className="font-medium">{lang.name}</span>
+              {language === lang.code && (
+                <span className="ml-auto text-blue-600">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Header() {
   const { language, setLanguage, t } = useLanguage()
@@ -28,13 +84,10 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="group">
             <div className="transition-transform group-hover:scale-105">
               <Logo />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Citea
-            </span>
           </Link>
 
           {/* Navigation */}
@@ -61,29 +114,8 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center gap-3">
-            {/* Language Switcher */}
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                  language === 'en'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLanguage('zh')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                  language === 'zh'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                中文
-              </button>
-            </div>
+            {/* Language Switcher - Dropdown */}
+            <LanguageDropdown language={language} setLanguage={setLanguage} />
 
             {/* CTA Button */}
             <Link 
