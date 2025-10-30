@@ -43,19 +43,19 @@ export default function Header() {
               href="#features" 
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
             >
-              {t.nav.features}
+              {t.header.features}
             </Link>
             <Link 
-              href="#how-it-works" 
+              href="#pricing" 
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
             >
-              {t.nav.howItWorks}
+              {t.header.pricing}
             </Link>
             <Link 
               href="#faq" 
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
             >
-              {t.nav.faq}
+              {t.header.faq}
             </Link>
           </nav>
 
@@ -90,7 +90,7 @@ export default function Header() {
               href="/auth/signin"
               className="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm hover:shadow-md"
             >
-              {t.nav.getStarted}
+              {t.header.getStarted}
             </Link>
           </div>
         </div>
