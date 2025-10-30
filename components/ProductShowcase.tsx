@@ -1,36 +1,35 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
-import Image from 'next/image'
+import { Play, Pause, Volume2, Maximize, Sparkles } from 'lucide-react'
+import Link from 'next/link'
 
 export default function ProductShowcase() {
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTab, setCurrentTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
 
-  const slides = [
-    {
+  const demos = {
+    finder: {
       title: '文献查找',
-      description: 'AI 驱动的智能搜索，自动识别研究领域',
-      component: <FinderScreenshot />
+      description: 'AI 驱动的智能搜索，从学术数据库中自动查找相关文献',
+      duration: '1:24'
     },
-    {
+    checker: {
       title: '引用验证',
-      description: '实时验证引用真实性，确保学术诚信',
-      component: <CheckerScreenshot />
+      description: '实时验证引用真实性，识别虚假文献，确保学术诚信',
+      duration: '2:15'
     },
-    {
-      title: 'AI 助手',
-      description: '专业的学术写作指导和引用建议',
-      component: <AssistantScreenshot />
+    assistant: {
+      title: 'AI 研究助手',
+      description: '智能对话助手，回答学术问题，提供引用建议',
+      duration: '1:48'
     }
-  ]
-
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length)
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+  }
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full mb-6 border border-blue-100">
             <Sparkles className="text-blue-600" size={18} />
@@ -40,54 +39,103 @@ export default function ProductShowcase() {
             看看 Citea 如何工作
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            从搜索到验证，完整的学术研究工作流程
+            真实的操作界面，完整的学术研究工作流程
           </p>
         </div>
 
-        <div className="relative max-w-6xl mx-auto">
-          {/* Screenshot Display */}
-          <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden p-8">
-            <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden">
-              {slides[currentSlide].component}
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-all border border-gray-200"
-          >
-            <ChevronLeft size={24} className="text-gray-700" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-all border border-gray-200"
-          >
-            <ChevronRight size={24} className="text-gray-700" />
-          </button>
-
-          {/* Indicators */}
-          <div className="flex justify-center gap-3 mt-8">
-            {slides.map((slide, index) => (
+        {/* Video Player Style Display */}
+        <div className="max-w-6xl mx-auto">
+          {/* Tab Navigation */}
+          <div className="flex justify-center gap-3 mb-6">
+            {(['finder', 'checker', 'assistant'] as const).map((tab) => (
               <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`transition-all ${
-                  index === currentSlide
-                    ? 'bg-blue-600 w-12 h-3 rounded-full'
-                    : 'bg-gray-300 hover:bg-gray-400 w-3 h-3 rounded-full'
+                key={tab}
+                onClick={() => {
+                  setCurrentTab(tab)
+                  setIsPlaying(false)
+                }}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+                  currentTab === tab
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
-              />
+              >
+                {demos[tab].title}
+              </button>
             ))}
           </div>
 
-          {/* Caption */}
-          <div className="text-center mt-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              {slides[currentSlide].title}
+          {/* Video Player Container */}
+          <div className="bg-gradient-to-b from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden">
+            {/* Video Display Area */}
+            <div className="relative aspect-video bg-black">
+              {/* 真实Dashboard截图预览 */}
+              <DashboardPreview tab={currentTab} />
+              
+              {/* Play Overlay */}
+              {!isPlaying && (
+                <button
+                  onClick={() => setIsPlaying(true)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/30 transition-colors group"
+                >
+                  <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                    <Play className="text-white ml-2" size={40} fill="white" />
+                  </div>
+                </button>
+              )}
+
+              {/* Time Progress Bar (when playing) */}
+              {isPlaying && (
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                  <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600 w-1/3 rounded-full"></div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Video Controls */}
+            <div className="bg-gray-900 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
+                >
+                  {isPlaying ? (
+                    <Pause className="text-white" size={20} fill="white" />
+                  ) : (
+                    <Play className="text-white ml-0.5" size={20} fill="white" />
+                  )}
+                </button>
+                <div className="text-white text-sm font-mono">
+                  0:00 / {demos[currentTab].duration}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button className="text-gray-400 hover:text-white transition-colors">
+                  <Volume2 size={20} />
+                </button>
+                <Link
+                  href="/auth/signin"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  立即体验
+                </Link>
+                <button className="text-gray-400 hover:text-white transition-colors">
+                  <Maximize size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="mt-8 text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              {demos[currentTab].title}
             </h3>
-            <p className="text-gray-600">
-              {slides[currentSlide].description}
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+              {demos[currentTab].description}
             </p>
           </div>
         </div>
@@ -96,8 +144,19 @@ export default function ProductShowcase() {
   )
 }
 
-// Real Dashboard Screenshots Components with Enhanced Details
-function FinderScreenshot() {
+// Dashboard Preview Component - 显示真实Dashboard截图
+function DashboardPreview({ tab }: { tab: 'finder' | 'checker' | 'assistant' }) {
+  if (tab === 'finder') {
+    return <FinderDashboard />
+  } else if (tab === 'checker') {
+    return <CheckerDashboard />
+  } else {
+    return <AssistantDashboard />
+  }
+}
+
+// 真实Dashboard组件 - 与实际dashboard页面同步
+function FinderDashboard() {
   return (
     <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
       {/* Mock Browser Top Bar */}
@@ -179,7 +238,7 @@ function FinderScreenshot() {
   )
 }
 
-function CheckerScreenshot() {
+function CheckerDashboard() {
   return (
     <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
       {/* Mock Browser Top Bar */}
@@ -272,7 +331,7 @@ function CheckerScreenshot() {
   )
 }
 
-function AssistantScreenshot() {
+function AssistantDashboard() {
   return (
     <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
       {/* Mock Browser Top Bar */}
