@@ -15,7 +15,7 @@ export default function Hero() {
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
           {t.hero.title1}
           <br />
-          <span className="relative inline-block text-blue-600">
+          <span className="relative inline-block text-amber-600">
             {t.hero.title2}
             {/* Wavy Underline SVG */}
             <svg 
@@ -27,7 +27,7 @@ export default function Hero() {
             >
               <path 
                 d="M0 6C20 2, 40 10, 60 6C80 2, 100 10, 120 6C140 2, 160 10, 180 6C200 2, 220 10, 240 6C260 2, 280 10, 300 6C320 2, 340 10, 360 6C380 2, 400 10, 400 6" 
-                stroke="#93C5FD" 
+                stroke="#FCD34D" 
                 strokeWidth="3" 
                 strokeLinecap="round"
                 className="animate-wave"
