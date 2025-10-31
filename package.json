@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:init": "node scripts/init-database.js",
+    "db:migrate": "node scripts/migrate-to-redis.js",
+    "db:test": "node scripts/init-database.js --create-test-user"
   },
   "dependencies": {
     "@vercel/kv": "^1.0.1",

@@ -21,7 +21,11 @@ if (process.env.REDIS_URL) {
 const DATA_DIR = path.join(process.cwd(), 'data')
 const USERS_FILE = path.join(DATA_DIR, 'users.json')
 
-export type StoredUser = AuthUser & { passwordHash: string }
+export type StoredUser = AuthUser & { 
+  passwordHash: string
+  createdAt?: string
+  lastLoginAt?: string
+}
 
 async function ensureDataFile() {
   try {
@@ -55,6 +59,8 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         email: data.email,
         plan: (data.plan as any) || 'free',
         passwordHash: data.passwordHash,
+        createdAt: data.createdAt,
+        lastLoginAt: data.lastLoginAt,
       }
     } catch (error) {
       console.error('Redis read error:', error)
@@ -92,6 +98,8 @@ export async function createUser(user: StoredUser): Promise<void> {
         email: user.email,
         plan: user.plan,
         passwordHash: user.passwordHash,
+        createdAt: user.createdAt || new Date().toISOString(),
+        lastLoginAt: user.lastLoginAt || new Date().toISOString(),
       })
       return
     } catch (error) {
@@ -111,6 +119,40 @@ export async function createUser(user: StoredUser): Promise<void> {
   const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
   json.users.push(user)
   await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
+}
+
+export async function updateUserLastLogin(email: string): Promise<void> {
+  // Check if KV is available
+  if (kv && process.env.KV_REST_API_URL) {
+    try {
+      await kv.hset(`user:${email.toLowerCase()}`, {
+        lastLoginAt: new Date().toISOString()
+      })
+      return
+    } catch (error) {
+      console.error('KV update error:', error)
+    }
+  }
+  
+  // Try Redis if available
+  if (redis) {
+    try {
+      await redis.hset(`user:${email.toLowerCase()}`, 'lastLoginAt', new Date().toISOString())
+      return
+    } catch (error) {
+      console.error('Redis update error:', error)
+    }
+  }
+  
+  // Fallback to file storage
+  await ensureDataFile()
+  const raw = await fs.readFile(USERS_FILE, 'utf8')
+  const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
+  const user = json.users.find(u => u.email.toLowerCase() === email.toLowerCase())
+  if (user) {
+    user.lastLoginAt = new Date().toISOString()
+    await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
+  }
 }
 
 

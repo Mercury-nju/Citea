@@ -17,7 +17,15 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10)
-    const user = { id: randomUUID(), name, email, passwordHash, plan: 'free' }
+    const user = { 
+      id: randomUUID(), 
+      name, 
+      email, 
+      passwordHash, 
+      plan: 'free',
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString()
+    }
     await createUser(user)
 
     const token = await signJwt({ id: user.id, name: user.name, email: user.email, plan: user.plan })

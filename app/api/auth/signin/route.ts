@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { signJwt, setAuthCookie } from '@/lib/auth'
-import { getUserByEmail } from '@/lib/userStore'
+import { getUserByEmail, updateUserLastLogin } from '@/lib/userStore'
 
 export async function POST(req: Request) {
   try {
@@ -17,6 +17,9 @@ export async function POST(req: Request) {
     if (!ok) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
+
+    // Update last login time
+    await updateUserLastLogin(user.email)
 
     const token = await signJwt({ id: user.id, name: user.name, email: user.email, plan: user.plan })
     await setAuthCookie(token)

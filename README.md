@@ -48,7 +48,7 @@ Chat with our AI assistant about your research questions, citation verification,
 - Node.js 18+ installed
 - npm or yarn package manager
 
-### Installation
+### Quick Start (Development)
 
 1. Clone the repository:
 ```bash
@@ -59,87 +59,44 @@ cd citea
 2. Install dependencies:
 ```bash
 npm install
-# or
-yarn install
 ```
 
 3. Run the development server:
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-### Environment Variables
+**Note**: For local development, user data is stored in `data/users.json` automatically. No database setup required!
 
-#### For Local Development
+### 🚀 Production Deployment
 
-Create an `.env.local` file:
+**Ready to deploy for real users? See our comprehensive guides:**
 
-```bash
-JWT_SECRET=your-strong-secret-here
-# KV is optional for local dev (will use local file storage)
-```
+- 📖 **[Quick Deployment Guide](./README_DEPLOYMENT.md)** - 5-minute setup
+- 📚 **[Complete Production Guide](./PRODUCTION_GUIDE.md)** - Detailed instructions
+- ✅ **[Deployment Checklist](./DEPLOYMENT_CHECKLIST.md)** - Pre-deployment verification
+- 🗄️ **[Database Setup](./DATABASE_SETUP.md)** - Database configuration
 
-#### For Production (Vercel)
+**Quick Deploy to Vercel (Recommended):**
 
-**⚠️ 重要：生产环境必须配置 Vercel KV，否则用户注册/登录功能无法使用！**
+1. Push code to GitHub
+2. Import project to Vercel
+3. Add Vercel KV database (Storage → Create Database → KV)
+4. Set environment variable: `JWT_SECRET` (generate with `openssl rand -base64 32`)
+5. Redeploy
 
-按以下步骤配置：
+✅ **Done! Users can now register and use your app!**
 
-**步骤 1: 创建 Vercel KV 数据库**
-1. 访问 [Vercel Dashboard](https://vercel.com/dashboard)
-2. 选择你的项目
-3. 点击 **Storage** 标签
-4. 点击 **Create Database**
-5. 选择 **KV (Redis)**
-6. 输入数据库名称（如 `citea-production`）
-7. 选择区域（建议选择离用户最近的区域）
-8. 点击 **Create**
-
-**步骤 2: 连接到项目**
-1. 创建完成后，点击 **Connect Project**
-2. 选择你的 Citea 项目
-3. 确认连接
-
-这将自动添加以下环境变量：
-- `KV_REST_API_URL`
-- `KV_REST_API_TOKEN`
-- `KV_URL`
-
-**步骤 3: 添加 JWT Secret**
-1. 进入项目 → **Settings** → **Environment Variables**
-2. 添加新变量：
-   - **Name**: `JWT_SECRET`
-   - **Value**: 生成一个强随机字符串（至少 32 字符）
-   ```bash
-   # 你可以用这个命令生成：
-   openssl rand -base64 32
-   ```
-3. 选择 **Production**, **Preview**, **Development** 全部环境
-4. 点击 **Save**
-
-**步骤 4: 重新部署**
-```bash
-git commit --allow-empty -m "chore: trigger redeploy with KV"
-git push
-```
-
-或在 Vercel Dashboard 点击 **Deployments** → **Redeploy**
-
-**验证配置：**
-- 部署成功后，访问 `/auth/signup` 尝试注册
-- 如果仍然显示"数据库未配置"，检查：
-  1. KV 数据库是否已连接到项目
-  2. 环境变量是否已正确设置
-  3. 是否已重新部署
+See [README_DEPLOYMENT.md](./README_DEPLOYMENT.md) for step-by-step instructions.
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14, React, TypeScript
 - **Styling**: Tailwind CSS
+- **Authentication**: JWT, bcryptjs
+- **Database**: Redis, Vercel KV (production), File storage (development)
 - **AI**: Tongyi Qianwen (通义千问)
 - **APIs**: CrossRef, PubMed, Semantic Scholar, arXiv
 - **Icons**: Lucide React
