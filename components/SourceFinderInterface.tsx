@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowUp, Sparkles, CheckCircle, Loader, ExternalLink, Copy } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface SearchStep {
   id: number
@@ -21,47 +22,23 @@ interface Source {
   verified: boolean
 }
 
-const SEARCH_STEPS: SearchStep[] = [
-  {
-    id: 1,
-    title: 'Literature Source Verification',
-    description: 'Tracing and validating academic sources',
-    status: 'pending'
-  },
-  {
-    id: 2,
-    title: 'Scanning academic databases',
-    description: 'Connecting to PubMed, CrossRef, and ArXiv',
-    status: 'pending'
-  },
-  {
-    id: 3,
-    title: 'Cross-referencing citations',
-    description: 'Analyzing citation networks and relationships',
-    status: 'pending'
-  },
-  {
-    id: 4,
-    title: 'Tracing publication lineage',
-    description: 'Mapping original sources and derivatives',
-    status: 'pending'
-  },
-  {
-    id: 5,
-    title: 'Validating authenticity',
-    description: 'Verifying DOI and publication records',
-    status: 'pending'
-  }
-]
-
 export default function SourceFinderInterface() {
+  const { t } = useLanguage()
   const [query, setQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
-  const [steps, setSteps] = useState<SearchStep[]>(SEARCH_STEPS)
+  const [steps, setSteps] = useState<SearchStep[]>([])
   const [sources, setSources] = useState<Source[]>([])
   const [showResults, setShowResults] = useState(false)
   const [originalText, setOriginalText] = useState('')
+
+  const SEARCH_STEPS: SearchStep[] = [
+    { id: 1, title: t.sourceFinder.step1, description: t.sourceFinder.step1Desc, status: 'pending' },
+    { id: 2, title: t.sourceFinder.step2, description: t.sourceFinder.step2Desc, status: 'pending' },
+    { id: 3, title: t.sourceFinder.step3, description: t.sourceFinder.step3Desc, status: 'pending' },
+    { id: 4, title: t.sourceFinder.step4, description: t.sourceFinder.step4Desc, status: 'pending' },
+    { id: 5, title: t.sourceFinder.step5, description: t.sourceFinder.step5Desc, status: 'pending' }
+  ]
 
   const examplePrompts = [
     'Bardeen-Cooper-Schrieffer (BCS) theory, where electrons form Cooper pairs through phonon interactions. However, high-temperature superconductors, such as cuprates and iron-based compounds, cannot be fully explained by this model.',
@@ -106,7 +83,7 @@ export default function SourceFinderInterface() {
       setShowResults(true)
     } catch (error) {
       console.error('Search error:', error)
-      alert('搜索失败，请重试')
+      alert(t.sourceFinder.searchFailed)
     } finally {
       setIsSearching(false)
     }
@@ -122,8 +99,8 @@ export default function SourceFinderInterface() {
         {/* Original Text */}
         <div className="bg-white rounded-xl p-6 border border-gray-200">
           <div className="flex items-start justify-between mb-4">
-            <h3 className="text-base font-semibold text-gray-900">原始文本</h3>
-            <p className="text-xs text-gray-500">点击引用编号跳转到对应文献</p>
+            <h3 className="text-base font-semibold text-gray-900">{t.sourceFinder.originalText}</h3>
+            <p className="text-xs text-gray-500">{t.sourceFinder.clickToJump}</p>
           </div>
           <p className="text-sm text-gray-700 leading-relaxed">
             {originalText}
@@ -139,8 +116,8 @@ export default function SourceFinderInterface() {
 
         {/* Results Header */}
         <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">建议您可以尝试：</h3>
-          <p className="text-sm text-gray-600">{sources.length} papers found</p>
+          <h3 className="text-lg font-bold text-gray-900 mb-1">{t.sourceFinder.suggestTry}</h3>
+          <p className="text-sm text-gray-600">{sources.length} {t.sourceFinder.papersFound}</p>
         </div>
 
         {/* Sources */}
@@ -157,7 +134,7 @@ export default function SourceFinderInterface() {
                     <p className="text-xs text-gray-600 leading-relaxed mb-1">
                       Bardeen-Cooper-Schrieffer (BCS) theory, where electrons form Cooper pairs through phonon interactions.
                     </p>
-                    <p className="text-xs text-gray-500">支撑文献（1 papers）</p>
+                    <p className="text-xs text-gray-500">{t.sourceFinder.supportingLit}（1 {t.sourceFinder.papers}）</p>
                   </div>
                 </div>
               </div>
@@ -169,7 +146,7 @@ export default function SourceFinderInterface() {
                   {source.verified && (
                     <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-bold">
                       <CheckCircle size={12} />
-                      {source.source}验证
+                      {source.source}{t.sourceFinder.verified}
                     </span>
                   )}
                   <div className="ml-auto flex items-center gap-1.5">
@@ -178,14 +155,14 @@ export default function SourceFinderInterface() {
                       className="flex items-center gap-1 px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 rounded-lg transition border border-gray-200"
                     >
                       <ExternalLink size={12} />
-                      访问
+                      {t.sourceFinder.visit}
                     </button>
                     <button 
                       onClick={() => copyToClipboard(`${source.authors} (${source.year}). ${source.title}. ${source.journal}. DOI: ${source.doi || 'N/A'}`)}
                       className="flex items-center gap-1 px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 rounded-lg transition border border-gray-200"
                     >
                       <Copy size={12} />
-                      复制
+                      {t.sourceFinder.copy}
                     </button>
                   </div>
                 </div>
@@ -229,13 +206,13 @@ export default function SourceFinderInterface() {
 
                 {/* Explanation */}
                 <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r">
-                  <p className="text-[10px] font-bold text-blue-900 mb-1.5 uppercase">参考文献说明</p>
+                  <p className="text-[10px] font-bold text-blue-900 mb-1.5 uppercase">{t.sourceFinder.explanation}</p>
                   <p className="text-xs text-blue-800 leading-relaxed mb-2">
-                    该文献通过 {source.source} 数据库验证，提供了关于主要观点的权威支持。
+                    {t.sourceFinder.explanationText.replace('{source}', source.source)}
                   </p>
                   <div className="pt-2 border-t border-blue-200">
                     <p className="text-[10px] text-blue-700">
-                      证据强度: <span className="font-bold">Strong</span>
+                      {t.sourceFinder.evidenceStrength} <span className="font-bold">{t.sourceFinder.strong}</span>
                     </p>
                   </div>
                 </div>
@@ -252,7 +229,7 @@ export default function SourceFinderInterface() {
           }}
           className="w-full bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 transition text-sm font-medium"
         >
-          新的搜索
+          {t.sourceFinder.newSearch}
         </button>
       </div>
     )
@@ -265,8 +242,8 @@ export default function SourceFinderInterface() {
           {/* Top Spinner */}
           <div className="flex flex-col items-center mb-10">
             <div className="w-12 h-12 rounded-full border-3 border-blue-200 border-t-blue-600 animate-spin mb-3" />
-            <h3 className="text-base font-bold text-gray-900 mb-1">Literature Source Verification</h3>
-            <p className="text-xs text-gray-600">Tracing and validating academic sources</p>
+            <h3 className="text-base font-bold text-gray-900 mb-1">{t.sourceFinder.searching}</h3>
+            <p className="text-xs text-gray-600">{t.sourceFinder.searchingDesc}</p>
           </div>
 
           {/* Steps */}
@@ -314,7 +291,7 @@ export default function SourceFinderInterface() {
 
           {/* Bottom Dots */}
           <div className="flex items-center justify-center gap-3 text-xs text-gray-600">
-            <span>Processing step {currentStep + 1} of {steps.length}</span>
+            <span>{t.sourceFinder.processingStep} {currentStep + 1} {t.sourceFinder.of} {steps.length}</span>
             <div className="flex gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '0ms' }} />
               <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -334,12 +311,12 @@ export default function SourceFinderInterface() {
           <textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="输入您的研究查询..."
+            placeholder={t.sourceFinder.inputPlaceholder}
             className="w-full h-48 p-3 border-0 focus:ring-0 resize-none text-sm text-gray-900 placeholder-gray-400"
             maxLength={300}
           />
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">{query.length}/300 字</span>
+            <span className="text-xs text-gray-500">{query.length}/300 {t.sourceFinder.characterCount}</span>
             <button
               onClick={handleSearch}
               disabled={!query.trim()}
@@ -355,7 +332,7 @@ export default function SourceFinderInterface() {
       <div>
         <div className="flex items-center gap-1.5 mb-2.5">
           <Sparkles className="text-yellow-500" size={14} />
-          <span className="text-xs font-medium text-gray-700">示例：</span>
+          <span className="text-xs font-medium text-gray-700">{t.sourceFinder.examples}</span>
         </div>
         <div className="space-y-2">
           {examplePrompts.map((prompt, index) => (
