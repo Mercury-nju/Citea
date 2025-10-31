@@ -31,9 +31,9 @@ export default function ProductShowcase() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-full mb-6 border border-amber-100">
-            <Sparkles className="text-amber-600" size={18} />
-            <span className="text-sm font-semibold text-amber-900">产品演示</span>
+          <div className="inline-flex items-center gap-2 bg-lime-50 px-4 py-2 rounded-full mb-6 border border-lime-100">
+            <Sparkles className="text-lime-600" size={18} />
+            <span className="text-sm font-semibold text-lime-900">产品演示</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             看看 Citea 如何工作
@@ -56,7 +56,7 @@ export default function ProductShowcase() {
                 }}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                   currentTab === tab
-                    ? 'bg-amber-500 text-white shadow-lg'
+                    ? 'bg-lime-500 text-white shadow-lg'
                     : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
@@ -78,7 +78,7 @@ export default function ProductShowcase() {
                   onClick={() => setIsPlaying(true)}
                   className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/30 transition-colors group"
                 >
-                  <div className="w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                  <div className="w-24 h-24 bg-lime-500 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
                     <Play className="text-white ml-2" size={40} fill="white" />
                   </div>
                 </button>
@@ -88,7 +88,7 @@ export default function ProductShowcase() {
               {isPlaying && (
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                   <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 w-1/3 rounded-full"></div>
+                    <div className="h-full bg-lime-500 w-1/3 rounded-full"></div>
                   </div>
                 </div>
               )}
@@ -99,7 +99,7 @@ export default function ProductShowcase() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center hover:bg-amber-600 transition-colors"
+                  className="w-10 h-10 bg-lime-500 rounded-lg flex items-center justify-center hover:bg-lime-600 transition-colors"
                 >
                   {isPlaying ? (
                     <Pause className="text-white" size={20} fill="white" />
@@ -118,7 +118,7 @@ export default function ProductShowcase() {
                 </button>
                 <Link
                   href="/auth/signin"
-                  className="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 transition-colors"
+                  className="px-4 py-2 bg-lime-500 text-white rounded-lg text-sm font-semibold hover:bg-lime-600 transition-colors"
                 >
                   立即体验
                 </Link>
