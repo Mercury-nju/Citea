@@ -64,7 +64,7 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         passwordHash: data.passwordHash,
         createdAt: data.createdAt,
         lastLoginAt: data.lastLoginAt,
-        emailVerified: data.emailVerified === 'true' || data.emailVerified === true,
+        emailVerified: (data.emailVerified as any) === 'true' || (data.emailVerified as any) === true,
         verificationCode: data.verificationCode,
         verificationExpiry: data.verificationExpiry,
       }
