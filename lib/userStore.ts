@@ -1,14 +1,21 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import type { AuthUser } from './auth'
+import Redis from 'ioredis'
 
 // Import Vercel KV - it will use env vars automatically when available
 let kv: any = null
+let redis: Redis | null = null
 try {
   const kvModule = require('@vercel/kv')
   kv = kvModule
 } catch {
   // KV not available (local dev without env vars)
+}
+
+// Initialize Redis if REDIS_URL is provided
+if (process.env.REDIS_URL) {
+  redis = new Redis(process.env.REDIS_URL as string)
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data')
@@ -36,6 +43,24 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
       throw error
     }
   }
+  // Try Redis if available
+  if (redis) {
+    try {
+      const data = await redis.hgetall(`user:${email.toLowerCase()}`)
+      if (!data || Object.keys(data).length === 0) return null
+      // Redis returns string fields; parse where needed
+      return {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        plan: (data.plan as any) || 'free',
+        passwordHash: data.passwordHash,
+      }
+    } catch (error) {
+      console.error('Redis read error:', error)
+      throw error
+    }
+  }
   
   // Fallback to file storage (local dev)
   await ensureDataFile()
@@ -57,10 +82,27 @@ export async function createUser(user: StoredUser): Promise<void> {
       throw new Error(`Failed to save user to database: ${error}`)
     }
   }
+  // Try Redis if available
+  if (redis) {
+    try {
+      const key = `user:${user.email.toLowerCase()}`
+      await redis.hset(key, {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        plan: user.plan,
+        passwordHash: user.passwordHash,
+      })
+      return
+    } catch (error) {
+      console.error('Redis write error:', error)
+      throw new Error(`Failed to save user to Redis: ${error}`)
+    }
+  }
   
   // Check if we're in production without KV configured
   if (process.env.VERCEL) {
-    throw new Error('Database not configured. Please set up Vercel KV in production.')
+    throw new Error('Database not configured. Please set up Vercel KV or REDIS_URL in production.')
   }
   
   // Fallback to file storage (local dev)
