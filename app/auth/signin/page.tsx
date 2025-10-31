@@ -17,22 +17,42 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    
+    console.log('登录尝试:', email)
+    
     try {
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
+      
+      console.log('登录响应状态:', res.status)
+      
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        alert(data.error || 'Sign in failed')
+        console.error('登录错误:', data)
+        
+        // 如果需要验证邮箱
+        if (data.needsVerification && data.email) {
+          if (confirm(data.error + '\n\n点击确定前往验证页面')) {
+            router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`)
+          }
+        } else {
+          alert(data.error || '登录失败，请检查邮箱和密码')
+        }
         setIsLoading(false)
         return
       }
-      router.push('/dashboard')
+      
+      const data = await res.json()
+      console.log('登录成功:', data)
+      
+      // 强制刷新后跳转
+      window.location.href = '/dashboard'
     } catch (err) {
-      alert('Sign in failed')
-    } finally {
+      console.error('登录异常:', err)
+      alert('登录失败: ' + (err as Error).message)
       setIsLoading(false)
     }
   }

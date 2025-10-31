@@ -18,6 +18,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
+    // 检查邮箱是否已验证
+    if (!user.emailVerified) {
+      return NextResponse.json({ 
+        error: '请先验证您的邮箱',
+        needsVerification: true,
+        email: user.email
+      }, { status: 403 })
+    }
+
     // Update last login time
     await updateUserLastLogin(user.email)
 

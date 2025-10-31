@@ -24,8 +24,9 @@ export default function SignUpPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       })
+      const data = await res.json().catch(() => ({}))
+      
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
         let errorMsg = data.error || 'Sign up failed'
         if (errorMsg === 'Internal error' && data.details?.includes('Database not configured')) {
           errorMsg = '⚠️ 数据库未配置。生产环境需要设置 Vercel KV。\n\n请按照 README.md 中的步骤配置数据库。'
@@ -34,7 +35,15 @@ export default function SignUpPage() {
         setIsLoading(false)
         return
       }
-      router.push('/dashboard')
+      
+      // 注册成功，跳转到验证页面
+      if (data.needsVerification) {
+        alert(data.message || '注册成功！请查看邮箱并输入验证码。')
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)
+      } else {
+        // 旧用户或不需要验证
+        router.push('/dashboard')
+      }
     } catch (err) {
       alert('Sign up failed')
     } finally {

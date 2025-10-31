@@ -25,6 +25,9 @@ export type StoredUser = AuthUser & {
   passwordHash: string
   createdAt?: string
   lastLoginAt?: string
+  emailVerified?: boolean
+  verificationCode?: string
+  verificationExpiry?: string
 }
 
 async function ensureDataFile() {
@@ -61,6 +64,9 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         passwordHash: data.passwordHash,
         createdAt: data.createdAt,
         lastLoginAt: data.lastLoginAt,
+        emailVerified: data.emailVerified === 'true' || data.emailVerified === true,
+        verificationCode: data.verificationCode,
+        verificationExpiry: data.verificationExpiry,
       }
     } catch (error) {
       console.error('Redis read error:', error)
@@ -100,6 +106,9 @@ export async function createUser(user: StoredUser): Promise<void> {
         passwordHash: user.passwordHash,
         createdAt: user.createdAt || new Date().toISOString(),
         lastLoginAt: user.lastLoginAt || new Date().toISOString(),
+        emailVerified: user.emailVerified ? 'true' : 'false',
+        verificationCode: user.verificationCode || '',
+        verificationExpiry: user.verificationExpiry || '',
       })
       return
     } catch (error) {
@@ -119,6 +128,103 @@ export async function createUser(user: StoredUser): Promise<void> {
   const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
   json.users.push(user)
   await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
+}
+
+export async function updateUserVerification(email: string, code: string, expiry: string): Promise<void> {
+  // Check if KV is available
+  if (kv && process.env.KV_REST_API_URL) {
+    try {
+      await kv.hset(`user:${email.toLowerCase()}`, {
+        verificationCode: code,
+        verificationExpiry: expiry
+      })
+      return
+    } catch (error) {
+      console.error('KV update error:', error)
+    }
+  }
+  
+  // Try Redis if available
+  if (redis) {
+    try {
+      const key = `user:${email.toLowerCase()}`
+      await redis.hset(key, {
+        verificationCode: code,
+        verificationExpiry: expiry
+      })
+      return
+    } catch (error) {
+      console.error('Redis update error:', error)
+    }
+  }
+  
+  // Fallback to file storage
+  await ensureDataFile()
+  const raw = await fs.readFile(USERS_FILE, 'utf8')
+  const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
+  const user = json.users.find(u => u.email.toLowerCase() === email.toLowerCase())
+  if (user) {
+    user.verificationCode = code
+    user.verificationExpiry = expiry
+    await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
+  }
+}
+
+export async function verifyUserEmail(email: string, code: string): Promise<boolean> {
+  const user = await getUserByEmail(email)
+  if (!user) return false
+  
+  // Check if code matches
+  if (user.verificationCode !== code) {
+    return false
+  }
+  
+  // Check if code expired
+  if (user.verificationExpiry && new Date(user.verificationExpiry) < new Date()) {
+    return false
+  }
+  
+  // Mark as verified
+  if (kv && process.env.KV_REST_API_URL) {
+    try {
+      await kv.hset(`user:${email.toLowerCase()}`, {
+        emailVerified: true,
+        verificationCode: '',
+        verificationExpiry: ''
+      })
+      return true
+    } catch (error) {
+      console.error('KV verification error:', error)
+    }
+  }
+  
+  if (redis) {
+    try {
+      await redis.hset(`user:${email.toLowerCase()}`, {
+        emailVerified: 'true',
+        verificationCode: '',
+        verificationExpiry: ''
+      })
+      return true
+    } catch (error) {
+      console.error('Redis verification error:', error)
+    }
+  }
+  
+  // File storage
+  await ensureDataFile()
+  const raw = await fs.readFile(USERS_FILE, 'utf8')
+  const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
+  const fileUser = json.users.find(u => u.email.toLowerCase() === email.toLowerCase())
+  if (fileUser) {
+    fileUser.emailVerified = true
+    fileUser.verificationCode = ''
+    fileUser.verificationExpiry = ''
+    await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
+    return true
+  }
+  
+  return false
 }
 
 export async function updateUserLastLogin(email: string): Promise<void> {
