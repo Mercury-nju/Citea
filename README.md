@@ -72,21 +72,69 @@ yarn dev
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-### Environment
+### Environment Variables
 
-Create an `.env.local` from `.env.example` and set:
+#### For Local Development
 
+Create an `.env.local` file:
+
+```bash
+JWT_SECRET=your-strong-secret-here
+# KV is optional for local dev (will use local file storage)
 ```
-JWT_SECRET=your-strong-secret
-# Optional in local dev; in Vercel these are injected when you add the KV addon
-KV_REST_API_URL=
-KV_REST_API_TOKEN=
+
+#### For Production (Vercel)
+
+**⚠️ 重要：生产环境必须配置 Vercel KV，否则用户注册/登录功能无法使用！**
+
+按以下步骤配置：
+
+**步骤 1: 创建 Vercel KV 数据库**
+1. 访问 [Vercel Dashboard](https://vercel.com/dashboard)
+2. 选择你的项目
+3. 点击 **Storage** 标签
+4. 点击 **Create Database**
+5. 选择 **KV (Redis)**
+6. 输入数据库名称（如 `citea-production`）
+7. 选择区域（建议选择离用户最近的区域）
+8. 点击 **Create**
+
+**步骤 2: 连接到项目**
+1. 创建完成后，点击 **Connect Project**
+2. 选择你的 Citea 项目
+3. 确认连接
+
+这将自动添加以下环境变量：
+- `KV_REST_API_URL`
+- `KV_REST_API_TOKEN`
+- `KV_URL`
+
+**步骤 3: 添加 JWT Secret**
+1. 进入项目 → **Settings** → **Environment Variables**
+2. 添加新变量：
+   - **Name**: `JWT_SECRET`
+   - **Value**: 生成一个强随机字符串（至少 32 字符）
+   ```bash
+   # 你可以用这个命令生成：
+   openssl rand -base64 32
+   ```
+3. 选择 **Production**, **Preview**, **Development** 全部环境
+4. 点击 **Save**
+
+**步骤 4: 重新部署**
+```bash
+git commit --allow-empty -m "chore: trigger redeploy with KV"
+git push
 ```
 
-On Vercel:
-- Add Storage → KV (Redis) to the project, which injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`
-- Add `JWT_SECRET` manually in Project → Settings → Environment Variables
-- Redeploy
+或在 Vercel Dashboard 点击 **Deployments** → **Redeploy**
+
+**验证配置：**
+- 部署成功后，访问 `/auth/signup` 尝试注册
+- 如果仍然显示"数据库未配置"，检查：
+  1. KV 数据库是否已连接到项目
+  2. 环境变量是否已正确设置
+  3. 是否已重新部署
 
 ## 🛠️ Tech Stack
 

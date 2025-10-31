@@ -39,6 +39,12 @@ export async function createUser(user: StoredUser): Promise<void> {
     await kv.kv.hset(`user:${user.email.toLowerCase()}`, user)
     return
   }
+  
+  // Check if we're in a serverless environment without write access
+  if (process.env.VERCEL && !kv?.kv) {
+    throw new Error('Database not configured. Please set up Vercel KV in production.')
+  }
+  
   await ensureDataFile()
   const raw = await fs.readFile(USERS_FILE, 'utf8')
   const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }

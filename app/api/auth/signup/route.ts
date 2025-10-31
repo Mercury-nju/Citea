@@ -25,7 +25,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, plan: user.plan } }, { status: 201 })
   } catch (e) {
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+    console.error('Signup error:', e)
+    return NextResponse.json({ 
+      error: 'Internal error', 
+      details: process.env.NODE_ENV === 'development' ? String(e) : undefined 
+    }, { status: 500 })
   }
 }
 

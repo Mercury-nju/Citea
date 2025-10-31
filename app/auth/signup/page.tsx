@@ -26,7 +26,11 @@ export default function SignUpPage() {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        alert(data.error || 'Sign up failed')
+        let errorMsg = data.error || 'Sign up failed'
+        if (errorMsg === 'Internal error' && data.details?.includes('Database not configured')) {
+          errorMsg = '⚠️ 数据库未配置。生产环境需要设置 Vercel KV。\n\n请按照 README.md 中的步骤配置数据库。'
+        }
+        alert(errorMsg)
         setIsLoading(false)
         return
       }
