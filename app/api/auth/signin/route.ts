@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { signJwt, setAuthCookie } from '@/lib/auth'
-import { promises as fs } from 'fs'
-import path from 'path'
-
-const USERS_FILE = path.join(process.cwd(), 'data', 'users.json')
+import { getUserByEmail } from '@/lib/userStore'
 
 export async function POST(req: Request) {
   try {
@@ -12,9 +9,7 @@ export async function POST(req: Request) {
     if (!email || !password) {
       return NextResponse.json({ error: 'Missing credentials' }, { status: 400 })
     }
-    const raw = await fs.readFile(USERS_FILE, 'utf8').catch(() => '{"users":[]}')
-    const data = JSON.parse(raw) as { users: any[] }
-    const user = data.users.find(u => u.email.toLowerCase() === String(email).toLowerCase())
+    const user = await getUserByEmail(String(email))
     if (!user) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
