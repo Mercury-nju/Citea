@@ -18,19 +18,24 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      // Store auth token (demo)
-      localStorage.setItem('citea_auth', 'demo_token')
-      localStorage.setItem('citea_user', JSON.stringify({
-        email,
-        name,
-        plan: 'free'
-      }))
-      
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error || 'Sign up failed')
+        setIsLoading(false)
+        return
+      }
       router.push('/dashboard')
-    }, 1000)
+    } catch (err) {
+      alert('Sign up failed')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

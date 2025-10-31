@@ -33,21 +33,20 @@ export default function DashboardPage() {
   ])
 
   useEffect(() => {
-    // Check authentication
-    const auth = localStorage.getItem('citea_auth')
-    const userData = localStorage.getItem('citea_user')
-    
-    if (!auth || !userData) {
-      router.push('/auth/signin')
-      return
+    const check = async () => {
+      const res = await fetch('/api/auth/me', { cache: 'no-store' })
+      const data = await res.json()
+      if (!data.user) {
+        router.push('/auth/signin')
+        return
+      }
+      setUser(data.user)
     }
-    
-    setUser(JSON.parse(userData))
+    check()
   }, [router])
 
-  const handleLogout = () => {
-    localStorage.removeItem('citea_auth')
-    localStorage.removeItem('citea_user')
+  const handleLogout = async () => {
+    await fetch('/api/auth/signout', { method: 'POST' })
     router.push('/')
   }
 
