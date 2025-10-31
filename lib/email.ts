@@ -1,8 +1,14 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY || '')
 
 export async function sendVerificationEmail(email: string, code: string, name: string) {
+  // 如果没有配置 API key，返回错误但不阻止构建
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY not configured, skipping email send')
+    return { success: false, error: 'Email service not configured' }
+  }
+  
   try {
     const { data, error } = await resend.emails.send({
       from: 'Citea <onboarding@resend.dev>', // 使用 Resend 的测试域名
@@ -71,6 +77,12 @@ export async function sendVerificationEmail(email: string, code: string, name: s
 }
 
 export async function sendWelcomeEmail(email: string, name: string) {
+  // 如果没有配置 API key，返回错误但不阻止构建
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY not configured, skipping email send')
+    return { success: false, error: 'Email service not configured' }
+  }
+  
   try {
     const { data, error } = await resend.emails.send({
       from: 'Citea <onboarding@resend.dev>',
