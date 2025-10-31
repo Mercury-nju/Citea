@@ -2,12 +2,14 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import type { AuthUser } from './auth'
 
+// Import Vercel KV - it will use env vars automatically when available
 let kv: any = null
 try {
-  // Optional dependency; only works in production if env is configured
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  kv = require('@vercel/kv')
-} catch {}
+  const kvModule = require('@vercel/kv')
+  kv = kvModule
+} catch {
+  // KV not available (local dev without env vars)
+}
 
 const DATA_DIR = path.join(process.cwd(), 'data')
 const USERS_FILE = path.join(DATA_DIR, 'users.json')
@@ -24,10 +26,18 @@ async function ensureDataFile() {
 }
 
 export async function getUserByEmail(email: string): Promise<StoredUser | null> {
-  if (kv?.kv) {
-    const data = await kv.kv.hgetall(`user:${email.toLowerCase()}`)
-    return (data as StoredUser) || null
+  // Check if KV is available (production with env vars)
+  if (kv && process.env.KV_REST_API_URL) {
+    try {
+      const data = await kv.hgetall(`user:${email.toLowerCase()}`)
+      return data || null
+    } catch (error) {
+      console.error('KV read error:', error)
+      throw error
+    }
   }
+  
+  // Fallback to file storage (local dev)
   await ensureDataFile()
   const raw = await fs.readFile(USERS_FILE, 'utf8')
   const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
@@ -35,16 +45,25 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
 }
 
 export async function createUser(user: StoredUser): Promise<void> {
-  if (kv?.kv) {
-    await kv.kv.hset(`user:${user.email.toLowerCase()}`, user)
-    return
+  // Check if KV is available (production with env vars)
+  if (kv && process.env.KV_REST_API_URL) {
+    try {
+      console.log('Saving user to KV:', user.email)
+      await kv.hset(`user:${user.email.toLowerCase()}`, user)
+      console.log('User saved successfully to KV')
+      return
+    } catch (error) {
+      console.error('KV write error:', error)
+      throw new Error(`Failed to save user to database: ${error}`)
+    }
   }
   
-  // Check if we're in a serverless environment without write access
-  if (process.env.VERCEL && !kv?.kv) {
+  // Check if we're in production without KV configured
+  if (process.env.VERCEL) {
     throw new Error('Database not configured. Please set up Vercel KV in production.')
   }
   
+  // Fallback to file storage (local dev)
   await ensureDataFile()
   const raw = await fs.readFile(USERS_FILE, 'utf8')
   const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
