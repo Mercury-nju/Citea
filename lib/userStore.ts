@@ -25,8 +25,8 @@ async function ensureDataFile() {
 
 export async function getUserByEmail(email: string): Promise<StoredUser | null> {
   if (kv?.kv) {
-    const data = await kv.kv.hgetall<StoredUser>(`user:${email.toLowerCase()}`)
-    return (data as any) || null
+    const data = await kv.kv.hgetall(`user:${email.toLowerCase()}`)
+    return (data as StoredUser) || null
   }
   await ensureDataFile()
   const raw = await fs.readFile(USERS_FILE, 'utf8')
@@ -36,7 +36,7 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
 
 export async function createUser(user: StoredUser): Promise<void> {
   if (kv?.kv) {
-    await kv.kv.hset(`user:${user.email.toLowerCase()}`, user as any)
+    await kv.kv.hset(`user:${user.email.toLowerCase()}`, user)
     return
   }
   await ensureDataFile()
