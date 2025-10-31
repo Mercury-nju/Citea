@@ -72,6 +72,22 @@ yarn dev
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
+### Environment
+
+Create an `.env.local` from `.env.example` and set:
+
+```
+JWT_SECRET=your-strong-secret
+# Optional in local dev; in Vercel these are injected when you add the KV addon
+KV_REST_API_URL=
+KV_REST_API_TOKEN=
+```
+
+On Vercel:
+- Add Storage → KV (Redis) to the project, which injects `KV_REST_API_URL` and `KV_REST_API_TOKEN`
+- Add `JWT_SECRET` manually in Project → Settings → Environment Variables
+- Redeploy
+
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14, React, TypeScript

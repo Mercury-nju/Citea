@@ -1,29 +1,77 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Play, Pause, Volume2, Maximize, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProductShowcase() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTab, setCurrentTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
+  const [progress, setProgress] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
 
   const demos = {
     finder: {
       title: '文献查找',
       description: 'AI 驱动的智能搜索，从学术数据库中自动查找相关文献',
-      duration: '1:24'
+      duration: 84, // seconds
+      durationDisplay: '1:24'
     },
     checker: {
       title: '引用验证',
       description: '实时验证引用真实性，识别虚假文献，确保学术诚信',
-      duration: '2:15'
+      duration: 135,
+      durationDisplay: '2:15'
     },
     assistant: {
       title: 'AI 研究助手',
       description: '智能对话助手，回答学术问题，提供引用建议',
-      duration: '1:48'
+      duration: 108,
+      durationDisplay: '1:48'
     }
+  }
+
+  // 播放进度控制
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+    
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setCurrentTime(prev => {
+          const duration = demos[currentTab].duration
+          if (prev >= duration) {
+            setIsPlaying(false)
+            return 0
+          }
+          return prev + 0.1
+        })
+      }, 100)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [isPlaying, currentTab])
+
+  // 计算进度百分比
+  useEffect(() => {
+    const duration = demos[currentTab].duration
+    setProgress((currentTime / duration) * 100)
+  }, [currentTime, currentTab])
+
+  // 切换标签时重置
+  const handleTabChange = (tab: 'finder' | 'checker' | 'assistant') => {
+    setCurrentTab(tab)
+    setIsPlaying(false)
+    setCurrentTime(0)
+    setProgress(0)
+  }
+
+  // 格式化时间显示
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
   return (
@@ -50,10 +98,7 @@ export default function ProductShowcase() {
             {(['finder', 'checker', 'assistant'] as const).map((tab) => (
               <button
                 key={tab}
-                onClick={() => {
-                  setCurrentTab(tab)
-                  setIsPlaying(false)
-                }}
+                onClick={() => handleTabChange(tab)}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                   currentTab === tab
                     ? 'bg-blue-600 text-white shadow-lg'
@@ -69,8 +114,8 @@ export default function ProductShowcase() {
           <div className="bg-gradient-to-b from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden">
             {/* Video Display Area */}
             <div className="relative aspect-video bg-black">
-              {/* 真实Dashboard截图预览 */}
-              <DashboardPreview tab={currentTab} />
+              {/* 动画演示预览 */}
+              <DashboardPreview tab={currentTab} isPlaying={isPlaying} progress={progress} />
               
               {/* Play Overlay */}
               {!isPlaying && (
@@ -87,8 +132,11 @@ export default function ProductShowcase() {
               {/* Time Progress Bar (when playing) */}
               {isPlaying && (
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                  <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-600 w-1/3 rounded-full"></div>
+                  <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden cursor-pointer">
+                    <div 
+                      className="h-full bg-blue-600 rounded-full transition-all duration-100"
+                      style={{ width: `${progress}%` }}
+                    ></div>
                   </div>
                 </div>
               )}
@@ -108,7 +156,7 @@ export default function ProductShowcase() {
                   )}
                 </button>
                 <div className="text-white text-sm font-mono">
-                  0:00 / {demos[currentTab].duration}
+                  {formatTime(currentTime)} / {demos[currentTab].durationDisplay}
                 </div>
               </div>
 
@@ -144,19 +192,32 @@ export default function ProductShowcase() {
   )
 }
 
-// Dashboard Preview Component - 显示真实Dashboard截图
-function DashboardPreview({ tab }: { tab: 'finder' | 'checker' | 'assistant' }) {
+// Dashboard Preview Component - 带动画的演示
+function DashboardPreview({ 
+  tab, 
+  isPlaying, 
+  progress 
+}: { 
+  tab: 'finder' | 'checker' | 'assistant'
+  isPlaying: boolean
+  progress: number 
+}) {
   if (tab === 'finder') {
-    return <FinderDashboard />
+    return <FinderDashboard isPlaying={isPlaying} progress={progress} />
   } else if (tab === 'checker') {
-    return <CheckerDashboard />
+    return <CheckerDashboard isPlaying={isPlaying} progress={progress} />
   } else {
-    return <AssistantDashboard />
+    return <AssistantDashboard isPlaying={isPlaying} progress={progress} />
   }
 }
 
-// 真实Dashboard组件 - 与实际dashboard页面同步
-function FinderDashboard() {
+// 真实Dashboard组件 - 带动画效果
+function FinderDashboard({ isPlaying, progress }: { isPlaying: boolean; progress: number }) {
+  // 根据进度显示不同的动画阶段
+  const showTyping = isPlaying && progress > 10 && progress < 30
+  const showSearch = isPlaying && progress >= 30 && progress < 50
+  const showResults = isPlaying && progress >= 50
+
   return (
     <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
       {/* Mock Browser Top Bar */}
@@ -187,19 +248,32 @@ function FinderDashboard() {
         <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-2">
           <div className="flex gap-2">
             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">235 characters</span>
-            <span className="text-xs text-blue-600 font-medium">✓ Ready to search</span>
+            {showTyping && (
+              <span className="text-xs text-blue-600 font-medium animate-pulse">⌨️ Typing...</span>
+            )}
+            {!isPlaying && (
+              <span className="text-xs text-blue-600 font-medium">✓ Ready to search</span>
+            )}
           </div>
-          <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold hover:shadow-lg transition-all">
-            🚀 Search Sources
+          <button className={`bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+            showSearch ? 'animate-pulse shadow-xl scale-105' : 'shadow-lg'
+          }`}>
+            {showSearch ? '🔍 Searching...' : '🚀 Search Sources'}
           </button>
         </div>
       </div>
 
       {/* Results with more details */}
       <div className="space-y-3 flex-1 overflow-hidden">
-        <div className="text-xs font-semibold text-gray-500 mb-2">Found 12 results in 0.8s</div>
+        {showResults && (
+          <div className="text-xs font-semibold text-gray-500 mb-2 animate-fade-in">
+            Found 12 results in 0.8s
+          </div>
+        )}
         
-        <div className="bg-white border-2 border-blue-200 rounded-xl p-4 shadow-md hover:shadow-xl transition-all">
+        <div className={`bg-white border-2 border-blue-200 rounded-xl p-4 shadow-md hover:shadow-xl transition-all ${
+          showResults ? 'animate-slide-up' : 'opacity-50'
+        }`}>
           <div className="flex items-center justify-between mb-2">
             <span className="bg-blue-600 text-white text-xs px-2.5 py-1 rounded-full font-bold">✓ Verified • CrossRef</span>
             <span className="text-xs text-gray-500">98% match</span>
@@ -238,7 +312,10 @@ function FinderDashboard() {
   )
 }
 
-function CheckerDashboard() {
+function CheckerDashboard({ isPlaying, progress }: { isPlaying: boolean; progress: number }) {
+  const showChecking = isPlaying && progress > 20 && progress < 50
+  const showResults = isPlaying && progress >= 50
+
   return (
     <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
       {/* Mock Browser Top Bar */}
@@ -255,16 +332,22 @@ function CheckerDashboard() {
 
       {/* Stats Summary */}
       <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-green-600">2</div>
+        <div className={`bg-green-50 border border-green-200 rounded-lg p-3 text-center transition-all ${
+          showChecking ? 'animate-pulse' : ''
+        }`}>
+          <div className="text-2xl font-bold text-green-600">{showResults ? '2' : '0'}</div>
           <div className="text-xs text-green-700 font-medium">Verified</div>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-red-600">1</div>
+        <div className={`bg-red-50 border border-red-200 rounded-lg p-3 text-center transition-all ${
+          showChecking ? 'animate-pulse' : ''
+        }`}>
+          <div className="text-2xl font-bold text-red-600">{showResults ? '1' : '0'}</div>
           <div className="text-xs text-red-700 font-medium">Not Found</div>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-blue-600">67%</div>
+        <div className={`bg-blue-50 border border-blue-200 rounded-lg p-3 text-center transition-all ${
+          showChecking ? 'animate-pulse' : ''
+        }`}>
+          <div className="text-2xl font-bold text-blue-600">{showResults ? '67%' : '0%'}</div>
           <div className="text-xs text-blue-700 font-medium">Accuracy</div>
         </div>
       </div>
@@ -331,7 +414,12 @@ function CheckerDashboard() {
   )
 }
 
-function AssistantDashboard() {
+function AssistantDashboard({ isPlaying, progress }: { isPlaying: boolean; progress: number }) {
+  const showFirstMessage = isPlaying && progress > 15
+  const showResponse = isPlaying && progress > 40
+  const showSecondMessage = isPlaying && progress > 70
+  const showTyping = isPlaying && progress > 85
+
   return (
     <div className="w-full h-full p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col">
       {/* Mock Browser Top Bar */}
@@ -362,14 +450,17 @@ function AssistantDashboard() {
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-hidden mb-4">
         {/* User Message */}
-        <div className="flex justify-end">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[75%] shadow-md">
-            <p className="text-sm">How do I cite a journal article with multiple authors in APA format?</p>
+        {showFirstMessage && (
+          <div className="flex justify-end animate-slide-in-right">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[75%] shadow-md">
+              <p className="text-sm">How do I cite a journal article with multiple authors in APA format?</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* AI Response with Rich Content */}
-        <div className="flex justify-start">
+        {showResponse && (
+          <div className="flex justify-start animate-slide-in-left">
           <div className="bg-white border-2 border-gray-200 rounded-2xl rounded-tl-sm px-5 py-4 max-w-[85%] shadow-lg">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg flex items-center justify-center">
@@ -404,28 +495,33 @@ function AssistantDashboard() {
               </p>
             </div>
           </div>
-        </div>
+          </div>
+        )}
 
         {/* User Follow-up */}
-        <div className="flex justify-end">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[70%] shadow-md">
-            <p className="text-sm">Can you verify this citation for me?</p>
-          </div>
-        </div>
-
-        {/* AI Typing Indicator */}
-        <div className="flex justify-start">
-          <div className="bg-white border-2 border-gray-200 rounded-2xl rounded-tl-sm px-5 py-3 shadow-lg">
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-              </div>
-              <span className="text-xs text-gray-500">AI is typing...</span>
+        {showSecondMessage && (
+          <div className="flex justify-end animate-slide-in-right">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[70%] shadow-md">
+              <p className="text-sm">Can you verify this citation for me?</p>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* AI Typing Indicator */}
+        {showTyping && (
+          <div className="flex justify-start animate-slide-in-left">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl rounded-tl-sm px-5 py-3 shadow-lg">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                </div>
+                <span className="text-xs text-gray-500">AI is typing...</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Input Box */}
