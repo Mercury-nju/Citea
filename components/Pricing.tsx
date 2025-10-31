@@ -73,7 +73,7 @@ export default function Pricing() {
         <div className="text-center mt-12">
           <p className="text-gray-600">
             {t.pricing.contact}{' '}
-            <a href="mailto:support@citea.com" className="text-lime-600 hover:underline font-medium">
+            <a href="mailto:support@citea.com" className="text-blue-600 hover:underline font-medium">
               support@citea.com
             </a>
           </p>
