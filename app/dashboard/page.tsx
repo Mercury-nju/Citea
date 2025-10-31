@@ -54,8 +54,8 @@ export default function DashboardPage() {
   const handleNewDocument = () => {
     const newDoc = {
       id: documents.length + 1,
-      title: '新文档',
-      date: '刚刚',
+      title: t.dashboard.newDocument,
+      date: t.dashboard.searchDocs,
       type: 'search'
     }
     setDocuments([newDoc, ...documents])
@@ -106,7 +106,7 @@ export default function DashboardPage() {
             className="w-full bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-all font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
           >
             <Plus size={20} />
-            新建文档
+            {t.dashboard.newDocument}
           </button>
         </div>
 
@@ -116,7 +116,7 @@ export default function DashboardPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
-              placeholder="搜索文档..."
+              placeholder={t.dashboard.searchDocs}
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm"
             />
           </div>
@@ -126,7 +126,7 @@ export default function DashboardPage() {
         <div className="flex-1 overflow-y-auto px-4">
           <div className="mb-2">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              过去7天
+              {t.dashboard.past7Days}
             </h3>
             <div className="space-y-1">
               {documents.map((doc) => (
@@ -152,7 +152,7 @@ export default function DashboardPage() {
           <div className="mt-8 text-center py-8">
             <BookOpen className="mx-auto text-gray-300 mb-3" size={48} />
             <p className="text-sm text-gray-500">
-              已到达文档历史记录的末尾
+              {t.dashboard.endOfHistory}
             </p>
           </div>
         </div>
@@ -163,14 +163,14 @@ export default function DashboardPage() {
             <div className="flex items-start gap-2 mb-2">
               <Sparkles className="text-blue-600 flex-shrink-0" size={20} />
               <div>
-                <h4 className="font-semibold text-gray-900 text-sm">升级到专业版</h4>
+                <h4 className="font-semibold text-gray-900 text-sm">{t.dashboard.upgradeToPro}</h4>
                 <p className="text-xs text-gray-600 mt-1">
-                  获取无限查询、高级分析和优先支持。
+                  {t.dashboard.upgradeDesc}
                 </p>
               </div>
             </div>
             <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium mt-2">
-              试用 Citea Pro →
+              {t.dashboard.tryPro}
             </button>
           </div>
 
@@ -181,12 +181,12 @@ export default function DashboardPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500">免费计划</p>
+              <p className="text-xs text-gray-500">{t.dashboard.freePlan}</p>
             </div>
             <button
               onClick={handleLogout}
               className="p-1.5 hover:bg-gray-200 rounded-lg transition"
-              title="登出"
+              title={t.dashboard.logout}
             >
               <LogOut size={16} className="text-gray-600" />
             </button>
@@ -200,10 +200,10 @@ export default function DashboardPage() {
         <header className="bg-white border-b border-gray-200 px-8 py-8">
           <div className="max-w-5xl mx-auto">
             <h1 className="text-2xl font-bold text-gray-900 mb-1.5">
-              研究助手
+              {t.dashboard.researchAssistant}
             </h1>
             <p className="text-sm text-gray-600">
-              快速查找支持文章或验证引文真实性
+              {t.dashboard.researchSubtitle}
             </p>
           </div>
         </header>
@@ -221,7 +221,7 @@ export default function DashboardPage() {
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                 }`}
               >
-                查找文献
+                {t.dashboard.findSources}
               </button>
               <button
                 onClick={() => setActiveTab('checker')}
@@ -231,7 +231,7 @@ export default function DashboardPage() {
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                 }`}
               >
-                验证引文
+                {t.dashboard.verifyCitations}
               </button>
               <button
                 onClick={() => setActiveTab('assistant')}
@@ -241,9 +241,9 @@ export default function DashboardPage() {
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                 }`}
               >
-                对话
+                {t.dashboard.chat}
                 <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold">
-                  BETA
+                  {t.dashboard.beta}
                 </span>
               </button>
             </div>
@@ -260,13 +260,13 @@ export default function DashboardPage() {
                   <textarea
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="粘贴包含引文的文本进行验证..."
+                    placeholder={t.dashboard.pasteText}
                     className="w-full h-64 p-4 border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400"
                     maxLength={300}
                   />
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <span className="text-sm text-gray-500">
-                      {query.length}/300 字
+                      {query.length}/300 {t.dashboard.characterCount}
                     </span>
                     <button
                       onClick={() => setLoading(true)}
@@ -289,7 +289,7 @@ export default function DashboardPage() {
                   <div className="h-64 flex items-center justify-center text-gray-400">
                     <div className="text-center">
                       <MessageSquare className="mx-auto mb-3" size={48} />
-                      <p className="text-sm">开始对话...</p>
+                      <p className="text-sm">{t.dashboard.startConversation}</p>
                     </div>
                   </div>
                   <div className="flex gap-2 pt-4 border-t border-gray-100">
@@ -297,7 +297,7 @@ export default function DashboardPage() {
                       type="text"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
-                      placeholder="输入您的问题..."
+                      placeholder={t.dashboard.enterQuestion}
                       className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       maxLength={300}
                     />
@@ -319,7 +319,7 @@ export default function DashboardPage() {
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="text-yellow-500" size={18} />
-                <span className="text-sm font-medium text-gray-700">示例：</span>
+                <span className="text-sm font-medium text-gray-700">{t.dashboard.examples}</span>
               </div>
               
               {activeTab === 'checker' && (
