@@ -3,6 +3,12 @@
 import { useState } from 'react'
 import { Sparkles } from 'lucide-react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+// 动态导入功能组件（避免SSR问题）
+const SourceFinderDemo = dynamic(() => import('./demos/SourceFinderDemo'), { ssr: false })
+const CitationCheckerDemo = dynamic(() => import('./demos/CitationCheckerDemo'), { ssr: false })
+const AIAssistantDemo = dynamic(() => import('./demos/AIAssistantDemo'), { ssr: false })
 
 export default function ProductShowcase() {
   const [currentTab, setCurrentTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
@@ -11,17 +17,14 @@ export default function ProductShowcase() {
     finder: {
       title: '文献查找',
       description: 'AI 驱动的智能搜索，从学术数据库中自动查找相关文献',
-      screenshot: '/screenshots/source-finder.png'
     },
     checker: {
       title: '引用验证',
       description: '实时验证引用真实性，识别虚假文献，确保学术诚信',
-      screenshot: '/screenshots/citation-checker.png'
     },
     assistant: {
       title: 'AI 研究助手',
       description: '智能对话助手，回答学术问题，提供引用建议',
-      screenshot: '/screenshots/ai-assistant.png'
     }
   }
 
@@ -61,46 +64,39 @@ export default function ProductShowcase() {
             ))}
           </div>
 
-          {/* Screenshot Container */}
-          <div className="relative group">
-            {/* Main Screenshot */}
+          {/* Live Demo Container */}
+          <div className="relative">
+            {/* Main Demo Display */}
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-200 bg-white">
-              <div className="relative aspect-video bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-                {/* Placeholder - 等待真实截图 */}
-                <div className="text-center p-12">
-                  <div className="text-6xl mb-6">
-                    {currentTab === 'finder' && '🔍'}
-                    {currentTab === 'checker' && '✅'}
-                    {currentTab === 'assistant' && '🤖'}
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    {demos[currentTab].title}
-                  </h3>
-                  <p className="text-gray-600 max-w-md mx-auto mb-6">
-                    {demos[currentTab].description}
-                  </p>
-                  <div className="inline-block bg-blue-50 border-2 border-blue-200 rounded-lg px-6 py-3">
-                    <p className="text-sm text-blue-800 font-medium">
-                      💡 真实截图准备中...
-                    </p>
-                    <p className="text-xs text-blue-600 mt-1">
-                      点击下方"开始使用"体验完整功能
-                    </p>
-                  </div>
+              {/* Browser Chrome */}
+              <div className="bg-gray-800 px-4 py-3 flex items-center gap-2">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <div className="flex-1 bg-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-300 font-mono">
+                  citea.app/{currentTab === 'finder' ? 'source-finder' : currentTab === 'checker' ? 'citation-checker' : 'ai-assistant'}
+                </div>
+                <div className="text-gray-400 text-xs">🔒 安全</div>
+              </div>
+
+              {/* Live Demo Content */}
+              <div className="relative bg-gradient-to-br from-gray-50 to-white" style={{ minHeight: '600px' }}>
+                {currentTab === 'finder' && <SourceFinderDemo />}
+                {currentTab === 'checker' && <CitationCheckerDemo />}
+                {currentTab === 'assistant' && <AIAssistantDemo />}
+                
+                {/* Overlay with CTA */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none flex items-end justify-center pb-8">
+                  <Link 
+                    href="/auth/signin"
+                    className="pointer-events-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-2xl transform hover:scale-105 transition-all"
+                  >
+                    🚀 开始使用完整功能
+                  </Link>
                 </div>
               </div>
-              
-              {/* Hover Overlay */}
-              <Link 
-                href="/auth/signin"
-                className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100"
-              >
-                <div className="transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                  <div className="bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-2xl">
-                    🚀 立即体验
-                  </div>
-                </div>
-              </Link>
             </div>
 
             {/* Decorative Elements */}
