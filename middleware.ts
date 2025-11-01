@@ -43,12 +43,10 @@ export async function middleware(request: NextRequest) {
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
   const isAuthPath = authPaths.some(path => pathname.startsWith(path))
   
-  // 对于 dashboard，让客户端页面自己处理认证检查，不在这里拦截
-  // 这样可以避免 cookie 延迟生效时的重定向循环
-  if (pathname === '/dashboard') {
-    console.log('[Middleware] Dashboard 路径，允许访问，让客户端处理认证')
-    return NextResponse.next()
-  }
+        // Dashboard 由客户端页面自己处理认证，不需要 middleware 拦截
+        if (pathname === '/dashboard') {
+          return NextResponse.next()
+        }
   
   // 其他受保护路径的检查
   if (isProtectedPath && !isAuthenticated) {

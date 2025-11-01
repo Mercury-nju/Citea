@@ -33,96 +33,54 @@ export default function DashboardPage() {
   ])
 
   useEffect(() => {
-    let retryCount = 0
-    const maxRetries = 5 // 减少重试次数，快速失败
-    let timeoutId: NodeJS.Timeout | null = null
-    
-    const check = async () => {
+    const checkAuth = async () => {
+      // 从 localStorage 获取 token
+      const token = localStorage.getItem('citea_auth_token')
+      
+      if (!token) {
+        router.push('/auth/signin')
+        return
+      }
+      
+      // 尝试从 localStorage 恢复用户信息
+      const savedUser = localStorage.getItem('citea_user')
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser)
+          setUser(userData)
+        } catch (e) {
+          console.error('Failed to parse saved user:', e)
+        }
+      }
+      
+      // 验证 token
       try {
-        console.log(`[Dashboard] 检查用户认证 (尝试 ${retryCount + 1}/${maxRetries})`)
-        
-        // 检查浏览器中的 cookie（用于调试）
-        const cookies = document.cookie
-        const hasAuthCookie = cookies.includes('citea_auth')
-        const cookieInfo = {
-          hasAuthCookie,
-          cookieCount: cookies.split(';').length,
-          allCookies: cookies || '(empty)',
-          cookiePreview: cookies.substring(0, 200)
-        }
-        console.log('[Dashboard] Cookie 检查:', JSON.stringify(cookieInfo, null, 2))
-        
-        // 尝试从 localStorage 获取 token（备用方案）
-        const tokenFromStorage = typeof window !== 'undefined' ? localStorage.getItem('citea_auth_token') : null
-        console.log('[Dashboard] localStorage token:', tokenFromStorage ? `✅ 存在 (${tokenFromStorage.length} 字符)` : '❌ 不存在')
-        
-        const headers: HeadersInit = {}
-        
-        // 如果 localStorage 有 token，添加到 header
-        if (tokenFromStorage) {
-          headers['Authorization'] = `Bearer ${tokenFromStorage}`
-          console.log('[Dashboard] ✅ 设置 Authorization header:', `Bearer ${tokenFromStorage.substring(0, 30)}...`)
-        } else {
-          console.log('[Dashboard] ⚠️ localStorage 中没有 token')
-        }
-        
-        const res = await fetch('/api/auth/me', { 
-          cache: 'no-store',
-          credentials: 'include',
-          headers: Object.keys(headers).length > 0 ? headers : undefined
+        const res = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         })
         
-        console.log('[Dashboard] API 响应状态:', res.status)
-        
         const data = await res.json()
-        console.log('[Dashboard] 认证检查结果:', JSON.stringify(data, null, 2))
         
-        if (!data.user) {
-          // 如果是刚登录，可能需要等待一下 cookie 生效
-          if (retryCount < maxRetries) {
-            retryCount++
-            const delay = retryCount * 200 // 递增延迟：200ms, 400ms, 600ms...
-            console.log(`[Dashboard] 未找到用户，${delay}ms 后重试... (已尝试 ${retryCount}/${maxRetries})`)
-            timeoutId = setTimeout(check, delay)
-            return
-          }
-          // 多次重试后仍然没有用户，跳转到登录页
-          console.error('[Dashboard] 认证失败，已重试', maxRetries, '次')
-          console.error('[Dashboard] Cookie 状态:', {
-            hasAuthCookie,
-            cookies: document.cookie
-          })
-          alert('登录失败：无法验证身份。请检查控制台日志并重新登录。')
+        if (data.user) {
+          // 更新用户信息
+          setUser(data.user)
+          localStorage.setItem('citea_user', JSON.stringify(data.user))
+        } else {
+          // Token 无效，清除并重定向
+          localStorage.removeItem('citea_auth_token')
+          localStorage.removeItem('citea_user')
           router.push('/auth/signin')
-          return
         }
-        
-        console.log('[Dashboard] ✅ 用户认证成功:', data.user)
-        setUser(data.user)
       } catch (error) {
-        console.error('[Dashboard] 检查用户认证失败:', error)
-        // 出错时也重试几次
-        if (retryCount < maxRetries) {
-          retryCount++
-          const delay = retryCount * 200
-          timeoutId = setTimeout(check, delay)
-          return
-        }
-        console.error('[Dashboard] 认证失败，重定向到登录页')
-        alert('认证检查失败，请重新登录')
+        console.error('Auth check failed:', error)
         router.push('/auth/signin')
       }
     }
     
-    // 立即开始检查，不等待
-    check()
-    
-    // 清理函数
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
-    }
+    checkAuth()
   }, [router])
 
   const handleLogout = async () => {

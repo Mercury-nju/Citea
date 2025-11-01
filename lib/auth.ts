@@ -16,37 +16,19 @@ const JWT_EXPIRES_SECONDS = 60 * 60 * 24 * 7 // 7 days
 const AUTH_COOKIE = 'citea_auth'
 
 export async function signJwt(user: AuthUser): Promise<string> {
-  console.log('[signJwt] 生成 token for user:', user.email)
-  console.log('[signJwt] JWT_SECRET 存在:', !!JWT_SECRET)
-  console.log('[signJwt] JWT_SECRET 长度:', JWT_SECRET?.length || 0)
-  
   const token = await new SignJWT({ user })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(JWT_EXPIRES_SECONDS)
     .sign(encoder.encode(JWT_SECRET))
-  
-  console.log('[signJwt] Token 生成成功，长度:', token.length)
-  console.log('[signJwt] Token 预览:', token.substring(0, 50))
-  
   return token
 }
 
 export async function verifyJwt(token: string): Promise<AuthUser | null> {
   try {
-    console.log('[verifyJwt] 开始验证 token，长度:', token.length)
-    console.log('[verifyJwt] JWT_SECRET 存在:', !!JWT_SECRET)
-    console.log('[verifyJwt] JWT_SECRET 长度:', JWT_SECRET?.length || 0)
-    
     const { payload } = await jwtVerify(token, encoder.encode(JWT_SECRET))
-    console.log('[verifyJwt] Token 验证成功，payload:', {
-      hasUser: !!(payload as any).user,
-      userEmail: (payload as any).user?.email || 'N/A'
-    })
     return (payload as any).user as AuthUser
   } catch (error) {
-    console.error('[verifyJwt] ❌ Token 验证失败:', error)
-    console.error('[verifyJwt] 错误详情:', error instanceof Error ? error.message : String(error))
     return null
   }
 }

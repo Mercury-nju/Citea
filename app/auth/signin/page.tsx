@@ -20,46 +20,29 @@ export default function SignInPage() {
     setIsLoading(true)
     setError('')
     
-    console.log('[SignIn] 开始登录:', email)
-    
     try {
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
       
-      console.log('[SignIn] 响应状态:', res.status)
-      
       const data = await res.json()
       
-      if (!res.ok) {
-        console.error('[SignIn] 登录失败:', data)
+      if (!res.ok || !data.success || !data.token) {
         setError(data.error || '登录失败')
         setIsLoading(false)
         return
       }
       
-      console.log('[SignIn] ✅ 登录成功:', data)
-      
-      // 检查响应中的 Set-Cookie
-      const setCookieHeader = res.headers.get('Set-Cookie')
-      console.log('[SignIn] Set-Cookie 响应头:', setCookieHeader || '❌ 无')
-      
-      // 如果 cookie 设置失败，使用 token 作为备用方案
-      if (data.token) {
-        console.log('[SignIn] 收到 token，保存到 localStorage 作为备用')
-        localStorage.setItem('citea_auth_token', data.token)
-        localStorage.setItem('citea_user', JSON.stringify(data.user))
-      }
+      // 保存 token 和用户信息到 localStorage
+      localStorage.setItem('citea_auth_token', data.token)
+      localStorage.setItem('citea_user', JSON.stringify(data.user))
       
       // 立即跳转
-      console.log('[SignIn] 🚀 跳转到 /dashboard')
-      window.location.replace('/dashboard')
+      window.location.href = '/dashboard'
       
     } catch (err) {
-      console.error('[SignIn] ❌ 异常:', err)
       setError('登录失败: ' + (err as Error).message)
       setIsLoading(false)
     }
