@@ -58,7 +58,7 @@ export default function ToolsShowcase() {
         <div className="max-w-5xl mx-auto">
           {/* Source Finder Demo */}
           {activeTab === 'finder' && (
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl border border-white/30 shadow-xl overflow-hidden">
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">AI 文献查找器</h3>
                 
@@ -131,7 +131,7 @@ export default function ToolsShowcase() {
 
           {/* Citation Checker Demo */}
           {activeTab === 'checker' && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl border border-white/30 shadow-xl overflow-hidden">
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">引用验证工具</h3>
                 
@@ -182,7 +182,7 @@ export default function ToolsShowcase() {
 
           {/* AI Assistant Demo */}
           {activeTab === 'assistant' && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl border border-white/30 shadow-xl overflow-hidden">
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                   AI 研究助手
@@ -230,26 +230,26 @@ export default function ToolsShowcase() {
 
           {/* Features Grid */}
           <div className="mt-12 grid md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg p-5 border border-gray-200">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
-                <Search className="text-blue-600" size={20} />
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
+                <Search className="text-blue-300" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-gray-900 mb-1">无限次引用检查</h4>
-              <p className="text-xs text-gray-600">在所有主要学术数据库中查找无限来源</p>
+              <h4 className="font-bold text-sm text-white mb-1">无限次引用检查</h4>
+              <p className="text-xs text-blue-200">在所有主要学术数据库中查找无限来源</p>
             </div>
-            <div className="bg-white rounded-lg p-5 border border-gray-200">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center mb-3">
-                <CheckCircle className="text-purple-600" size={20} />
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
+              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-3">
+                <CheckCircle className="text-purple-300" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-gray-900 mb-1">实时验证</h4>
-              <p className="text-xs text-gray-600">即时验证权威来源的引用</p>
+              <h4 className="font-bold text-sm text-white mb-1">实时验证</h4>
+              <p className="text-xs text-blue-200">即时验证权威来源的引用</p>
             </div>
-            <div className="bg-white rounded-lg p-5 border border-gray-200">
-              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
-                <MessageSquare className="text-amber-600" size={20} />
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center mb-3">
+                <MessageSquare className="text-amber-300" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-gray-900 mb-1">AI 研究助手对话</h4>
-              <p className="text-xs text-gray-600">获得有关引用问题和研究的即时帮助</p>
+              <h4 className="font-bold text-sm text-white mb-1">AI 研究助手对话</h4>
+              <p className="text-xs text-blue-200">获得有关引用问题和研究的即时帮助</p>
             </div>
           </div>
         </div>
