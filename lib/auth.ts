@@ -45,24 +45,35 @@ export async function setAuthCookie(token: string) {
 }
 
 export function setAuthCookieInResponse(response: NextResponse, token: string) {
-  const isProduction = !!(process.env.VERCEL || process.env.NODE_ENV === 'production')
+  // 暂时禁用 secure，因为可能导致 cookie 无法设置
+  // Vercel 使用 HTTPS，但某些情况下 secure cookie 可能有问题
+  // TODO: 确认生产环境 HTTPS 后可以重新启用 secure
   
   response.cookies.set(AUTH_COOKIE, token, {
     httpOnly: true,
-    secure: isProduction, // 在生产环境使用 secure（需要 HTTPS）
+    secure: false, // 暂时禁用 secure 以调试
     sameSite: 'lax',
     path: '/',
     maxAge: JWT_EXPIRES_SECONDS,
   })
   
-  console.log('[Auth] Cookie 设置:', {
+  // 验证 cookie 是否被设置
+  const allCookies = response.headers.get('Set-Cookie')
+  
+  console.log('[Auth] Cookie 设置尝试:', {
     name: AUTH_COOKIE,
     httpOnly: true,
-    secure: isProduction,
+    secure: false,
     sameSite: 'lax',
     path: '/',
     maxAge: JWT_EXPIRES_SECONDS,
+    tokenLength: token.length,
+    setCookieHeader: allCookies ? '✅ 已设置' : '❌ 未设置'
   })
+  
+  if (allCookies) {
+    console.log('[Auth] Set-Cookie 内容:', allCookies.substring(0, 200))
+  }
 }
 
 export async function clearAuthCookie() {
