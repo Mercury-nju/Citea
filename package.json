@@ -12,6 +12,7 @@
     "db:test": "node scripts/init-database.js --create-test-user"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "@vercel/kv": "^1.0.1",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",

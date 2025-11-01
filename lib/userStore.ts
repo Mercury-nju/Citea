@@ -14,8 +14,37 @@ try {
 }
 
 // Initialize Redis if REDIS_URL is provided
+// Support both standard Redis URL (redis://) and Upstash REST URL
 if (process.env.REDIS_URL) {
-  redis = new Redis(process.env.REDIS_URL as string)
+  const redisUrl = process.env.REDIS_URL as string
+  // Only initialize if it's a standard Redis protocol URL (not REST API)
+  if (redisUrl.startsWith('redis://') || redisUrl.startsWith('rediss://')) {
+    try {
+      redis = new Redis(redisUrl, {
+        maxRetriesPerRequest: 3,
+        retryStrategy: (times) => {
+          if (times > 3) {
+            return null // Stop retrying
+          }
+          return Math.min(times * 50, 2000)
+        }
+      })
+      // Test connection
+      redis.on('error', (err) => {
+        console.error('Redis connection error:', err)
+      })
+      redis.on('connect', () => {
+        console.log('Redis connected successfully')
+      })
+    } catch (error) {
+      console.error('Failed to initialize Redis:', error)
+      redis = null
+    }
+  } else {
+    console.warn('REDIS_URL is not a standard Redis protocol URL. Upstash REST API is not directly supported by ioredis.')
+    console.warn('Please use REDIS_URL with format: redis://... or rediss://...')
+    console.warn('For Upstash REST API, consider using @upstash/redis package instead.')
+  }
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data')

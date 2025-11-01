@@ -49,8 +49,23 @@ export async function POST(req: Request) {
     
     if (!emailResult.success) {
       console.error('验证邮件发送失败:', emailResult.error)
-      // 即使邮件发送失败，用户也已创建，返回成功但提示用户
+      console.error('邮件发送详情:', JSON.stringify(emailResult, null, 2))
+      
+      // 邮件发送失败，但用户已创建，返回警告信息
+      return NextResponse.json({ 
+        user: { id: user.id, name: user.name, email: user.email, plan: user.plan },
+        needsVerification: true,
+        message: '注册成功！但邮件发送失败。请检查邮箱配置或稍后重试。',
+        emailError: true,
+        emailErrorDetails: process.env.VERCEL_ENV !== 'production' ? emailResult.error : undefined
+      }, { status: 201 })
     }
+
+    console.log('验证邮件发送成功:', {
+      email,
+      messageId: emailResult.data?.messageId,
+      to: email
+    })
 
     // 不自动登录，需要验证邮箱后才能登录
     return NextResponse.json({ 
@@ -58,11 +73,37 @@ export async function POST(req: Request) {
       needsVerification: true,
       message: '注册成功！请查看您的邮箱并输入验证码。'
     }, { status: 201 })
-  } catch (e) {
+  } catch (e: any) {
     console.error('Signup error:', e)
+    console.error('Error stack:', e?.stack)
+    
+    // 提供更详细的错误信息
+    const errorMessage = e?.message || 'Internal error'
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    
+    // 如果是数据库配置问题，给出明确提示
+    if (errorMessage.includes('Database not configured') || errorMessage.includes('KV_REST_API_URL')) {
+      return NextResponse.json({ 
+        error: 'Database not configured',
+        message: 'Please configure Vercel KV or REDIS_URL in environment variables.',
+        details: isDevelopment ? errorMessage : undefined
+      }, { status: 500 })
+    }
+    
+    // Redis 连接错误
+    if (errorMessage.includes('Redis') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('connect')) {
+      return NextResponse.json({ 
+        error: 'Database connection failed',
+        message: 'Unable to connect to database. Please check REDIS_URL configuration.',
+        details: isDevelopment ? errorMessage : undefined
+      }, { status: 500 })
+    }
+    
+    // 在生产环境也返回一些有用的错误信息
     return NextResponse.json({ 
       error: 'Internal error', 
-      details: process.env.NODE_ENV === 'development' ? String(e) : undefined 
+      message: errorMessage || 'An unexpected error occurred. Please try again later.',
+      details: process.env.VERCEL_ENV !== 'production' ? (errorMessage + '\n' + e?.stack) : undefined
     }, { status: 500 })
   }
 }

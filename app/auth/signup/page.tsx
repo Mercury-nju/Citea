@@ -38,7 +38,13 @@ export default function SignUpPage() {
       
       // 注册成功，跳转到验证页面
       if (data.needsVerification) {
-        alert(data.message || '注册成功！请查看邮箱并输入验证码。')
+        if (data.emailError) {
+          // 邮件发送失败，显示警告但允许继续验证（可能已发送）
+          const message = `${data.message}\n\n${data.emailErrorDetails ? `错误详情: ${data.emailErrorDetails}` : ''}\n\n您可以尝试直接输入验证码，或者稍后使用"重新发送"功能。`
+          alert(message)
+        } else {
+          alert(data.message || '注册成功！请查看邮箱并输入验证码。')
+        }
         router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)
       } else {
         // 旧用户或不需要验证

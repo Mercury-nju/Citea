@@ -7,7 +7,7 @@
  *   node scripts/test-email.js your@email.com
  */
 
-const { Resend } = require('resend')
+const brevo = require('@getbrevo/brevo')
 const fs = require('fs')
 const path = require('path')
 
@@ -31,52 +31,57 @@ if (!testEmail) {
   process.exit(1)
 }
 
-if (!process.env.RESEND_API_KEY) {
-  console.error('❌ 未设置 RESEND_API_KEY')
+if (!process.env.BREVO_API_KEY) {
+  console.error('❌ 未设置 BREVO_API_KEY')
   process.exit(1)
 }
 
-console.log('📧 测试邮件发送...')
-console.log('API Key:', process.env.RESEND_API_KEY.substring(0, 10) + '...')
+console.log('📧 测试邮件发送 (Brevo)...')
+console.log('API Key:', process.env.BREVO_API_KEY.substring(0, 10) + '...')
 console.log('收件人:', testEmail)
 console.log()
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const apiInstance = new brevo.TransactionalEmailsApi()
+apiInstance.setApiKey(
+  brevo.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY
+)
 
 async function sendTestEmail() {
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Citea <onboarding@resend.dev>',
-      to: [testEmail],
-      subject: '测试邮件 - Citea',
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-          </head>
-          <body style="font-family: Arial, sans-serif; padding: 20px;">
-            <h1 style="color: #667eea;">Citea 邮件测试</h1>
-            <p>如果您收到这封邮件，说明邮件服务配置正确！</p>
-            <p>测试时间: ${new Date().toLocaleString('zh-CN')}</p>
-            <hr>
-            <p style="color: #666; font-size: 12px;">这是一封测试邮件</p>
-          </body>
-        </html>
-      `,
-    })
-
-    if (error) {
-      console.error('❌ 发送失败:', error)
-      return
+    const sendSmtpEmail = new brevo.SendSmtpEmail()
+    sendSmtpEmail.to = [{ email: testEmail }]
+    sendSmtpEmail.sender = {
+      email: process.env.BREVO_FROM_EMAIL || 'noreply@brevo.com',
+      name: 'Citea'
     }
+    sendSmtpEmail.subject = '测试邮件 - Citea'
+    sendSmtpEmail.htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+        </head>
+        <body style="font-family: Arial, sans-serif; padding: 20px;">
+          <h1 style="color: #667eea;">Citea 邮件测试</h1>
+          <p>如果您收到这封邮件，说明 Brevo 邮件服务配置正确！</p>
+          <p>测试时间: ${new Date().toLocaleString('zh-CN')}</p>
+          <hr>
+          <p style="color: #666; font-size: 12px;">这是一封测试邮件</p>
+        </body>
+      </html>
+    `
 
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
     console.log('✅ 发送成功!')
-    console.log('邮件 ID:', data.id)
+    console.log('邮件 ID:', result.messageId)
     console.log()
     console.log('请检查邮箱（包括垃圾邮件文件夹）')
   } catch (error) {
     console.error('❌ 发生错误:', error.message)
+    if (error.response) {
+      console.error('错误详情:', JSON.stringify(error.response.body, null, 2))
+    }
   }
 }
 
