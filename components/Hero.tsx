@@ -9,13 +9,19 @@ export default function Hero() {
   const { t } = useLanguage()
   
   return (
-    <section className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto text-center">
+    <section className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 opacity-20" style={{
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
+        backgroundSize: '40px 40px',
+      }}></div>
+      
+      <div className="max-w-7xl mx-auto text-center relative z-10">
         {/* Main Heading */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
           {t.hero.title1}
           <br />
-          <span className="relative inline-block text-blue-600">
+          <span className="relative inline-block text-blue-400">
             {t.hero.title2}
             {/* Wavy Underline SVG */}
             <svg 
@@ -37,7 +43,7 @@ export default function Hero() {
         </h1>
         
         {/* Subtitle */}
-        <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-blue-200 mb-10 max-w-3xl mx-auto leading-relaxed">
           {t.hero.subtitle}
         </p>
 
@@ -51,7 +57,7 @@ export default function Hero() {
           </Link>
           <Link
             href="/auth/signin"
-            className="group bg-white text-gray-900 border-2 border-gray-200 px-10 py-4 rounded-xl hover:border-gray-300 hover:shadow-md transition-all text-lg font-semibold"
+            className="group bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 px-10 py-4 rounded-xl hover:border-white/50 hover:bg-white/20 transition-all text-lg font-semibold"
           >
             {t.hero.checkCitations}
           </Link>
@@ -63,7 +69,7 @@ export default function Hero() {
             const toolsSection = document.getElementById('tools')
             toolsSection?.scrollIntoView({ behavior: 'smooth' })
           }}
-          className="text-gray-600 hover:text-gray-900 transition flex items-center gap-2 mx-auto group mb-16"
+          className="text-blue-200 hover:text-white transition flex items-center gap-2 mx-auto group mb-16"
         >
           <div className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center group-hover:bg-gray-100 transition">
             <Play size={14} className="fill-current ml-0.5" />
@@ -73,7 +79,7 @@ export default function Hero() {
 
         {/* Database Integration */}
         <div className="mt-16">
-          <p className="text-sm text-gray-500 mb-6 uppercase tracking-wider font-medium">
+          <p className="text-sm text-blue-200/80 mb-6 uppercase tracking-wider font-medium">
             {t.hero.databases}
           </p>
           <DatabaseLogos />

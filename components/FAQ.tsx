@@ -53,19 +53,19 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-5 text-left hover:bg-gray-50 transition flex justify-between items-center group"
+        className="w-full px-6 py-5 text-left hover:bg-white/10 transition flex justify-between items-center group"
       >
-        <span className="font-semibold text-gray-900 text-lg pr-4">{question}</span>
+        <span className="font-semibold text-white text-lg pr-4">{question}</span>
         <ChevronDown 
-          className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-blue-200 flex-shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
-        <div className="px-6 py-5 bg-gray-50 border-t border-gray-200">
-          <p className="text-gray-700 leading-relaxed">{answer}</p>
+        <div className="px-6 py-5 bg-white/5 border-t border-white/10">
+          <p className="text-white/80 leading-relaxed">{answer}</p>
         </div>
       </div>
     </div>
@@ -76,13 +76,19 @@ export default function FAQ() {
   const { t } = useLanguage()
 
   return (
-    <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-      <div className="max-w-7xl mx-auto">
+    <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 opacity-20" style={{
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
+        backgroundSize: '40px 40px',
+      }}></div>
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {t.faq.title}
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-blue-200 max-w-3xl mx-auto">
             {t.faq.subtitle}
           </p>
         </div>
