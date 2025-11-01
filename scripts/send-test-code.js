@@ -25,7 +25,7 @@ if (fs.existsSync(envPath)) {
   })
 }
 
-const TEST_EMAIL = 'lihongyangnju@gmail.com'
+const TEST_EMAIL = '2945235656@qq.com'
 const TEST_NAME = 'Test User'
 
 // 生成 6 位验证码
@@ -58,7 +58,7 @@ async function sendTestCode() {
   
   sendSmtpEmail.to = [{ email: TEST_EMAIL, name: TEST_NAME }]
   sendSmtpEmail.sender = {
-    email: process.env.BREVO_FROM_EMAIL || 'noreply@brevo.com',
+    email: process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com',
     name: 'Citea'
   }
   sendSmtpEmail.subject = '验证您的 Citea 账号'
@@ -114,8 +114,11 @@ async function sendTestCode() {
     console.log('📤 正在发送邮件...')
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
     
-    const messageId = result.messageId || 'sent'
-    console.log('\n✅ 邮件发送成功!')
+    console.log('\n📋 Brevo API 完整响应:')
+    console.log(JSON.stringify(result, null, 2))
+    
+    const messageId = result.messageId || result.response?.body?.messageId || 'sent'
+    console.log('\n✅ Brevo API 返回成功!')
     console.log(`邮件 ID: ${messageId}`)
     console.log(`收件人: ${TEST_EMAIL}`)
     console.log(`验证码: ${verificationCode}`)
