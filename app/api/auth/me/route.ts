@@ -14,24 +14,35 @@ export async function GET(req: Request) {
       contentType: req.headers.get('Content-Type'),
     })
     
-    // 方式1: 从 cookie 获取 token
-    const cookieStore = cookies()
-    let token = cookieStore.get('citea_auth')?.value
+    // 优先从 Authorization header 获取（因为 cookie 有问题）
+    let token: string | undefined = undefined
     let tokenSource = 'none'
     
-    if (token) {
-      tokenSource = 'cookie'
-      console.log('[Auth/Me] ✅ 从 cookie 获取 token，长度:', token.length)
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7)
+      tokenSource = 'header'
+      console.log('[Auth/Me] ✅ 从 Authorization header 获取 token，长度:', token.length)
     }
     
-    // 方式2: 从 Authorization header 获取（备用方案）
-    if (!token && authHeader) {
-      if (authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7)
-        tokenSource = 'header'
-        console.log('[Auth/Me] ✅ 从 Authorization header 获取 token，长度:', token.length)
-      } else {
-        console.log('[Auth/Me] ⚠️ Authorization header 格式不正确:', authHeader.substring(0, 20))
+    // 如果没有 header，再从 cookie 获取
+    if (!token) {
+      const cookieStore = cookies()
+      const cookieToken = cookieStore.get('citea_auth')?.value
+      if (cookieToken) {
+        token = cookieToken
+        tokenSource = 'cookie'
+        console.log('[Auth/Me] ✅ 从 cookie 获取 token，长度:', token.length)
+      }
+    }
+    
+    // 最后尝试从 query 参数获取（调试用）
+    if (!token) {
+      const url = new URL(req.url)
+      const queryToken = url.searchParams.get('token')
+      if (queryToken) {
+        token = queryToken
+        tokenSource = 'query'
+        console.log('[Auth/Me] ✅ 从 query 参数获取 token')
       }
     }
     
@@ -39,15 +50,21 @@ export async function GET(req: Request) {
       hasToken: !!token,
       tokenLength: token?.length || 0,
       source: tokenSource,
-      tokenPreview: token ? `${token.substring(0, 30)}...` : 'null'
+      tokenPreview: token ? `${token.substring(0, 50)}...` : 'null',
+      hasAuthHeader: !!authHeader,
+      authHeaderPreview: authHeader ? `${authHeader.substring(0, 30)}...` : 'null'
     })
     
     if (!token) {
       console.log('[Auth/Me] ❌ 未找到 token')
-      return NextResponse.json({ user: null, debug: { tokenSource, hasAuthHeader: !!authHeader } }, { status: 200 })
+      return NextResponse.json({ user: null, debug: { 
+        tokenSource, 
+        hasAuthHeader: !!authHeader,
+        authHeaderValue: authHeader || 'null'
+      } }, { status: 200 })
     }
     
-    console.log('[Auth/Me] 开始验证 token...')
+    console.log('[Auth/Me] 开始验证 token，来源:', tokenSource)
     const user = await verifyJwt(token)
     
     if (user) {
@@ -55,7 +72,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ user }, { status: 200 })
     } else {
       console.log('[Auth/Me] ❌ Token 验证失败 - verifyJwt 返回 null')
-      return NextResponse.json({ user: null, debug: { tokenSource, tokenLength: token.length } }, { status: 200 })
+      console.log('[Auth/Me] Token 内容预览:', token.substring(0, 100))
+      return NextResponse.json({ 
+        user: null, 
+        debug: { 
+          tokenSource, 
+          tokenLength: token.length,
+          tokenPreview: token.substring(0, 50)
+        } 
+      }, { status: 200 })
     }
   } catch (error) {
     console.error('[Auth/Me] ❌ 异常:', error)

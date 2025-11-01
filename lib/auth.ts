@@ -16,11 +16,19 @@ const JWT_EXPIRES_SECONDS = 60 * 60 * 24 * 7 // 7 days
 const AUTH_COOKIE = 'citea_auth'
 
 export async function signJwt(user: AuthUser): Promise<string> {
+  console.log('[signJwt] 生成 token for user:', user.email)
+  console.log('[signJwt] JWT_SECRET 存在:', !!JWT_SECRET)
+  console.log('[signJwt] JWT_SECRET 长度:', JWT_SECRET?.length || 0)
+  
   const token = await new SignJWT({ user })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(JWT_EXPIRES_SECONDS)
     .sign(encoder.encode(JWT_SECRET))
+  
+  console.log('[signJwt] Token 生成成功，长度:', token.length)
+  console.log('[signJwt] Token 预览:', token.substring(0, 50))
+  
   return token
 }
 
