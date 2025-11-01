@@ -43,19 +43,8 @@ export async function POST(req: Request) {
     
     console.log('[SignIn] Token 生成成功，长度:', token.length)
     console.log('[SignIn] Token 预览:', token.substring(0, 50))
-    
-    // 立即测试验证这个 token
-    const { verifyJwt } = await import('@/lib/auth')
-    const testVerification = await verifyJwt(token)
-    console.log('[SignIn] ✅ 生成后立即验证 token:', testVerification ? '成功' : '失败')
-    if (!testVerification) {
-      console.error('[SignIn] ❌ 严重错误：刚生成的 token 无法验证！')
-      return NextResponse.json({ 
-        error: 'Token generation failed. Please check server logs.' 
-      }, { status: 500 })
-    }
 
-    // 只返回 token，不设置 cookie
+    // 返回 token 和用户信息
     return NextResponse.json({ 
       success: true,
       token: token,
