@@ -60,39 +60,112 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
     setCurrentStep(0)
     setSteps(SEARCH_STEPS.map(s => ({ ...s, status: 'pending' })))
 
+    const allSources: Source[] = []
+
     try {
-      for (let i = 0; i < SEARCH_STEPS.length; i++) {
-        setCurrentStep(i)
-        setSteps(prev => prev.map((step, idx) => ({
-          ...step,
-          status: idx === i ? 'processing' : idx < i ? 'completed' : 'pending'
-        })))
-        await new Promise(resolve => setTimeout(resolve, 800))
-      }
-
-      setSteps(prev => prev.map(step => ({ ...step, status: 'completed' })))
-
-      const response = await fetch('/api/find-sources', {
+      // Step 1: 智能分析用户意图，确定搜索策略
+      setCurrentStep(0)
+      setSteps(prev => prev.map((step, idx) => ({
+        ...step,
+        status: idx === 0 ? 'processing' : 'pending'
+      })))
+      
+      const step1Response = await fetch('/api/find-sources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: query }),
+        body: JSON.stringify({ text: query, step: 1 }),
       })
+      
+      if (!step1Response.ok) throw new Error('Step 1 failed')
+      
+      const step1Data = await step1Response.json()
+      setSteps(prev => prev.map((step, idx) => ({
+        ...step,
+        status: idx === 0 ? 'completed' : idx === 1 ? 'processing' : 'pending'
+      })))
+      setCurrentStep(1)
 
-      if (!response.ok) throw new Error('Search failed')
+      // Step 2: 搜索 CrossRef 数据库
+      const step2Response = await fetch('/api/find-sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: query, step: 2 }),
+      })
+      
+      if (step2Response.ok) {
+        const step2Data = await step2Response.json()
+        allSources.push(...(step2Data.sources || []))
+      }
+      
+      setSteps(prev => prev.map((step, idx) => ({
+        ...step,
+        status: idx <= 1 ? 'completed' : idx === 2 ? 'processing' : 'pending'
+      })))
+      setCurrentStep(2)
 
-      const data = await response.json()
-      setSources(data.sources || [])
+      // Step 3: 搜索 PubMed 数据库（如果是医学相关）
+      if (step1Data.strategy?.searchType === 'medical' || step1Data.strategy?.databases?.includes('PubMed')) {
+        const step3Response = await fetch('/api/find-sources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: query, step: 3 }),
+        })
+        
+        if (step3Response.ok) {
+          const step3Data = await step3Response.json()
+          allSources.push(...(step3Data.sources || []))
+        }
+      }
+      
+      setSteps(prev => prev.map((step, idx) => ({
+        ...step,
+        status: idx <= 2 ? 'completed' : idx === 3 ? 'processing' : 'pending'
+      })))
+      setCurrentStep(3)
+
+      // Step 4: 搜索 Semantic Scholar 数据库
+      const step4Response = await fetch('/api/find-sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: query, step: 4 }),
+      })
+      
+      if (step4Response.ok) {
+        const step4Data = await step4Response.json()
+        allSources.push(...(step4Data.sources || []))
+      }
+      
+      setSteps(prev => prev.map((step, idx) => ({
+        ...step,
+        status: idx <= 3 ? 'completed' : idx === 4 ? 'processing' : 'pending'
+      })))
+      setCurrentStep(4)
+
+      // Step 5: 智能筛选和去重，返回最终结果
+      const step5Response = await fetch('/api/find-sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: query, step: 5 }),
+      })
+      
+      if (!step5Response.ok) throw new Error('Step 5 failed')
+      
+      const step5Data = await step5Response.json()
+      setSources(step5Data.sources || [])
+      
+      setSteps(prev => prev.map(step => ({ ...step, status: 'completed' })))
       
       await new Promise(resolve => setTimeout(resolve, 300))
       setShowResults(true)
       
       // 保存搜索历史
       if (onSearchComplete) {
-        onSearchComplete(query, { sources: data.sources || [], count: (data.sources || []).length })
+        onSearchComplete(query, { sources: step5Data.sources || [], count: (step5Data.sources || []).length })
       }
     } catch (error) {
       console.error('Search error:', error)
       alert(t.sourceFinder.searchFailed)
+      setSteps(prev => prev.map(step => ({ ...step, status: 'pending' })))
     } finally {
       setIsSearching(false)
     }
