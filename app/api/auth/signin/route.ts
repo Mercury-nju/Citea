@@ -64,23 +64,36 @@ export async function POST(req: Request) {
 
     const token = await signJwt({ id: user.id, name: user.name, email: user.email, plan: user.plan })
     
-    // 创建响应
-    const response = NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, plan: user.plan } })
-    
-    // 在响应对象上设置 cookie（这是关键！）
-    setAuthCookieInResponse(response, token)
-    
-    // 验证 cookie 是否真的被设置了
-    const setCookieHeader = response.headers.get('Set-Cookie')
-    
     console.log('Login successful for:', email)
     console.log('Token generated, length:', token.length)
+    
+    // 直接创建响应并设置 cookie
+    const response = NextResponse.json({ 
+      user: { id: user.id, name: user.name, email: user.email, plan: user.plan } 
+    })
+    
+    // 直接设置 cookie，不使用辅助函数
+    const JWT_EXPIRES_SECONDS = 60 * 60 * 24 * 7 // 7 days
+    response.cookies.set('citea_auth', token, {
+      httpOnly: true,
+      secure: false, // 暂时禁用
+      sameSite: 'lax',
+      path: '/',
+      maxAge: JWT_EXPIRES_SECONDS,
+    })
+    
+    // 验证 cookie 是否被设置
+    const setCookieHeader = response.headers.get('Set-Cookie')
     console.log('Cookie header Set-Cookie:', setCookieHeader ? '✅ 已设置' : '❌ 未设置')
     if (setCookieHeader) {
-      console.log('Cookie 内容预览:', setCookieHeader.substring(0, 150))
+      console.log('✅ Cookie 完整内容:', setCookieHeader)
+    } else {
+      console.error('❌ 错误：Cookie 未设置！尝试手动设置...')
+      // 尝试手动添加 Set-Cookie header
+      response.headers.append('Set-Cookie', `citea_auth=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${JWT_EXPIRES_SECONDS}`)
+      console.log('✅ 手动设置 Set-Cookie header')
     }
     
-    // 返回响应（cookie 已经设置）
     return response
   } catch (e) {
     console.error('Login error:', e)
