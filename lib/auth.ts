@@ -35,10 +35,15 @@ export async function signJwt(user: AuthUser): Promise<string> {
   // 确保 payload 结构正确
   const payload = { user }
   
+  // 使用时间字符串格式设置过期时间（7天后）
+  const expirationTime = new Date(Date.now() + JWT_EXPIRES_SECONDS * 1000)
+  console.log('[signJwt] 过期时间:', expirationTime.toISOString())
+  console.log('[signJwt] 当前时间:', new Date().toISOString())
+  
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(JWT_EXPIRES_SECONDS)
+    .setExpirationTime(expirationTime)
     .sign(encoder.encode(JWT_SECRET))
   
   console.log('[signJwt] Token 生成成功，长度:', token.length)
