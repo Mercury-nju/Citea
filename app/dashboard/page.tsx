@@ -61,6 +61,18 @@ export default function DashboardPage() {
       
       // 验证 token
       try {
+        // 先测试 token 是否有效
+        console.log('[Dashboard] 先测试 token 有效性...')
+        const testRes = await fetch('/api/auth/test-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ token })
+        })
+        const testData = await testRes.json()
+        console.log('[Dashboard] Token 测试结果:', testData)
+        
         console.log('[Dashboard] 发送认证请求到 /api/auth/me')
         const res = await fetch('/api/auth/me', {
           method: 'GET',
