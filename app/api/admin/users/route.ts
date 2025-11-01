@@ -53,7 +53,7 @@ export async function GET() {
             plan: userData.plan || 'free',
             createdAt: userData.createdAt,
             lastLoginAt: userData.lastLoginAt,
-            emailVerified: userData.emailVerified === 'true' || userData.emailVerified === true,
+            emailVerified: userData.emailVerified === 'true',
           })
         }
       }
