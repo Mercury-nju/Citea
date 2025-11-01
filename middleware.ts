@@ -43,19 +43,15 @@ export async function middleware(request: NextRequest) {
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
   const isAuthPath = authPaths.some(path => pathname.startsWith(path))
   
-  // 未登录用户访问受保护路径 -> 重定向到登录页
-  // 但如果是 dashboard，给一些容错时间（可能刚登录 cookie 还没生效）
+  // 对于 dashboard，让客户端页面自己处理认证检查，不在这里拦截
+  // 这样可以避免 cookie 延迟生效时的重定向循环
+  if (pathname === '/dashboard') {
+    console.log('[Middleware] Dashboard 路径，允许访问，让客户端处理认证')
+    return NextResponse.next()
+  }
+  
+  // 其他受保护路径的检查
   if (isProtectedPath && !isAuthenticated) {
-    // 检查是否是 dashboard，如果是，检查 referer 看是否从登录页来的
-    const referer = request.headers.get('referer') || ''
-    const isFromSignin = referer.includes('/auth/signin')
-    
-    if (pathname === '/dashboard' && isFromSignin) {
-      console.log('[Middleware] Dashboard 请求来自登录页，可能是刚登录，允许访问让客户端处理')
-      // 允许访问，让 dashboard 页面的客户端代码处理认证重试
-      return NextResponse.next()
-    }
-    
     console.log('[Middleware] 未认证访问受保护路径:', pathname, '-> 重定向到登录页')
     const url = new URL('/auth/signin', request.url)
     url.searchParams.set('redirect', pathname)

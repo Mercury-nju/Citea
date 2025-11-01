@@ -45,9 +45,22 @@ export async function setAuthCookie(token: string) {
 }
 
 export function setAuthCookieInResponse(response: NextResponse, token: string) {
+  const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production'
+  
   response.cookies.set(AUTH_COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProduction, // 在生产环境使用 secure（需要 HTTPS）
+    sameSite: 'lax',
+    path: '/',
+    maxAge: JWT_EXPIRES_SECONDS,
+    // 明确设置 domain（在生产环境可能不需要，但明确设置有助于调试）
+    // domain: isProduction ? undefined : 'localhost',
+  })
+  
+  console.log('[Auth] Cookie 设置:', {
+    name: AUTH_COOKIE,
+    httpOnly: true,
+    secure: isProduction,
     sameSite: 'lax',
     path: '/',
     maxAge: JWT_EXPIRES_SECONDS,

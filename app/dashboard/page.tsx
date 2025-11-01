@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     let retryCount = 0
-    const maxRetries = 10 // 增加重试次数，给 cookie 更多时间生效
+    const maxRetries = 20 // 大幅增加重试次数，给 cookie 更多时间生效
     let timeoutId: NodeJS.Timeout | null = null
     
     const check = async () => {
@@ -51,13 +51,15 @@ export default function DashboardPage() {
           // 如果是刚登录，可能需要等待一下 cookie 生效
           if (retryCount < maxRetries) {
             retryCount++
-            const delay = retryCount < 3 ? 300 : 500 // 前几次快速重试，之后慢一点
-            console.log(`[Dashboard] 未找到用户，${delay}ms 后重试...`)
+            // 前几次快速重试，之后逐渐增加延迟
+            const delay = retryCount < 5 ? 200 : retryCount < 10 ? 500 : 1000
+            console.log(`[Dashboard] 未找到用户，${delay}ms 后重试... (已尝试 ${retryCount}/${maxRetries})`)
             timeoutId = setTimeout(check, delay)
             return
           }
           // 多次重试后仍然没有用户，跳转到登录页
-          console.error('[Dashboard] 认证失败，重定向到登录页')
+          console.error('[Dashboard] 认证失败，已重试', maxRetries, '次，重定向到登录页')
+          alert('登录状态已过期，请重新登录')
           router.push('/auth/signin')
           return
         }
@@ -69,11 +71,12 @@ export default function DashboardPage() {
         // 出错时也重试几次
         if (retryCount < maxRetries) {
           retryCount++
-          const delay = retryCount < 3 ? 300 : 500
+          const delay = retryCount < 5 ? 200 : retryCount < 10 ? 500 : 1000
           timeoutId = setTimeout(check, delay)
           return
         }
         console.error('[Dashboard] 认证失败，重定向到登录页')
+        alert('认证检查失败，请重新登录')
         router.push('/auth/signin')
       }
     }
