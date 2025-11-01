@@ -3,6 +3,9 @@ import { getAdminSession } from '@/lib/adminAuth'
 import DashboardStats from '@/components/admin/DashboardStats'
 import DashboardCharts from '@/components/admin/DashboardCharts'
 
+// 确保这是动态路由
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboardPage() {
   const session = await getAdminSession()
   

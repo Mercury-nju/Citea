@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation'
 import { getAdminSession } from '@/lib/adminAuth'
 import UsersTable from '@/components/admin/UsersTable'
 
+// 确保这是动态路由
+export const dynamic = 'force-dynamic'
+
 export default async function AdminUsersPage() {
   const session = await getAdminSession()
   

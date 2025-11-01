@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Lock } from 'lucide-react'
 
@@ -9,6 +9,28 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [checking, setChecking] = useState(true)
+
+  // 检查是否已经登录
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/admin/stats', {
+          method: 'GET',
+          credentials: 'include',
+        })
+        if (res.ok) {
+          // 已经登录，重定向到 dashboard
+          router.push('/admin/dashboard')
+        } else {
+          setChecking(false)
+        }
+      } catch {
+        setChecking(false)
+      }
+    }
+    checkAuth()
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,6 +41,7 @@ export default function AdminLoginPage() {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ password }),
       })
 
@@ -31,12 +54,19 @@ export default function AdminLoginPage() {
       }
 
       // 登录成功，跳转到后台首页
-      router.push('/admin/dashboard')
-      router.refresh()
+      window.location.href = '/admin/dashboard'
     } catch (err) {
       setError('登录失败，请重试')
       setIsLoading(false)
     }
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-white">检查登录状态...</div>
+      </div>
+    )
   }
 
   return (
