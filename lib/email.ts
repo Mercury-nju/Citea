@@ -1,6 +1,12 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY || '')
+// 延迟初始化 Resend 实例
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY not configured')
+  }
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function sendVerificationEmail(email: string, code: string, name: string) {
   // 如果没有配置 API key，返回错误但不阻止构建
@@ -10,6 +16,7 @@ export async function sendVerificationEmail(email: string, code: string, name: s
   }
   
   try {
+    const resend = getResendClient()
     const { data, error } = await resend.emails.send({
       from: 'Citea <onboarding@resend.dev>', // 使用 Resend 的测试域名
       to: [email],
@@ -84,6 +91,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
   }
   
   try {
+    const resend = getResendClient()
     const { data, error } = await resend.emails.send({
       from: 'Citea <onboarding@resend.dev>',
       to: [email],
