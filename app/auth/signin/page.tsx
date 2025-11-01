@@ -48,29 +48,12 @@ export default function SignInPage() {
       }
       
       const data = await res.json()
-      console.log('登录成功:', data)
-      console.log('准备跳转到 dashboard...')
+      console.log('✅ 登录成功:', data)
       
-      // 先验证 cookie 是否设置成功
-      const verifyRes = await fetch('/api/auth/me', {
-        credentials: 'include',
-        cache: 'no-store'
-      })
-      const verifyData = await verifyRes.json()
-      console.log('验证用户:', verifyData)
-      
-      if (verifyData.user) {
-        console.log('✅ Cookie 验证成功，跳转到 dashboard')
-        // Cookie 已设置，直接跳转
-        window.location.href = '/dashboard'
-      } else {
-        console.warn('⚠️ Cookie 未设置，等待后重试...')
-        // 等待更长时间后重试跳转
-        setTimeout(() => {
-          console.log('重试跳转到 dashboard')
-          window.location.href = '/dashboard'
-        }, 500)
-      }
+      // 直接跳转，让 dashboard 页面处理认证检查
+      // 使用 window.location 强制完整页面刷新，确保 cookie 被读取
+      console.log('🔄 跳转到 dashboard...')
+      window.location.href = '/dashboard'
     } catch (err) {
       console.error('登录异常:', err)
       alert('登录失败: ' + (err as Error).message)
