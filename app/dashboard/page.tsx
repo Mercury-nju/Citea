@@ -54,20 +54,22 @@ export default function DashboardPage() {
         
         // 尝试从 localStorage 获取 token（备用方案）
         const tokenFromStorage = typeof window !== 'undefined' ? localStorage.getItem('citea_auth_token') : null
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json',
-        }
+        console.log('[Dashboard] localStorage token:', tokenFromStorage ? `✅ 存在 (${tokenFromStorage.length} 字符)` : '❌ 不存在')
+        
+        const headers: HeadersInit = {}
         
         // 如果 localStorage 有 token，添加到 header
         if (tokenFromStorage) {
           headers['Authorization'] = `Bearer ${tokenFromStorage}`
-          console.log('[Dashboard] 使用 localStorage token')
+          console.log('[Dashboard] ✅ 设置 Authorization header:', `Bearer ${tokenFromStorage.substring(0, 30)}...`)
+        } else {
+          console.log('[Dashboard] ⚠️ localStorage 中没有 token')
         }
         
         const res = await fetch('/api/auth/me', { 
           cache: 'no-store',
           credentials: 'include',
-          headers
+          headers: Object.keys(headers).length > 0 ? headers : undefined
         })
         
         console.log('[Dashboard] API 响应状态:', res.status)
