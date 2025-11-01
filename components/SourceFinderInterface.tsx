@@ -104,7 +104,15 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
       setCurrentStep(2)
 
       // Step 3: 搜索 PubMed 数据库（如果是医学相关）
-      if (step1Data.strategy?.searchType === 'medical' || step1Data.strategy?.databases?.includes('PubMed')) {
+      const shouldSearchPubMed = step1Data.strategy?.searchType === 'medical' || step1Data.strategy?.databases?.includes('PubMed')
+      
+      if (shouldSearchPubMed) {
+        setSteps(prev => prev.map((step, idx) => ({
+          ...step,
+          status: idx <= 2 ? 'completed' : idx === 3 ? 'processing' : 'pending'
+        })))
+        setCurrentStep(3)
+        
         const step3Response = await fetch('/api/find-sources', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -115,13 +123,23 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
           const step3Data = await step3Response.json()
           allSources.push(...(step3Data.sources || []))
         }
+      } else {
+        // 跳过 PubMed，直接标记为完成
+        setSteps(prev => prev.map((step, idx) => ({
+          ...step,
+          status: idx <= 2 ? 'completed' : idx === 3 ? 'completed' : idx === 4 ? 'processing' : 'pending'
+        })))
+        setCurrentStep(4)
       }
       
-      setSteps(prev => prev.map((step, idx) => ({
-        ...step,
-        status: idx <= 2 ? 'completed' : idx === 3 ? 'processing' : 'pending'
-      })))
-      setCurrentStep(3)
+      // 继续到 Step 4
+      if (shouldSearchPubMed) {
+        setSteps(prev => prev.map((step, idx) => ({
+          ...step,
+          status: idx <= 3 ? 'completed' : idx === 4 ? 'processing' : 'pending'
+        })))
+        setCurrentStep(4)
+      }
 
       // Step 4: 搜索 Semantic Scholar 数据库
       const step4Response = await fetch('/api/find-sources', {
