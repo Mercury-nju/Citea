@@ -14,7 +14,8 @@ import {
   BookOpen,
   CheckCircle,
   MessageSquare,
-  ArrowUp
+  ArrowUp,
+  ArrowLeft
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
@@ -267,6 +268,16 @@ export default function DashboardPage() {
         {/* Header */}
         <header className="bg-white border-b border-gray-200 px-8 py-8">
           <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+                title="返回上一页"
+              >
+                <ArrowLeft size={20} />
+                <span className="text-sm font-medium">返回</span>
+              </button>
+            </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-1.5">
               {t.dashboard.researchAssistant}
             </h1>
