@@ -48,19 +48,36 @@ export default function SignInPage() {
       }
       
       const data = await res.json()
-      console.log('✅ 登录成功:', data)
+      console.log('✅ 登录成功:', JSON.stringify(data, null, 2))
       
       // 检查响应头中的 Set-Cookie
       const setCookieHeader = res.headers.get('Set-Cookie')
-      console.log('📋 Set-Cookie 响应头:', setCookieHeader ? '已设置' : '未找到')
+      console.log('📋 Set-Cookie 响应头存在:', setCookieHeader ? '✅ 是' : '❌ 否')
       if (setCookieHeader) {
-        console.log('Cookie 内容:', setCookieHeader.substring(0, 100))
+        console.log('📋 Set-Cookie 完整内容:', setCookieHeader)
+        // 检查是否包含我们的 cookie
+        if (setCookieHeader.includes('citea_auth')) {
+          console.log('✅ Cookie 名称正确 (citea_auth)')
+        } else {
+          console.warn('⚠️ Cookie 名称不匹配，不包含 citea_auth')
+        }
+      } else {
+        console.error('❌ Set-Cookie 响应头未找到！这是问题所在！')
       }
       
-      // 直接跳转，不再等待验证
-      // Cookie 应该在响应中已经设置了，浏览器会自动处理
-      console.log('🚀 立即跳转到 /dashboard')
-      window.location.href = '/dashboard'
+      // 等待一下，然后检查 cookie 是否在浏览器中
+      setTimeout(() => {
+        const cookies = document.cookie
+        const hasCookie = cookies.includes('citea_auth')
+        console.log('🍪 跳转前浏览器 Cookie 检查:', {
+          hasCiteaAuth: hasCookie,
+          allCookies: cookies || '(empty)'
+        })
+        
+        // 直接跳转
+        console.log('🚀 跳转到 /dashboard')
+        window.location.href = '/dashboard'
+      }, 100) // 短暂等待让浏览器处理 cookie
     } catch (err) {
       console.error('登录异常:', err)
       alert('登录失败: ' + (err as Error).message)

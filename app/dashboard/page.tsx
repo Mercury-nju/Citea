@@ -44,11 +44,13 @@ export default function DashboardPage() {
         // 检查浏览器中的 cookie（用于调试）
         const cookies = document.cookie
         const hasAuthCookie = cookies.includes('citea_auth')
-        console.log('[Dashboard] Cookie 检查:', {
+        const cookieInfo = {
           hasAuthCookie,
           cookieCount: cookies.split(';').length,
-          cookiePreview: cookies.substring(0, 100)
-        })
+          allCookies: cookies || '(empty)',
+          cookiePreview: cookies.substring(0, 200)
+        }
+        console.log('[Dashboard] Cookie 检查:', JSON.stringify(cookieInfo, null, 2))
         
         const res = await fetch('/api/auth/me', { 
           cache: 'no-store',
@@ -56,9 +58,10 @@ export default function DashboardPage() {
         })
         
         console.log('[Dashboard] API 响应状态:', res.status)
+        console.log('[Dashboard] API 响应头 Set-Cookie:', res.headers.get('Set-Cookie') || '无')
         
         const data = await res.json()
-        console.log('[Dashboard] 认证检查结果:', data)
+        console.log('[Dashboard] 认证检查结果:', JSON.stringify(data, null, 2))
         
         if (!data.user) {
           // 如果是刚登录，可能需要等待一下 cookie 生效
