@@ -34,16 +34,29 @@ export default function DashboardPage() {
 
   useEffect(() => {
     let retryCount = 0
-    const maxRetries = 20 // 大幅增加重试次数，给 cookie 更多时间生效
+    const maxRetries = 5 // 减少重试次数，快速失败
     let timeoutId: NodeJS.Timeout | null = null
     
     const check = async () => {
       try {
         console.log(`[Dashboard] 检查用户认证 (尝试 ${retryCount + 1}/${maxRetries})`)
+        
+        // 检查浏览器中的 cookie（用于调试）
+        const cookies = document.cookie
+        const hasAuthCookie = cookies.includes('citea_auth')
+        console.log('[Dashboard] Cookie 检查:', {
+          hasAuthCookie,
+          cookieCount: cookies.split(';').length,
+          cookiePreview: cookies.substring(0, 100)
+        })
+        
         const res = await fetch('/api/auth/me', { 
           cache: 'no-store',
           credentials: 'include' // 确保包含 cookie
         })
+        
+        console.log('[Dashboard] API 响应状态:', res.status)
+        
         const data = await res.json()
         console.log('[Dashboard] 认证检查结果:', data)
         
@@ -51,15 +64,18 @@ export default function DashboardPage() {
           // 如果是刚登录，可能需要等待一下 cookie 生效
           if (retryCount < maxRetries) {
             retryCount++
-            // 前几次快速重试，之后逐渐增加延迟
-            const delay = retryCount < 5 ? 200 : retryCount < 10 ? 500 : 1000
+            const delay = retryCount * 200 // 递增延迟：200ms, 400ms, 600ms...
             console.log(`[Dashboard] 未找到用户，${delay}ms 后重试... (已尝试 ${retryCount}/${maxRetries})`)
             timeoutId = setTimeout(check, delay)
             return
           }
           // 多次重试后仍然没有用户，跳转到登录页
-          console.error('[Dashboard] 认证失败，已重试', maxRetries, '次，重定向到登录页')
-          alert('登录状态已过期，请重新登录')
+          console.error('[Dashboard] 认证失败，已重试', maxRetries, '次')
+          console.error('[Dashboard] Cookie 状态:', {
+            hasAuthCookie,
+            cookies: document.cookie
+          })
+          alert('登录失败：无法验证身份。请检查控制台日志并重新登录。')
           router.push('/auth/signin')
           return
         }
@@ -71,7 +87,7 @@ export default function DashboardPage() {
         // 出错时也重试几次
         if (retryCount < maxRetries) {
           retryCount++
-          const delay = retryCount < 5 ? 200 : retryCount < 10 ? 500 : 1000
+          const delay = retryCount * 200
           timeoutId = setTimeout(check, delay)
           return
         }
@@ -81,6 +97,7 @@ export default function DashboardPage() {
       }
     }
     
+    // 立即开始检查，不等待
     check()
     
     // 清理函数

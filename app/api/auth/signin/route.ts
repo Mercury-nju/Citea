@@ -70,9 +70,15 @@ export async function POST(req: Request) {
     // 在响应对象上设置 cookie（这是关键！）
     setAuthCookieInResponse(response, token)
     
+    // 验证 cookie 是否真的被设置了
+    const setCookieHeader = response.headers.get('Set-Cookie')
+    
     console.log('Login successful for:', email)
-    console.log('Token generated, cookie set in response')
-    console.log('Cookie header:', response.headers.get('Set-Cookie'))
+    console.log('Token generated, length:', token.length)
+    console.log('Cookie header Set-Cookie:', setCookieHeader ? '✅ 已设置' : '❌ 未设置')
+    if (setCookieHeader) {
+      console.log('Cookie 内容预览:', setCookieHeader.substring(0, 150))
+    }
     
     // 返回响应（cookie 已经设置）
     return response

@@ -50,38 +50,17 @@ export default function SignInPage() {
       const data = await res.json()
       console.log('✅ 登录成功:', data)
       
-      // 等待并验证 cookie 是否生效
-      console.log('🔄 等待 cookie 设置...')
+      // 检查响应头中的 Set-Cookie
+      const setCookieHeader = res.headers.get('Set-Cookie')
+      console.log('📋 Set-Cookie 响应头:', setCookieHeader ? '已设置' : '未找到')
+      if (setCookieHeader) {
+        console.log('Cookie 内容:', setCookieHeader.substring(0, 100))
+      }
       
-      // 等待后验证 cookie 是否生效
-      setTimeout(async () => {
-        try {
-          console.log('🔍 验证 cookie 是否已设置...')
-          const verifyRes = await fetch('/api/auth/me', {
-            credentials: 'include',
-            cache: 'no-store'
-          })
-          const verifyData = await verifyRes.json()
-          
-          if (verifyData.user) {
-            console.log('✅ Cookie 验证成功，用户:', verifyData.user.email)
-            console.log('🚀 跳转到 /dashboard')
-            window.location.href = '/dashboard'
-          } else {
-            console.warn('⚠️ Cookie 未生效，等待后重试...')
-            // 再等待一下，然后强制跳转
-            setTimeout(() => {
-              console.log('🚀 强制跳转到 /dashboard（让页面重试认证）')
-              window.location.href = '/dashboard'
-            }, 500)
-          }
-        } catch (verifyError) {
-          console.error('验证 cookie 失败:', verifyError)
-          // 即使验证失败也尝试跳转，让 dashboard 页面处理
-          console.log('🚀 跳转到 /dashboard（让页面处理认证）')
-          window.location.href = '/dashboard'
-        }
-      }, 300) // 增加到 300ms 给 cookie 更多时间
+      // 直接跳转，不再等待验证
+      // Cookie 应该在响应中已经设置了，浏览器会自动处理
+      console.log('🚀 立即跳转到 /dashboard')
+      window.location.href = '/dashboard'
     } catch (err) {
       console.error('登录异常:', err)
       alert('登录失败: ' + (err as Error).message)
