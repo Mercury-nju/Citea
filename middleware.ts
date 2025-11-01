@@ -14,9 +14,12 @@ const encoder = new TextEncoder()
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // Admin 路由由 admin layout 处理，不在这里拦截
+  // Admin 路由：设置路径名和 URL header 供 layout 使用
   if (pathname.startsWith('/admin')) {
-    return NextResponse.next()
+    const response = NextResponse.next()
+    response.headers.set('x-pathname', pathname)
+    response.headers.set('x-url', request.url)
+    return response
   }
   
   // 获取认证 token
