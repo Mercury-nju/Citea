@@ -71,7 +71,7 @@ export default function DashboardPage() {
           body: JSON.stringify({ token })
         })
         const testData = await testRes.json()
-        console.log('[Dashboard] Token 测试结果:', testData)
+        console.log('[Dashboard] Token 测试结果:', JSON.stringify(testData, null, 2))
         
         console.log('[Dashboard] 发送认证请求到 /api/auth/me')
         const res = await fetch('/api/auth/me', {
@@ -83,7 +83,7 @@ export default function DashboardPage() {
         
         console.log('[Dashboard] 认证响应状态:', res.status)
         const data = await res.json()
-        console.log('[Dashboard] 认证响应数据:', data)
+        console.log('[Dashboard] 认证响应数据:', JSON.stringify(data, null, 2))
         
         if (data.user) {
           console.log('[Dashboard] ✅ 认证成功，用户:', data.user.email)
