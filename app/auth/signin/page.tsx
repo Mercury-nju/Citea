@@ -48,8 +48,12 @@ export default function SignInPage() {
       const data = await res.json()
       console.log('登录成功:', data)
       
-      // 强制刷新后跳转
-      window.location.href = '/dashboard'
+      // 等待一下确保 cookie 设置完成，然后跳转
+      // 使用 router.push 并强制刷新以确保 cookie 被读取
+      setTimeout(() => {
+        // 使用 window.location.href 确保完整页面刷新，这样 cookie 会被正确读取
+        window.location.href = '/dashboard'
+      }, 100)
     } catch (err) {
       console.error('登录异常:', err)
       alert('登录失败: ' + (err as Error).message)

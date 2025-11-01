@@ -33,15 +33,42 @@ export default function DashboardPage() {
   ])
 
   useEffect(() => {
+    let retryCount = 0
+    const maxRetries = 3
+    
     const check = async () => {
-      const res = await fetch('/api/auth/me', { cache: 'no-store' })
-      const data = await res.json()
-      if (!data.user) {
+      try {
+        const res = await fetch('/api/auth/me', { 
+          cache: 'no-store',
+          credentials: 'include' // 确保包含 cookie
+        })
+        const data = await res.json()
+        
+        if (!data.user) {
+          // 如果是刚登录，可能需要等待一下 cookie 生效
+          if (retryCount < maxRetries) {
+            retryCount++
+            setTimeout(check, 200) // 200ms 后重试
+            return
+          }
+          // 多次重试后仍然没有用户，跳转到登录页
+          router.push('/auth/signin')
+          return
+        }
+        
+        setUser(data.user)
+      } catch (error) {
+        console.error('检查用户认证失败:', error)
+        // 出错时也重试几次
+        if (retryCount < maxRetries) {
+          retryCount++
+          setTimeout(check, 200)
+          return
+        }
         router.push('/auth/signin')
-        return
       }
-      setUser(data.user)
     }
+    
     check()
   }, [router])
 
