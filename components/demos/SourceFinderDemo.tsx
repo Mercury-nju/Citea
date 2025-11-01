@@ -1,60 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Sparkles, CheckCircle, Zap } from 'lucide-react'
+import { Search, Sparkles, CheckCircle } from 'lucide-react'
 
 export default function SourceFinderDemo() {
   const [isSearching, setIsSearching] = useState(false)
-  const [currentStep, setCurrentStep] = useState(1)
 
   const handleDemo = () => {
     setIsSearching(true)
-    setCurrentStep(1)
-    
-    // 模拟步骤进度
-    const steps = [1, 2, 3, 4]
-    let stepIndex = 0
-    const interval = setInterval(() => {
-      stepIndex++
-      if (stepIndex < steps.length) {
-        setCurrentStep(steps[stepIndex])
-      } else {
-        clearInterval(interval)
-        setTimeout(() => {
-          setIsSearching(false)
-          setCurrentStep(1)
-        }, 1000)
-      }
-    }, 800)
+    setTimeout(() => setIsSearching(false), 3000)
   }
-
-  const features = [
-    {
-      title: 'Literature Source Verification',
-      description: 'Tracing and validating academic sources',
-      icon: CheckCircle,
-    },
-    {
-      title: 'Scanning academic databases',
-      description: 'Connecting to PubMed, CrossRef, and ArXiv',
-      icon: Search,
-    },
-    {
-      title: 'Cross-referencing citations',
-      description: 'Analyzing citation networks and relationships',
-      icon: Sparkles,
-    },
-    {
-      title: 'Tracing publication lineage',
-      description: 'Mapping original sources and derivatives',
-      icon: Zap,
-    },
-    {
-      title: 'Validating authenticity',
-      description: 'Verifying DOI and publication records',
-      icon: CheckCircle,
-    },
-  ]
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
