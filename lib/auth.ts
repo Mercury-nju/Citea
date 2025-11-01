@@ -30,14 +30,20 @@ export async function signJwt(user: AuthUser): Promise<string> {
   console.log('[signJwt] 生成 token for user:', user.email)
   console.log('[signJwt] JWT_SECRET from env:', process.env.JWT_SECRET ? '已设置' : '未设置（使用默认值）')
   console.log('[signJwt] JWT_SECRET length:', JWT_SECRET.length)
+  console.log('[signJwt] User 对象:', JSON.stringify(user, null, 2))
   
-  const token = await new SignJWT({ user })
+  // 确保 payload 结构正确
+  const payload = { user }
+  
+  const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(JWT_EXPIRES_SECONDS)
     .sign(encoder.encode(JWT_SECRET))
   
   console.log('[signJwt] Token 生成成功，长度:', token.length)
+  console.log('[signJwt] Token 前50字符:', token.substring(0, 50))
+  
   return token
 }
 
@@ -50,12 +56,25 @@ export async function verifyJwt(token: string): Promise<AuthUser | null> {
     const { payload } = await jwtVerify(token, encoder.encode(JWT_SECRET))
     
     console.log('[verifyJwt] Token 验证成功')
+    console.log('[verifyJwt] Payload keys:', Object.keys(payload))
     console.log('[verifyJwt] Payload:', JSON.stringify(payload, null, 2))
     
-    const user = (payload as any).user as AuthUser
+    // 尝试多种方式获取 user 数据
+    let user = (payload as any).user as AuthUser
     
+    // 如果 payload 中没有 user，尝试直接从 payload 读取
     if (!user) {
-      console.error('[verifyJwt] ❌ Payload 中没有 user 字段')
+      console.log('[verifyJwt] Payload 中没有 user 字段，尝试直接从 payload 读取')
+      // 检查是否是直接的 user 对象
+      if ((payload as any).email) {
+        user = payload as any as AuthUser
+      }
+    }
+    
+    // 如果还是没有，尝试检查是否有其他结构
+    if (!user) {
+      console.error('[verifyJwt] ❌ Payload 中没有找到用户信息')
+      console.error('[verifyJwt] Payload 完整内容:', JSON.stringify(payload, null, 2))
       return null
     }
     
@@ -63,7 +82,11 @@ export async function verifyJwt(token: string): Promise<AuthUser | null> {
     return user
   } catch (error) {
     console.error('[verifyJwt] ❌ Token 验证失败:', error)
-    console.error('[verifyJwt] 错误详情:', error instanceof Error ? error.message : String(error))
+    console.error('[verifyJwt] 错误类型:', error instanceof Error ? error.constructor.name : typeof error)
+    console.error('[verifyJwt] 错误消息:', error instanceof Error ? error.message : String(error))
+    if (error instanceof Error && error.stack) {
+      console.error('[verifyJwt] 错误堆栈:', error.stack)
+    }
     return null
   }
 }
