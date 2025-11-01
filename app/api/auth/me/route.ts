@@ -1,32 +1,43 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getAuthTokenFromCookies, verifyJwt } from '@/lib/auth'
+import { verifyJwt } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    // 获取所有 cookies
+    // 方式1: 从 cookie 获取 token
     const cookieStore = cookies()
-    const allCookies = cookieStore.getAll()
+    let token = cookieStore.get('citea_auth')?.value
     
-    // 查找 citea_auth cookie
-    const authCookie = cookieStore.get('citea_auth')
-    
-    console.log('[Auth/Me] Cookie 检查:', {
-      totalCookies: allCookies.length,
-      cookieNames: allCookies.map(c => c.name),
-      hasCiteaAuth: !!authCookie,
-      authCookieValue: authCookie ? `${authCookie.value.substring(0, 30)}...` : 'null'
-    })
-    
-    if (!authCookie) {
-      console.log('[Auth/Me] ❌ 未找到 citea_auth cookie')
-      return NextResponse.json({ user: null }, { status: 200 })
+    // 方式2: 从 Authorization header 获取（备用方案）
+    if (!token) {
+      const authHeader = req.headers.get('Authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        token = authHeader.substring(7)
+        console.log('[Auth/Me] 从 Authorization header 获取 token')
+      }
     }
     
-    const token = authCookie.value
-    console.log('[Auth/Me] Token 提取成功，长度:', token.length)
+    // 方式3: 从 query 参数获取（临时调试）
+    if (!token) {
+      const url = new URL(req.url)
+      token = url.searchParams.get('token') || undefined
+      if (token) {
+        console.log('[Auth/Me] 从 query 参数获取 token')
+      }
+    }
+    
+    console.log('[Auth/Me] Token 检查:', {
+      hasToken: !!token,
+      tokenLength: token?.length || 0,
+      source: token ? (cookieStore.get('citea_auth') ? 'cookie' : 'header/query') : 'none'
+    })
+    
+    if (!token) {
+      console.log('[Auth/Me] ❌ 未找到 token')
+      return NextResponse.json({ user: null }, { status: 200 })
+    }
     
     const user = await verifyJwt(token)
     

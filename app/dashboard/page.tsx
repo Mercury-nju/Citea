@@ -52,13 +52,25 @@ export default function DashboardPage() {
         }
         console.log('[Dashboard] Cookie 检查:', JSON.stringify(cookieInfo, null, 2))
         
+        // 尝试从 localStorage 获取 token（备用方案）
+        const tokenFromStorage = typeof window !== 'undefined' ? localStorage.getItem('citea_auth_token') : null
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        }
+        
+        // 如果 localStorage 有 token，添加到 header
+        if (tokenFromStorage) {
+          headers['Authorization'] = `Bearer ${tokenFromStorage}`
+          console.log('[Dashboard] 使用 localStorage token')
+        }
+        
         const res = await fetch('/api/auth/me', { 
           cache: 'no-store',
-          credentials: 'include' // 确保包含 cookie
+          credentials: 'include',
+          headers
         })
         
         console.log('[Dashboard] API 响应状态:', res.status)
-        console.log('[Dashboard] API 响应头 Set-Cookie:', res.headers.get('Set-Cookie') || '无')
         
         const data = await res.json()
         console.log('[Dashboard] 认证检查结果:', JSON.stringify(data, null, 2))

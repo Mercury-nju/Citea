@@ -31,7 +31,6 @@ export default function SignInPage() {
       })
       
       console.log('[SignIn] 响应状态:', res.status)
-      console.log('[SignIn] Set-Cookie 响应头:', res.headers.get('Set-Cookie') || '无')
       
       const data = await res.json()
       
@@ -44,7 +43,18 @@ export default function SignInPage() {
       
       console.log('[SignIn] ✅ 登录成功:', data)
       
-      // 立即跳转，不再等待
+      // 检查响应中的 Set-Cookie
+      const setCookieHeader = res.headers.get('Set-Cookie')
+      console.log('[SignIn] Set-Cookie 响应头:', setCookieHeader || '❌ 无')
+      
+      // 如果 cookie 设置失败，使用 token 作为备用方案
+      if (data.token) {
+        console.log('[SignIn] 收到 token，保存到 localStorage 作为备用')
+        localStorage.setItem('citea_auth_token', data.token)
+        localStorage.setItem('citea_user', JSON.stringify(data.user))
+      }
+      
+      // 立即跳转
       console.log('[SignIn] 🚀 跳转到 /dashboard')
       window.location.replace('/dashboard')
       

@@ -43,34 +43,35 @@ export async function POST(req: Request) {
     // 创建响应对象
     const response = NextResponse.json({ 
       user: { id: user.id, name: user.name, email: user.email, plan: user.plan },
-      success: true
+      success: true,
+      token: token // 也返回 token 作为备用方案
     })
     
-    // 在响应对象上直接设置 cookie - 这是关键！
-    response.cookies.set({
-      name: 'citea_auth',
-      value: token,
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    })
-    
-    // 验证 cookie 是否被设置到响应头
-    const allHeaders = response.headers.get('Set-Cookie')
-    console.log('[Login] Set-Cookie 响应头:', allHeaders || '❌ 未找到')
-    
-    if (allHeaders) {
-      console.log('[Login] ✅ Cookie 已设置到响应:', allHeaders.substring(0, 100))
-    } else {
-      // 如果上面的方法失败，尝试手动设置
-      console.log('[Login] ⚠️ 自动设置失败，尝试手动设置...')
-      response.headers.append('Set-Cookie', 
-        `citea_auth=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`
-      )
-      console.log('[Login] ✅ 手动设置 Set-Cookie header')
+    // 尝试多种方式设置 cookie
+    try {
+      // 方式1: 使用 response.cookies.set() 对象语法
+      response.cookies.set({
+        name: 'citea_auth',
+        value: token,
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      })
+      
+      // 方式2: 使用手动设置 Set-Cookie header
+      const cookieString = `citea_auth=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`
+      response.headers.set('Set-Cookie', cookieString)
+      
+      console.log('[Login] ✅ Cookie 设置完成（双重方式）')
+    } catch (cookieError) {
+      console.error('[Login] ⚠️ Cookie 设置异常:', cookieError)
     }
+    
+    // 验证
+    const setCookieHeader = response.headers.get('Set-Cookie')
+    console.log('[Login] 最终 Set-Cookie header:', setCookieHeader ? `✅ ${setCookieHeader.substring(0, 100)}` : '❌ 未设置')
     
     return response
   } catch (e) {
