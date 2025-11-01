@@ -26,9 +26,27 @@ export async function signJwt(user: AuthUser): Promise<string> {
 
 export async function verifyJwt(token: string): Promise<AuthUser | null> {
   try {
+    console.log('[verifyJwt] 开始验证 token')
+    console.log('[verifyJwt] JWT_SECRET 存在:', !!JWT_SECRET)
+    console.log('[verifyJwt] JWT_SECRET 长度:', JWT_SECRET?.length || 0)
+    
     const { payload } = await jwtVerify(token, encoder.encode(JWT_SECRET))
-    return (payload as any).user as AuthUser
+    
+    console.log('[verifyJwt] Token 验证成功')
+    console.log('[verifyJwt] Payload:', JSON.stringify(payload, null, 2))
+    
+    const user = (payload as any).user as AuthUser
+    
+    if (!user) {
+      console.error('[verifyJwt] ❌ Payload 中没有 user 字段')
+      return null
+    }
+    
+    console.log('[verifyJwt] ✅ 返回用户:', user.email)
+    return user
   } catch (error) {
+    console.error('[verifyJwt] ❌ Token 验证失败:', error)
+    console.error('[verifyJwt] 错误详情:', error instanceof Error ? error.message : String(error))
     return null
   }
 }

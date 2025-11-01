@@ -37,24 +37,31 @@ export default function DashboardPage() {
       // 从 localStorage 获取 token
       const token = localStorage.getItem('citea_auth_token')
       
+      console.log('[Dashboard] 开始认证检查，token 存在:', !!token)
+      
       if (!token) {
+        console.log('[Dashboard] ❌ 没有 token，跳转到登录页')
         router.push('/auth/signin')
         return
       }
       
-      // 尝试从 localStorage 恢复用户信息
+      console.log('[Dashboard] Token 长度:', token.length)
+      
+      // 尝试从 localStorage 恢复用户信息（先显示，提升体验）
       const savedUser = localStorage.getItem('citea_user')
       if (savedUser) {
         try {
           const userData = JSON.parse(savedUser)
+          console.log('[Dashboard] 从 localStorage 恢复用户信息:', userData.email)
           setUser(userData)
         } catch (e) {
-          console.error('Failed to parse saved user:', e)
+          console.error('[Dashboard] 解析用户信息失败:', e)
         }
       }
       
       // 验证 token
       try {
+        console.log('[Dashboard] 发送认证请求到 /api/auth/me')
         const res = await fetch('/api/auth/me', {
           method: 'GET',
           headers: {
@@ -62,21 +69,26 @@ export default function DashboardPage() {
           }
         })
         
+        console.log('[Dashboard] 认证响应状态:', res.status)
         const data = await res.json()
+        console.log('[Dashboard] 认证响应数据:', data)
         
         if (data.user) {
+          console.log('[Dashboard] ✅ 认证成功，用户:', data.user.email)
           // 更新用户信息
           setUser(data.user)
           localStorage.setItem('citea_user', JSON.stringify(data.user))
         } else {
-          // Token 无效，清除并重定向
-          localStorage.removeItem('citea_auth_token')
-          localStorage.removeItem('citea_user')
-          router.push('/auth/signin')
+          console.error('[Dashboard] ❌ Token 验证失败，响应:', data)
+          // 不清除 token，先看看是什么问题
+          // localStorage.removeItem('citea_auth_token')
+          // localStorage.removeItem('citea_user')
+          // 暂时不跳转，看看是不是 token 验证的问题
+          console.warn('[Dashboard] Token 验证失败，但不跳转，查看控制台日志')
         }
       } catch (error) {
-        console.error('Auth check failed:', error)
-        router.push('/auth/signin')
+        console.error('[Dashboard] ❌ 认证检查异常:', error)
+        // 出错时不跳转，先看看是什么错误
       }
     }
     
