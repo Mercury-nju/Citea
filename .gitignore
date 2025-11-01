@@ -42,6 +42,9 @@ next-env.d.ts
 /data
 users.json
 
+# independent admin project (for separate deployment)
+/admin
+
 # IDE
 .vscode/
 .idea/
