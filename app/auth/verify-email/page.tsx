@@ -21,6 +21,8 @@ function VerifyEmailContent() {
   useEffect(() => {
     if (emailParam) {
       setEmail(emailParam)
+      // 显示初始提示
+      setMessage('✅ 注册成功！验证码已发送到您的邮箱，请查收。')
     }
   }, [emailParam])
 
@@ -105,13 +107,19 @@ function VerifyEmailContent() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               验证您的邮箱
             </h1>
-            <p className="text-gray-600">
-              我们已向您的邮箱发送了 6 位验证码
-            </p>
+            {emailParam ? (
+              <p className="text-gray-600">
+                验证码已发送至 <span className="font-semibold text-blue-600">{emailParam}</span>
+              </p>
+            ) : (
+              <p className="text-gray-600">
+                请输入您的邮箱和收到的 6 位验证码
+              </p>
+            )}
           </div>
 
           {message && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm text-center">
               {message}
             </div>
           )}
