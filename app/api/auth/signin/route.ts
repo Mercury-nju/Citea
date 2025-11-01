@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { signJwt, setAuthCookieInResponse } from '@/lib/auth'
+import { signJwt } from '@/lib/auth'
 import { getUserByEmail, updateUserLastLogin } from '@/lib/userStore'
 
 export async function POST(req: Request) {
