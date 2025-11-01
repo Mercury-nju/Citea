@@ -50,10 +50,15 @@ export default function SignInPage() {
       const data = await res.json()
       console.log('✅ 登录成功:', data)
       
-      // 直接跳转，让 dashboard 页面处理认证检查
-      // 使用 window.location 强制完整页面刷新，确保 cookie 被读取
-      console.log('🔄 跳转到 dashboard...')
-      window.location.href = '/dashboard'
+      // 等待一下确保 cookie 在响应中被设置
+      // 然后跳转，让 dashboard 页面处理认证检查
+      console.log('🔄 等待 cookie 设置，准备跳转到 dashboard...')
+      
+      // 等待 200ms 确保 cookie 在浏览器中生效
+      setTimeout(() => {
+        console.log('🚀 执行跳转到 /dashboard')
+        window.location.href = '/dashboard'
+      }, 200)
     } catch (err) {
       console.error('登录异常:', err)
       alert('登录失败: ' + (err as Error).message)

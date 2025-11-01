@@ -30,9 +30,13 @@ export async function middleware(request: NextRequest) {
     try {
       await jwtVerify(token, encoder.encode(JWT_SECRET))
       isAuthenticated = true
-    } catch {
+      console.log('[Middleware] Token 验证成功')
+    } catch (error) {
       isAuthenticated = false
+      console.log('[Middleware] Token 验证失败:', error)
     }
+  } else {
+    console.log('[Middleware] 未找到 token cookie')
   }
   
   // 检查是否访问受保护的路径
@@ -41,9 +45,14 @@ export async function middleware(request: NextRequest) {
   
   // 未登录用户访问受保护路径 -> 重定向到登录页
   if (isProtectedPath && !isAuthenticated) {
+    console.log('[Middleware] 未认证访问受保护路径:', pathname, '-> 重定向到登录页')
     const url = new URL('/auth/signin', request.url)
     url.searchParams.set('redirect', pathname)
     return NextResponse.redirect(url)
+  }
+  
+  if (isProtectedPath && isAuthenticated) {
+    console.log('[Middleware] 已认证用户访问:', pathname, '-> 允许访问')
   }
   
   // 已登录用户访问登录/注册页 -> 重定向到控制台
