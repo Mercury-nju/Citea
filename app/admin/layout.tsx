@@ -8,11 +8,14 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  // 检查管理员认证
+  // 检查管理员认证（登录页面会自行处理，这里只保护其他页面）
   const session = await getAdminSession()
   
+  // 如果没有 session，让子页面自己处理（login 页面会显示，其他页面会重定向）
   if (!session) {
-    redirect('/admin/login')
+    // 返回 children，让子页面自己处理重定向
+    // login 页面会显示，其他页面会被各自的页面组件重定向
+    return <>{children}</>
   }
 
   return (
