@@ -34,7 +34,11 @@ interface DetectionStep {
   status: StepStatus
 }
 
-export default function CitationCheckerInterface() {
+interface CitationCheckerInterfaceProps {
+  onCheckComplete?: (text: string, results?: any) => void
+}
+
+export default function CitationCheckerInterface({ onCheckComplete }: CitationCheckerInterfaceProps = {}) {
   const [text, setText] = useState('')
   const [isChecking, setIsChecking] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
@@ -120,6 +124,10 @@ export default function CitationCheckerInterface() {
         setError(data.error)
       } else {
         setResult(data)
+        // 保存搜索历史
+        if (onCheckComplete) {
+          onCheckComplete(text, data)
+        }
       }
     } catch (err) {
       console.error('Citation check error:', err)

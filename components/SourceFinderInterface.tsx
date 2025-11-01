@@ -22,7 +22,11 @@ interface Source {
   verified: boolean
 }
 
-export default function SourceFinderInterface() {
+interface SourceFinderInterfaceProps {
+  onSearchComplete?: (query: string, results?: any) => void
+}
+
+export default function SourceFinderInterface({ onSearchComplete }: SourceFinderInterfaceProps = {}) {
   const { t } = useLanguage()
   const [query, setQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
@@ -81,6 +85,11 @@ export default function SourceFinderInterface() {
       
       await new Promise(resolve => setTimeout(resolve, 300))
       setShowResults(true)
+      
+      // 保存搜索历史
+      if (onSearchComplete) {
+        onSearchComplete(query, { sources: data.sources || [], count: (data.sources || []).length })
+      }
     } catch (error) {
       console.error('Search error:', error)
       alert(t.sourceFinder.searchFailed)

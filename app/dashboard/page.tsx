@@ -14,8 +14,7 @@ import {
   BookOpen,
   CheckCircle,
   MessageSquare,
-  ArrowUp,
-  ArrowLeft
+  ArrowUp
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
@@ -28,10 +27,46 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
-  const [documents, setDocuments] = useState([
-    { id: 1, title: '[57]Anonymous. (2023). Bardeen-Cooper...', date: '2天前', type: 'citation' },
-    { id: 2, title: '在认知心理学中...', date: '3天前', type: 'search' },
-  ])
+  const [documents, setDocuments] = useState<any[]>([])
+  
+  // 从 localStorage 加载搜索历史
+  useEffect(() => {
+    if (user) {
+      const savedHistory = localStorage.getItem(`citea_search_history_${user.email}`)
+      if (savedHistory) {
+        try {
+          const history = JSON.parse(savedHistory)
+          setDocuments(history)
+        } catch (e) {
+          console.error('Failed to load search history:', e)
+        }
+      }
+    }
+  }, [user])
+  
+  // 保存搜索历史到 localStorage
+  const saveSearchHistory = (searchType: 'finder' | 'checker', query: string, results?: any) => {
+    if (!user) return
+    
+    const newDoc = {
+      id: Date.now().toString(),
+      title: query.substring(0, 50) + (query.length > 50 ? '...' : ''),
+      date: new Date().toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }),
+      type: searchType,
+      fullQuery: query,
+      results: results,
+      timestamp: Date.now()
+    }
+    
+    const updated = [newDoc, ...documents.filter(d => d.id !== newDoc.id)].slice(0, 50) // 最多保存50条
+    setDocuments(updated)
+    
+    try {
+      localStorage.setItem(`citea_search_history_${user.email}`, JSON.stringify(updated))
+    } catch (e) {
+      console.error('Failed to save search history:', e)
+    }
+  }
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -121,13 +156,17 @@ export default function DashboardPage() {
   }
 
   const handleNewDocument = () => {
-    const newDoc = {
-      id: documents.length + 1,
-      title: t.dashboard.newDocument,
-      date: t.dashboard.searchDocs,
-      type: 'search'
+    // 切换到对应的 tab 并清空输入
+    setActiveTab('finder')
+    setQuery('')
+  }
+  
+  const handleHistoryClick = (doc: any) => {
+    if (doc.type === 'finder') {
+      setActiveTab('finder')
+    } else if (doc.type === 'checker') {
+      setActiveTab('checker')
     }
-    setDocuments([newDoc, ...documents])
   }
 
   const examplePrompts = {
@@ -198,32 +237,44 @@ export default function DashboardPage() {
               {t.dashboard.past7Days}
             </h3>
             <div className="space-y-1">
-              {documents.map((doc) => (
-                <button
-                  key={doc.id}
-                  className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 transition group"
-                >
-                  <div className="flex items-start gap-2">
-                    <FileText size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900 truncate">
-                        {doc.title}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">{doc.date}</p>
+              {documents.length > 0 ? (
+                documents.map((doc) => (
+                  <button
+                    key={doc.id}
+                    onClick={() => handleHistoryClick(doc)}
+                    className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 transition group"
+                  >
+                    <div className="flex items-start gap-2">
+                      <FileText size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-900 truncate">
+                          {doc.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-gray-500">{doc.date}</p>
+                          {doc.type === 'finder' && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
+                              搜索
+                            </span>
+                          )}
+                          {doc.type === 'checker' && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded">
+                              验证
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                ))
+              ) : (
+                <div className="text-center py-8 text-sm text-gray-500">
+                  {t.dashboard.noHistory || '暂无搜索历史'}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Empty State */}
-          <div className="mt-8 text-center py-8">
-            <BookOpen className="mx-auto text-gray-300 mb-3" size={48} />
-            <p className="text-sm text-gray-500">
-              {t.dashboard.endOfHistory}
-            </p>
-          </div>
         </div>
 
         {/* Upgrade to Pro */}
@@ -268,16 +319,6 @@ export default function DashboardPage() {
         {/* Header */}
         <header className="bg-white border-b border-gray-200 px-8 py-8">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-4 mb-4">
-              <button
-                onClick={() => router.back()}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-                title="返回上一页"
-              >
-                <ArrowLeft size={20} />
-                <span className="text-sm font-medium">返回</span>
-              </button>
-            </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-1.5">
               {t.dashboard.researchAssistant}
             </h1>
@@ -328,9 +369,17 @@ export default function DashboardPage() {
             </div>
 
             {/* Main Input Area */}
-            {activeTab === 'finder' && <SourceFinderInterface />}
+            {activeTab === 'finder' && (
+              <SourceFinderInterface 
+                onSearchComplete={(query: string, results?: any) => saveSearchHistory('finder', query, results)}
+              />
+            )}
             
-            {activeTab === 'checker' && <CitationCheckerInterface />}
+            {activeTab === 'checker' && (
+              <CitationCheckerInterface 
+                onCheckComplete={(query: string, results?: any) => saveSearchHistory('checker', query, results)}
+              />
+            )}
 
             {activeTab === 'assistant' && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
