@@ -18,7 +18,8 @@ export async function sendVerificationEmail(email: string, code: string, name: s
   try {
     const resend = getResendClient()
     const { data, error } = await resend.emails.send({
-      from: 'Citea <onboarding@resend.dev>', // 使用 Resend 的测试域名
+      // 生产环境使用自定义域名，开发环境使用测试域名
+      from: process.env.RESEND_FROM_EMAIL || 'Citea <onboarding@resend.dev>',
       to: [email],
       subject: '验证您的 Citea 账号',
       html: `
@@ -93,7 +94,8 @@ export async function sendWelcomeEmail(email: string, name: string) {
   try {
     const resend = getResendClient()
     const { data, error } = await resend.emails.send({
-      from: 'Citea <onboarding@resend.dev>',
+      // 生产环境使用自定义域名，开发环境使用测试域名
+      from: process.env.RESEND_FROM_EMAIL || 'Citea <onboarding@resend.dev>',
       to: [email],
       subject: '欢迎加入 Citea!',
       html: `
