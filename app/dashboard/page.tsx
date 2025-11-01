@@ -79,16 +79,23 @@ export default function DashboardPage() {
           setUser(data.user)
           localStorage.setItem('citea_user', JSON.stringify(data.user))
         } else {
-          console.error('[Dashboard] ❌ Token 验证失败，响应:', data)
-          // 不清除 token，先看看是什么问题
-          // localStorage.removeItem('citea_auth_token')
-          // localStorage.removeItem('citea_user')
-          // 暂时不跳转，看看是不是 token 验证的问题
-          console.warn('[Dashboard] Token 验证失败，但不跳转，查看控制台日志')
+          console.error('[Dashboard] ❌ Token 验证失败')
+          console.error('[Dashboard] 错误信息:', data.error)
+          console.error('[Dashboard] 完整响应:', JSON.stringify(data, null, 2))
+          
+          // 如果验证失败，清除 token 并跳转
+          localStorage.removeItem('citea_auth_token')
+          localStorage.removeItem('citea_user')
+          console.log('[Dashboard] 清除 token，跳转到登录页')
+          router.push('/auth/signin')
         }
       } catch (error) {
         console.error('[Dashboard] ❌ 认证检查异常:', error)
-        // 出错时不跳转，先看看是什么错误
+        console.error('[Dashboard] 异常详情:', error instanceof Error ? error.stack : String(error))
+        // 清除 token 并跳转
+        localStorage.removeItem('citea_auth_token')
+        localStorage.removeItem('citea_user')
+        router.push('/auth/signin')
       }
     }
     
