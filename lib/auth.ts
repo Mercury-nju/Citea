@@ -11,7 +11,18 @@ export type AuthUser = {
   plan?: string
 }
 
+// 确保 JWT_SECRET 存在，如果未设置，使用一个固定的默认值
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me'
+
+// 在模块加载时输出 JWT_SECRET 状态（用于调试）
+if (typeof process !== 'undefined' && process.env) {
+  console.log('[Auth] JWT_SECRET status:', {
+    hasEnvVar: !!process.env.JWT_SECRET,
+    length: process.env.JWT_SECRET?.length || 0,
+    usingDefault: !process.env.JWT_SECRET,
+    preview: process.env.JWT_SECRET ? `${process.env.JWT_SECRET.substring(0, 10)}...` : 'N/A'
+  })
+}
 const JWT_EXPIRES_SECONDS = 60 * 60 * 24 * 7 // 7 days
 const AUTH_COOKIE = 'citea_auth'
 
