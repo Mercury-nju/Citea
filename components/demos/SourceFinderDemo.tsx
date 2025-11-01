@@ -57,144 +57,113 @@ export default function SourceFinderDemo() {
   ]
 
   return (
-    <div className="relative min-h-[600px] bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-8 overflow-hidden">
-      {/* Grid Pattern Background */}
-      <div className="absolute inset-0 opacity-20" style={{
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-      }}></div>
-      
-      <div className="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 h-full">
-        {/* Left Section - Features & Progress */}
-        <div className="flex flex-col justify-between">
-          {/* Title */}
-          <div className="mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2">
-              AI 文献查找器
-            </h2>
-            <p className="text-blue-200 text-sm">
-              AI-powered academic literature search and verification
-            </p>
-          </div>
+    <div className="p-8 max-w-5xl mx-auto">
+      {/* Header */}
+      <div className="mb-8 text-center">
+        <div className="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full mb-4">
+          <Sparkles className="text-blue-600" size={20} />
+          <span className="text-sm font-semibold text-blue-900">AI 文献查找</span>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">智能搜索学术文献</h2>
+        <p className="text-gray-600">粘贴你的研究内容，AI 自动为你查找相关文献</p>
+      </div>
 
-          {/* Features List */}
-          <div className="space-y-4 mb-8">
-            {features.map((feature, index) => {
-              const Icon = feature.icon
-              const isActive = isSearching && currentStep > index
-              
-              return (
-                <div
-                  key={index}
-                  className={`flex items-start gap-4 p-4 rounded-xl transition-all duration-500 ${
-                    isActive
-                      ? 'bg-blue-500/20 border border-blue-400/50 shadow-lg shadow-blue-500/20'
-                      : 'bg-white/5 border border-white/10'
-                  }`}
-                >
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                    isActive
-                      ? 'bg-blue-500 shadow-lg shadow-blue-500/50'
-                      : 'bg-white/10'
-                  }`}>
-                    <Icon 
-                      className={isActive ? 'text-white' : 'text-white/60'} 
-                      size={20} 
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-semibold mb-1 transition-colors ${
-                      isActive ? 'text-white' : 'text-white/80'
-                    }`}>
-                      {feature.title}
-                    </p>
-                    <p className={`text-sm transition-colors ${
-                      isActive ? 'text-blue-200' : 'text-white/50'
-                    }`}>
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
+      {/* Input Area */}
+      <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-6 shadow-lg">
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+          <Search className="text-blue-600" size={24} />
+          <span className="font-bold text-gray-900 text-lg">输入研究内容</span>
+        </div>
+        <textarea
+          readOnly
+          value="Bardeen-Cooper-Schrieffer (BCS) theory describes how electrons form Cooper pairs through phonon interactions, leading to superconductivity. However, high-temperature superconductors like cuprates cannot be fully explained by this conventional model."
+          className="w-full h-32 text-gray-700 resize-none border-0 focus:outline-none leading-relaxed bg-gray-50 rounded-lg p-4"
+        />
+        <div className="flex justify-between items-center mt-4">
+          <div className="flex gap-2 items-center">
+            <span className="text-sm text-gray-500">📝 235 字符</span>
+            <span className="text-sm text-green-600 font-medium">✓ 准备就绪</span>
           </div>
+          <button 
+            onClick={handleDemo}
+            disabled={isSearching}
+            className={`bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all ${
+              isSearching ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-xl hover:scale-105'
+            }`}
+          >
+            {isSearching ? '🔍 搜索中...' : '🚀 开始搜索'}
+          </button>
+        </div>
+      </div>
 
-          {/* Progress Indicator */}
-          {isSearching && (
-            <div className="bg-white/10 rounded-xl p-4 border border-white/20">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white/80 text-sm font-medium">
-                  Processing step {currentStep} of 4
-                </span>
-                <span className="text-blue-300 text-sm font-semibold">
-                  {Math.round((currentStep / 4) * 100)}%
-                </span>
-              </div>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4].map((step) => (
-                  <div
-                    key={step}
-                    className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${
-                      step <= currentStep
-                        ? 'bg-blue-500 shadow-lg shadow-blue-500/50'
-                        : 'bg-white/20'
-                    }`}
-                  ></div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Results Preview */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-bold text-gray-900">搜索结果</h3>
+          <span className="text-sm text-gray-500">找到 12 条结果 • 用时 0.8s</span>
         </div>
 
-        {/* Right Section - Results Preview */}
-        <div className="flex flex-col">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 flex-1 flex flex-col">
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-white mb-2">Search Results</h3>
-              <p className="text-blue-200 text-sm">
-                {isSearching ? 'Searching across multiple databases...' : 'Found relevant academic sources'}
-              </p>
+        {/* Result Card 1 */}
+        <div className={`bg-white border-2 border-blue-200 rounded-xl p-5 shadow-md transition-all ${
+          isSearching ? 'animate-pulse' : 'hover:shadow-xl'
+        }`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="text-blue-600" size={20} fill="currentColor" />
+              <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-bold">
+                ✓ 已验证 • CrossRef
+              </span>
             </div>
-
-            {/* Result Cards */}
-            <div className="space-y-4 flex-1 overflow-y-auto">
-              {[1, 2, 3, 4].map((item, index) => (
-                <div
-                  key={index}
-                  className={`bg-white rounded-xl p-4 flex items-start gap-4 transition-all duration-500 ${
-                    isSearching && index >= currentStep
-                      ? 'opacity-30 scale-95'
-                      : 'opacity-100 shadow-lg'
-                  }`}
-                  style={{
-                    animationDelay: `${index * 200}ms`,
-                  }}
-                >
-                  {/* Icon Circle */}
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Search className="text-blue-600" size={20} />
-                  </div>
-                  
-                  {/* Content Placeholder */}
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                    <div className="h-3 bg-gray-100 rounded w-3/4"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Action Button */}
-            {!isSearching && (
-              <button
-                onClick={handleDemo}
-                className="mt-6 w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
-              >
-                <Sparkles size={20} />
-                <span>开始搜索</span>
-              </button>
-            )}
+            <span className="text-sm text-green-600 font-semibold">98% 匹配</span>
           </div>
+          <h4 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
+            Superconductivity at interfaces between conventional and unconventional superconductors
+          </h4>
+          <p className="text-sm text-gray-600 mb-3">
+            👤 J C Inkson • 📚 Journal of Physics C: Solid State Physics • 📅 1975
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            <span className="text-xs bg-gray-100 px-3 py-1 rounded-full">DOI: 10.1088/0022-3719/8/13/021</span>
+            <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">📊 1,247 引用</span>
+            <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">⭐ 高影响力</span>
+          </div>
+        </div>
+
+        {/* Result Card 2 */}
+        <div className={`bg-white border-2 border-green-200 rounded-xl p-5 shadow-md transition-all ${
+          isSearching ? 'animate-pulse opacity-70' : 'hover:shadow-xl'
+        }`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="text-green-600" size={20} fill="currentColor" />
+              <span className="bg-green-600 text-white text-xs px-3 py-1 rounded-full font-bold">
+                ✓ 已验证 • PubMed
+              </span>
+            </div>
+            <span className="text-sm text-green-600 font-semibold">95% 匹配</span>
+          </div>
+          <h4 className="text-lg font-bold text-gray-900 mb-2 leading-tight">
+            Cooper pairing mechanisms in condensed matter systems
+          </h4>
+          <p className="text-sm text-gray-600 mb-3">
+            👤 A. Smith, B. Johnson, C. Lee • 📚 Physical Review B • 📅 2018
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            <span className="text-xs bg-gray-100 px-3 py-1 rounded-full">PMID: 29845632</span>
+            <span className="text-xs bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-medium">📈 影响因子: 8.2</span>
+          </div>
+        </div>
+
+        {/* Result Card 3 - Partial */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 opacity-60">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-bold">✓ arXiv</span>
+            <span className="text-sm text-gray-500">89% 匹配</span>
+          </div>
+          <h4 className="text-base font-bold text-gray-900 mb-1">
+            High-temperature superconductivity mechanisms...
+          </h4>
+          <p className="text-sm text-gray-600">👤 Multiple authors • 📅 2023</p>
         </div>
       </div>
     </div>
