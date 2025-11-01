@@ -9,24 +9,18 @@ export default function DetailedFeatures() {
   const { t } = useLanguage()
 
   return (
-    <section id="features" className="py-24 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
-      {/* Grid Pattern Background */}
-      <div className="absolute inset-0 opacity-20" style={{
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-      }}></div>
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+    <section id="features" className="py-24 bg-gradient-to-b from-white to-gray-50">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-white">{t.detailedFeatures.title1}</span>
+            <span className="text-gray-900">{t.detailedFeatures.title1}</span>
             <br />
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {t.detailedFeatures.title2}
             </span>
           </h2>
-          <p className="text-lg text-blue-200 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             {t.detailedFeatures.subtitle}
           </p>
         </div>

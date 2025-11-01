@@ -16,19 +16,13 @@ export default function ToolsShowcase() {
   ]
 
   return (
-    <section id="tools" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
-      {/* Grid Pattern Background */}
-      <div className="absolute inset-0 opacity-20" style={{
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-      }}></div>
-      
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section id="tools" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
             立即开始验证引用
           </h2>
-          <p className="text-lg text-blue-200 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             准备好确保您研究中的每个引用都是真实的了吗？现在开始使用 Citea 的强大工具。
           </p>
         </div>
@@ -44,7 +38,7 @@ export default function ToolsShowcase() {
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   activeTab === tab.id
                     ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-white/10 backdrop-blur-sm text-white border border-white/30 hover:bg-white/20'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
                 <Icon size={18} />
@@ -58,7 +52,7 @@ export default function ToolsShowcase() {
         <div className="max-w-5xl mx-auto">
           {/* Source Finder Demo */}
           {activeTab === 'finder' && (
-            <div className="bg-white rounded-xl border border-white/30 shadow-xl overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">AI 文献查找器</h3>
                 
@@ -131,7 +125,7 @@ export default function ToolsShowcase() {
 
           {/* Citation Checker Demo */}
           {activeTab === 'checker' && (
-            <div className="bg-white rounded-xl border border-white/30 shadow-xl overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">引用验证工具</h3>
                 
@@ -182,7 +176,7 @@ export default function ToolsShowcase() {
 
           {/* AI Assistant Demo */}
           {activeTab === 'assistant' && (
-            <div className="bg-white rounded-xl border border-white/30 shadow-xl overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                   AI 研究助手
@@ -230,26 +224,26 @@ export default function ToolsShowcase() {
 
           {/* Features Grid */}
           <div className="mt-12 grid md:grid-cols-3 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
-                <Search className="text-blue-300" size={20} />
+            <div className="bg-white rounded-lg p-5 border border-gray-200">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
+                <Search className="text-blue-600" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-white mb-1">无限次引用检查</h4>
-              <p className="text-xs text-blue-200">在所有主要学术数据库中查找无限来源</p>
+              <h4 className="font-bold text-sm text-gray-900 mb-1">无限次引用检查</h4>
+              <p className="text-xs text-gray-600">在所有主要学术数据库中查找无限来源</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-3">
-                <CheckCircle className="text-purple-300" size={20} />
+            <div className="bg-white rounded-lg p-5 border border-gray-200">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center mb-3">
+                <CheckCircle className="text-purple-600" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-white mb-1">实时验证</h4>
-              <p className="text-xs text-blue-200">即时验证权威来源的引用</p>
+              <h4 className="font-bold text-sm text-gray-900 mb-1">实时验证</h4>
+              <p className="text-xs text-gray-600">即时验证权威来源的引用</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center mb-3">
-                <MessageSquare className="text-amber-300" size={20} />
+            <div className="bg-white rounded-lg p-5 border border-gray-200">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
+                <MessageSquare className="text-amber-600" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-white mb-1">AI 研究助手对话</h4>
-              <p className="text-xs text-blue-200">获得有关引用问题和研究的即时帮助</p>
+              <h4 className="font-bold text-sm text-gray-900 mb-1">AI 研究助手对话</h4>
+              <p className="text-xs text-gray-600">获得有关引用问题和研究的即时帮助</p>
             </div>
           </div>
         </div>

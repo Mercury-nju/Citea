@@ -52,19 +52,13 @@ export default function Testimonials() {
   const { t } = useLanguage()
 
   return (
-    <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
-      {/* Grid Pattern Background */}
-      <div className="absolute inset-0 opacity-20" style={{
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-      }}></div>
-      
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             {t.testimonials.title}
           </h2>
-          <p className="text-xl text-blue-200 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             {t.testimonials.subtitle}
           </p>
         </div>
@@ -75,7 +69,7 @@ export default function Testimonials() {
               {column.map((testimonial, index) => (
                 <div
                   key={index}
-                  className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl border border-white/20 hover:shadow-xl hover:border-blue-400/50 transition-all duration-300 group"
+                  className="bg-white p-8 rounded-2xl border border-gray-200 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group"
                 >
                   {/* Stars */}
                   <div className="flex gap-1 mb-4">
@@ -85,7 +79,7 @@ export default function Testimonials() {
                   </div>
 
                   {/* Quote */}
-                  <p className="text-white/90 mb-6 leading-relaxed italic">
+                  <p className="text-gray-700 mb-6 leading-relaxed italic">
                     "{testimonial.quote}"
                   </p>
 
@@ -95,8 +89,8 @@ export default function Testimonials() {
                       {testimonial.author.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-semibold text-white">{testimonial.author}</p>
-                      <p className="text-sm text-blue-200">{testimonial.role}</p>
+                      <p className="font-semibold text-gray-900">{testimonial.author}</p>
+                      <p className="text-sm text-gray-600">{testimonial.role}</p>
                     </div>
                   </div>
                 </div>
