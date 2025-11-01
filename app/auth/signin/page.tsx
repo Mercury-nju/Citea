@@ -13,74 +13,44 @@ export default function SignInPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
     
-    console.log('登录尝试:', email)
+    console.log('[SignIn] 开始登录:', email)
     
     try {
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // 重要：确保包含 cookie
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
       
-      console.log('登录响应状态:', res.status)
-      console.log('响应头 Set-Cookie:', res.headers.get('Set-Cookie'))
+      console.log('[SignIn] 响应状态:', res.status)
+      console.log('[SignIn] Set-Cookie 响应头:', res.headers.get('Set-Cookie') || '无')
+      
+      const data = await res.json()
       
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        console.error('登录错误:', data)
-        
-        // 如果需要验证邮箱
-        if (data.needsVerification && data.email) {
-          if (confirm(data.error + '\n\n点击确定前往验证页面')) {
-            router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`)
-          }
-        } else {
-          alert(data.error || '登录失败，请检查邮箱和密码')
-        }
+        console.error('[SignIn] 登录失败:', data)
+        setError(data.error || '登录失败')
         setIsLoading(false)
         return
       }
       
-      const data = await res.json()
-      console.log('✅ 登录成功:', JSON.stringify(data, null, 2))
+      console.log('[SignIn] ✅ 登录成功:', data)
       
-      // 检查响应头中的 Set-Cookie
-      const setCookieHeader = res.headers.get('Set-Cookie')
-      console.log('📋 Set-Cookie 响应头存在:', setCookieHeader ? '✅ 是' : '❌ 否')
-      if (setCookieHeader) {
-        console.log('📋 Set-Cookie 完整内容:', setCookieHeader)
-        // 检查是否包含我们的 cookie
-        if (setCookieHeader.includes('citea_auth')) {
-          console.log('✅ Cookie 名称正确 (citea_auth)')
-        } else {
-          console.warn('⚠️ Cookie 名称不匹配，不包含 citea_auth')
-        }
-      } else {
-        console.error('❌ Set-Cookie 响应头未找到！这是问题所在！')
-      }
+      // 立即跳转，不再等待
+      console.log('[SignIn] 🚀 跳转到 /dashboard')
+      window.location.replace('/dashboard')
       
-      // 等待一下，然后检查 cookie 是否在浏览器中
-      setTimeout(() => {
-        const cookies = document.cookie
-        const hasCookie = cookies.includes('citea_auth')
-        console.log('🍪 跳转前浏览器 Cookie 检查:', {
-          hasCiteaAuth: hasCookie,
-          allCookies: cookies || '(empty)'
-        })
-        
-        // 直接跳转
-        console.log('🚀 跳转到 /dashboard')
-        window.location.href = '/dashboard'
-      }, 100) // 短暂等待让浏览器处理 cookie
     } catch (err) {
-      console.error('登录异常:', err)
-      alert('登录失败: ' + (err as Error).message)
+      console.error('[SignIn] ❌ 异常:', err)
+      setError('登录失败: ' + (err as Error).message)
       setIsLoading(false)
     }
   }
@@ -88,12 +58,10 @@ export default function SignInPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <Link href="/" className="flex justify-center mb-8">
           <Logo />
         </Link>
 
-        {/* Sign In Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
             {t.auth.signIn.title}
@@ -102,8 +70,13 @@ export default function SignInPage() {
             {t.auth.signIn.subtitle}
           </p>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t.auth.signIn.emailLabel}
@@ -117,11 +90,11 @@ export default function SignInPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   placeholder={t.auth.signIn.emailPlaceholder}
+                  disabled={isLoading}
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t.auth.signIn.passwordLabel}
@@ -135,22 +108,11 @@ export default function SignInPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   placeholder={t.auth.signIn.passwordPlaceholder}
+                  disabled={isLoading}
                 />
               </div>
             </div>
 
-            {/* Forgot Password */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-                <span className="ml-2 text-sm text-gray-600">{t.auth.signIn.rememberMe}</span>
-              </label>
-              <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
-                {t.auth.signIn.forgotPassword}
-              </Link>
-            </div>
-
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -167,7 +129,6 @@ export default function SignInPage() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
@@ -177,7 +138,6 @@ export default function SignInPage() {
             </div>
           </div>
 
-          {/* Social Login */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <button className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -196,7 +156,6 @@ export default function SignInPage() {
             </button>
           </div>
 
-          {/* Sign Up Link */}
           <p className="text-center text-gray-600">
             {t.auth.signIn.noAccount}{' '}
             <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
@@ -205,7 +164,6 @@ export default function SignInPage() {
           </p>
         </div>
 
-        {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-8">
           {t.auth.signIn.termsPrefix}{' '}
           <Link href="/terms" className="text-gray-700 hover:underline">{t.auth.signIn.terms}</Link>
@@ -216,4 +174,3 @@ export default function SignInPage() {
     </div>
   )
 }
-
