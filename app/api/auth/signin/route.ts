@@ -12,20 +12,35 @@ export async function POST(req: Request) {
     }
 
     console.log('Login attempt for:', email)
+    console.log('Password provided:', password ? 'yes' : 'no', '(length:', password?.length || 0, ')')
     
-    const user = await getUserByEmail(String(email))
+    const normalizedEmail = String(email).toLowerCase().trim()
+    const user = await getUserByEmail(normalizedEmail)
     
     if (!user) {
-      console.log('User not found:', email)
+      console.log('❌ User not found:', normalizedEmail)
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
-    console.log('User found, checking password...')
-    console.log('User emailVerified:', user.emailVerified)
+    console.log('✅ User found:', { 
+      email: user.email, 
+      name: user.name,
+      hasPasswordHash: !!user.passwordHash,
+      passwordHashLength: user.passwordHash?.length || 0,
+      emailVerified: user.emailVerified 
+    })
 
+    if (!user.passwordHash) {
+      console.error('❌ User exists but passwordHash is missing!')
+      return NextResponse.json({ error: 'Account configuration error. Please contact support.' }, { status: 500 })
+    }
+
+    console.log('🔐 Comparing password...')
     const ok = await bcrypt.compare(password, user.passwordHash)
+    console.log('🔐 Password match:', ok)
+    
     if (!ok) {
-      console.log('Password mismatch for:', email)
+      console.log('❌ Password mismatch for:', normalizedEmail)
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 

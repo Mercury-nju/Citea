@@ -69,11 +69,44 @@ async function ensureDataFile() {
 }
 
 export async function getUserByEmail(email: string): Promise<StoredUser | null> {
+  const normalizedEmail = email.toLowerCase()
+  console.log('getUserByEmail: searching for', normalizedEmail)
+  
   // Check if KV is available (production with env vars)
   if (kv && process.env.KV_REST_API_URL) {
     try {
-      const data = await kv.hgetall(`user:${email.toLowerCase()}`)
-      return data || null
+      const key = `user:${normalizedEmail}`
+      console.log('KV: looking up key', key)
+      const data = await kv.hgetall(key)
+      console.log('KV: received data', data ? Object.keys(data) : 'null/empty')
+      
+      // KV hgetall returns empty object {} if key doesn't exist
+      if (!data || Object.keys(data).length === 0 || !data.id) {
+        console.log('KV: user not found')
+        return null
+      }
+      
+      // KV returns all fields as-is
+      const user = {
+        id: data.id as string,
+        name: data.name as string,
+        email: data.email as string,
+        plan: (data.plan as any) || 'free',
+        passwordHash: data.passwordHash as string,
+        createdAt: data.createdAt as string | undefined,
+        lastLoginAt: data.lastLoginAt as string | undefined,
+        emailVerified: (data.emailVerified as any) === 'true' || (data.emailVerified as any) === true || data.emailVerified === true,
+        verificationCode: data.verificationCode as string | undefined,
+        verificationExpiry: data.verificationExpiry as string | undefined,
+      }
+      
+      if (!user.passwordHash) {
+        console.error('KV: user found but passwordHash is missing!')
+        return null
+      }
+      
+      console.log('KV: user found', { email: user.email, hasPasswordHash: !!user.passwordHash, emailVerified: user.emailVerified })
+      return user
     } catch (error) {
       console.error('KV read error:', error)
       throw error
@@ -82,10 +115,18 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
   // Try Redis if available
   if (redis) {
     try {
-      const data = await redis.hgetall(`user:${email.toLowerCase()}`)
-      if (!data || Object.keys(data).length === 0) return null
+      const key = `user:${normalizedEmail}`
+      console.log('Redis: looking up key', key)
+      const data = await redis.hgetall(key)
+      console.log('Redis: received data', data ? Object.keys(data) : 'null/empty')
+      
+      if (!data || Object.keys(data).length === 0 || !data.id) {
+        console.log('Redis: user not found')
+        return null
+      }
+      
       // Redis returns string fields; parse where needed
-      return {
+      const user = {
         id: data.id,
         name: data.name,
         email: data.email,
@@ -97,6 +138,14 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         verificationCode: data.verificationCode,
         verificationExpiry: data.verificationExpiry,
       }
+      
+      if (!user.passwordHash) {
+        console.error('Redis: user found but passwordHash is missing!')
+        return null
+      }
+      
+      console.log('Redis: user found', { email: user.email, hasPasswordHash: !!user.passwordHash, emailVerified: user.emailVerified })
+      return user
     } catch (error) {
       console.error('Redis read error:', error)
       throw error
@@ -107,7 +156,9 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
   await ensureDataFile()
   const raw = await fs.readFile(USERS_FILE, 'utf8')
   const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
-  return json.users.find(u => u.email.toLowerCase() === email.toLowerCase()) || null
+  const user = json.users.find(u => u.email.toLowerCase() === normalizedEmail) || null
+  console.log('File storage: user', user ? 'found' : 'not found')
+  return user
 }
 
 export async function createUser(user: StoredUser): Promise<void> {
