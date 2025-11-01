@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { signJwt, setAuthCookie } from '@/lib/auth'
+import { signJwt, setAuthCookieInResponse } from '@/lib/auth'
 import { getUserByEmail, updateUserLastLogin } from '@/lib/userStore'
 
 export async function POST(req: Request) {
@@ -63,10 +63,19 @@ export async function POST(req: Request) {
     await updateUserLastLogin(user.email)
 
     const token = await signJwt({ id: user.id, name: user.name, email: user.email, plan: user.plan })
-    await setAuthCookie(token)
+    
+    // 创建响应
+    const response = NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, plan: user.plan } })
+    
+    // 在响应对象上设置 cookie（这是关键！）
+    setAuthCookieInResponse(response, token)
     
     console.log('Login successful for:', email)
-    return NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, plan: user.plan } })
+    console.log('Token generated, cookie set in response')
+    console.log('Cookie header:', response.headers.get('Set-Cookie'))
+    
+    // 返回响应（cookie 已经设置）
+    return response
   } catch (e) {
     console.error('Login error:', e)
     return NextResponse.json({ 

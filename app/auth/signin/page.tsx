@@ -24,10 +24,12 @@ export default function SignInPage() {
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // 重要：确保包含 cookie
         body: JSON.stringify({ email, password }),
       })
       
       console.log('登录响应状态:', res.status)
+      console.log('响应头 Set-Cookie:', res.headers.get('Set-Cookie'))
       
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
@@ -47,13 +49,28 @@ export default function SignInPage() {
       
       const data = await res.json()
       console.log('登录成功:', data)
+      console.log('准备跳转到 dashboard...')
       
-      // 等待一下确保 cookie 设置完成，然后跳转
-      // 使用 router.push 并强制刷新以确保 cookie 被读取
-      setTimeout(() => {
-        // 使用 window.location.href 确保完整页面刷新，这样 cookie 会被正确读取
+      // 先验证 cookie 是否设置成功
+      const verifyRes = await fetch('/api/auth/me', {
+        credentials: 'include',
+        cache: 'no-store'
+      })
+      const verifyData = await verifyRes.json()
+      console.log('验证用户:', verifyData)
+      
+      if (verifyData.user) {
+        console.log('✅ Cookie 验证成功，跳转到 dashboard')
+        // Cookie 已设置，直接跳转
         window.location.href = '/dashboard'
-      }, 100)
+      } else {
+        console.warn('⚠️ Cookie 未设置，等待后重试...')
+        // 等待更长时间后重试跳转
+        setTimeout(() => {
+          console.log('重试跳转到 dashboard')
+          window.location.href = '/dashboard'
+        }, 500)
+      }
     } catch (err) {
       console.error('登录异常:', err)
       alert('登录失败: ' + (err as Error).message)

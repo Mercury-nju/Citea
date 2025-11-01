@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 import { SignJWT, jwtVerify } from 'jose'
 
 const encoder = new TextEncoder()
@@ -33,7 +34,18 @@ export async function verifyJwt(token: string): Promise<AuthUser | null> {
 }
 
 export async function setAuthCookie(token: string) {
-  cookies().set(AUTH_COOKIE, token, {
+  const cookieStore = cookies()
+  cookieStore.set(AUTH_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: JWT_EXPIRES_SECONDS,
+  })
+}
+
+export function setAuthCookieInResponse(response: NextResponse, token: string) {
+  response.cookies.set(AUTH_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
