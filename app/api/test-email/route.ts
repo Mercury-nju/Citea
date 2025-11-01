@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         fromEmail: process.env.BREVO_FROM_EMAIL || 'noreply@brevo.com',
         apiKeyPrefix: process.env.BREVO_API_KEY?.substring(0, 15) + '...' || 'NOT SET'
       },
-      messageId: result.data?.messageId
+      messageId: (result.data as any)?.messageId || 'sent'
     })
   } catch (error: any) {
     return NextResponse.json({

@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 
     console.log('验证邮件发送成功:', {
       email,
-      messageId: emailResult.data?.messageId,
+      messageId: (emailResult.data as any)?.messageId || 'sent',
       to: email
     })
 

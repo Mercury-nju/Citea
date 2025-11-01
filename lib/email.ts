@@ -80,11 +80,11 @@ export async function sendVerificationEmail(email: string, code: string, name: s
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
     console.log('邮件发送成功:', {
-      messageId: result.messageId,
+      messageId: (result as any).messageId || 'sent',
       to: email,
       code: code.substring(0, 2) + '****'
     })
-    return { success: true, data: result }
+    return { success: true, data: result as any }
   } catch (error: any) {
     console.error('邮件发送异常:', {
       error: error.message,
