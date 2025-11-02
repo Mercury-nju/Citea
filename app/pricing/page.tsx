@@ -35,7 +35,7 @@ export default function PricingPage() {
     {
       id: 'weekly',
       name: isChinese ? '周费' : 'Weekly',
-      price: isChinese ? '¥XX' : '$XX',
+      price: isChinese ? '¥35' : '$4.9',
       period: isChinese ? '/周' : '/week',
       credits: isChinese ? '每周35积分' : '35 credits/week',
       wordLimit: '1000',
@@ -54,7 +54,7 @@ export default function PricingPage() {
     {
       id: 'monthly',
       name: isChinese ? '月费' : 'Monthly',
-      price: isChinese ? '¥XX' : '$XX',
+      price: isChinese ? '¥92' : '$12.9',
       period: isChinese ? '/月' : '/month',
       credits: isChinese ? '每月150积分' : '150 credits/month',
       wordLimit: '1000',
@@ -73,7 +73,7 @@ export default function PricingPage() {
     {
       id: 'yearly',
       name: isChinese ? '年费' : 'Yearly',
-      price: isChinese ? '¥XX' : '$XX',
+      price: isChinese ? '¥640' : '$89.9',
       period: isChinese ? '/年' : '/year',
       credits: isChinese ? '3000积分' : '3000 credits',
       wordLimit: '1000',
