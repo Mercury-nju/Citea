@@ -45,9 +45,9 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
   ]
 
   const examplePrompts = [
-    'Bardeen-Cooper-Schrieffer (BCS) theory, where electrons form Cooper pairs through phonon interactions. However, high-temperature superconductors, such as cuprates and iron-based compounds, cannot be fully explained by this model.',
-    'Machine learning algorithms have shown significant improvements in medical diagnosis accuracy, particularly in identifying early-stage cancers from imaging data.',
-    'Climate change impacts on marine ecosystems include ocean acidification, temperature rise, and altered current patterns affecting biodiversity.',
+    'Neural network-based models have been applied to predict protein folding structures with accuracy comparable to experimental methods.',
+    'Quantum dot technologies enable tunable light emission properties, offering potential applications in next-generation display and photovoltaic systems.',
+    'Social media usage has been linked to changes in adolescent mental health, particularly in relation to anxiety and self-esteem levels.',
   ]
 
   const handleSearch = async () => {
