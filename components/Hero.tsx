@@ -15,24 +15,10 @@ export default function Hero() {
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
           {t.hero.title1}
           <br />
-          <span className="relative inline-block text-blue-600">
-            {t.hero.title2}
-            {/* Wavy Underline SVG */}
-            <svg 
-              className="absolute left-0 right-0 -bottom-2 w-full" 
-              viewBox="0 0 400 12" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-              preserveAspectRatio="none"
-            >
-              <path 
-                d="M0 6C20 2, 40 10, 60 6C80 2, 100 10, 120 6C140 2, 160 10, 180 6C200 2, 220 10, 240 6C260 2, 280 10, 300 6C320 2, 340 10, 360 6C380 2, 400 10, 400 6" 
-                stroke="#93C5FD" 
-                strokeWidth="3" 
-                strokeLinecap="round"
-                className="animate-wave"
-              />
-            </svg>
+          <span className="relative inline-block">
+            <span className="relative z-10 text-blue-600">{t.hero.title2}</span>
+            {/* Gradient underline */}
+            <span className="absolute left-0 right-0 bottom-0 h-3 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 opacity-30 rounded-sm -z-0"></span>
           </span>
         </h1>
         
