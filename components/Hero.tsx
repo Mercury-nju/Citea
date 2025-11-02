@@ -22,48 +22,46 @@ export default function Hero() {
       setShowCursor(prev => !prev)
     }, 530)
 
-    // 第一阶段：打字第一个标题
-    if (phase === 'text1') {
-      if (displayedText1.length < fullText1.length) {
-        const timer = setTimeout(() => {
-          setDisplayedText1(fullText1.slice(0, displayedText1.length + 1))
-        }, 80) // 每个字符 80ms
-        
-        return () => {
-          clearTimeout(timer)
-          clearInterval(cursorInterval)
-        }
-      } else {
-        // 第一个标题完成，等待一下然后开始第二个
-        setTimeout(() => {
-          setPhase('text2')
-          setDisplayedText2('')
-        }, 500)
-      }
-    }
-
-    // 第二阶段：打字第二个标题
-    if (phase === 'text2') {
-      if (displayedText2.length < fullText2.length) {
-        const timer = setTimeout(() => {
-          setDisplayedText2(fullText2.slice(0, displayedText2.length + 1))
-        }, 80)
-        
-        return () => {
-          clearTimeout(timer)
-          clearInterval(cursorInterval)
-        }
-      } else {
-        // 完成后隐藏光标
-        setTimeout(() => {
-          setPhase('complete')
-          setShowCursor(false)
-        }, 500)
-      }
-    }
-
     return () => clearInterval(cursorInterval)
-  }, [displayedText1, displayedText2, fullText1, fullText2, phase])
+  }, [])
+
+  useEffect(() => {
+    // 第一阶段：打字第一个标题
+    if (phase === 'text1' && displayedText1.length < fullText1.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText1(fullText1.slice(0, displayedText1.length + 1))
+      }, 80) // 每个字符 80ms
+      
+      return () => clearTimeout(timer)
+    } else if (phase === 'text1' && displayedText1.length === fullText1.length) {
+      // 第一个标题完成，等待一下然后开始第二个
+      const timer = setTimeout(() => {
+        setPhase('text2')
+        setDisplayedText2('')
+      }, 500)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [displayedText1, fullText1, phase])
+
+  useEffect(() => {
+    // 第二阶段：打字第二个标题
+    if (phase === 'text2' && displayedText2.length < fullText2.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText2(fullText2.slice(0, displayedText2.length + 1))
+      }, 80)
+      
+      return () => clearTimeout(timer)
+    } else if (phase === 'text2' && displayedText2.length === fullText2.length) {
+      // 完成后隐藏光标
+      const timer = setTimeout(() => {
+        setPhase('complete')
+        setShowCursor(false)
+      }, 500)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [displayedText2, fullText2, phase])
   
   return (
     <section className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
