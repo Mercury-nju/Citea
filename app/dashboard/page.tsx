@@ -495,39 +495,6 @@ export default function DashboardPage() {
 
             {/* Example Prompts - Only show for assistant */}
             {activeTab === 'assistant' && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                {activeTab === 'assistant' && (
-                <div className="p-6">
-                  <div className="h-64 flex items-center justify-center text-gray-400">
-                    <div className="text-center">
-                      <MessageSquare className="mx-auto mb-3" size={48} />
-                      <p className="text-sm">{t.dashboard.startConversation}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 pt-4 border-t border-gray-100">
-                    <input
-                      type="text"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder={t.dashboard.enterQuestion}
-                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      maxLength={300}
-                    />
-                    <button
-                      onClick={() => setLoading(true)}
-                      disabled={!query.trim()}
-                      className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                    >
-                      <ArrowUp size={18} />
-                    </button>
-                  </div>
-                </div>
-              )}
-              </div>
-            )}
-
-            {/* Example Prompts - Only show for assistant */}
-            {activeTab === 'assistant' && (
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="text-yellow-500" size={18} />
