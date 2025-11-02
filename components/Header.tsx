@@ -149,17 +149,21 @@ export default function Header() {
               <span className="hidden md:inline">{t.header.discord}</span>
             </a>
 
-            {/* User Icon / CTA Button */}
-            <Link 
-              href="/auth/signin"
-              className="w-9 h-9 rounded-lg bg-gray-900 hover:bg-gray-800 flex items-center justify-center transition-all"
-              title={t.header.getStarted}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="white"/>
-                <path d="M12.0002 14.5C6.99016 14.5 2.91016 17.86 2.91016 22C2.91016 22.28 3.13016 22.5 3.41016 22.5H20.5902C20.8702 22.5 21.0902 22.28 21.0902 22C21.0902 17.86 17.0102 14.5 12.0002 14.5Z" fill="white"/>
-              </svg>
-            </Link>
+            {/* Sign In / Sign Up Buttons */}
+            <div className="flex items-center gap-2">
+              <Link 
+                href="/auth/signin"
+                className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors whitespace-nowrap"
+              >
+                {t.header.signIn || 'Log In'}
+              </Link>
+              <Link 
+                href="/auth/signup"
+                className="px-3 sm:px-4 py-2 text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              >
+                {t.header.signUp || 'Sign Up'}
+              </Link>
+            </div>
           </div>
         </div>
       </div>

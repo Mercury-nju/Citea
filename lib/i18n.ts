@@ -33,6 +33,8 @@ export const translations = {
       blog: 'Blog',
       getStarted: 'Get Started',
       startFree: 'Start Free',
+      signIn: 'Log In',
+      signUp: 'Sign Up',
       discord: 'Discord',
     },
     
@@ -391,6 +393,8 @@ export const translations = {
       blog: '博客',
       getStarted: '开始使用',
       startFree: '免费开始',
+      signIn: '登录',
+      signUp: '注册',
       discord: 'Discord',
     },
     
