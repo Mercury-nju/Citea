@@ -29,13 +29,13 @@ export default function ProductShowcase() {
   }
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full mb-6 border border-blue-100">
+          <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full mb-6 border border-gray-200">
             <Sparkles className="text-blue-600" size={18} />
-            <span className="text-sm font-semibold text-blue-900">产品演示</span>
+            <span className="text-sm font-semibold text-gray-900">产品演示</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             看看 Citea 如何工作
@@ -53,9 +53,9 @@ export default function ProductShowcase() {
               <button
                 key={tab}
                 onClick={() => setCurrentTab(tab)}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                   currentTab === tab
-                    ? 'bg-blue-600 text-white shadow-lg scale-105'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
@@ -67,40 +67,36 @@ export default function ProductShowcase() {
           {/* Live Demo Container */}
           <div className="relative">
             {/* Main Demo Display */}
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-200 bg-white">
+            <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-white">
               {/* Browser Chrome */}
-              <div className="bg-gray-800 px-4 py-3 flex items-center gap-2">
+              <div className="bg-gray-50 px-4 py-3 flex items-center gap-2 border-b border-gray-200">
                 <div className="flex gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                  <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                  <div className="w-3 h-3 rounded-full bg-gray-300"></div>
                 </div>
-                <div className="flex-1 bg-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-300 font-mono">
+                <div className="flex-1 bg-white rounded-md px-3 py-1.5 text-sm text-gray-600 font-mono border border-gray-200">
                   citea.app/{currentTab === 'finder' ? 'source-finder' : currentTab === 'checker' ? 'citation-checker' : 'ai-assistant'}
                 </div>
-                <div className="text-gray-400 text-xs">🔒 安全</div>
               </div>
 
               {/* Live Demo Content */}
-              <div className="relative bg-gradient-to-br from-gray-50 to-white" style={{ minHeight: '600px' }}>
+              <div className="relative bg-white" style={{ minHeight: '500px', maxHeight: '600px' }}>
                 {currentTab === 'finder' && <SourceFinderDemo />}
                 {currentTab === 'checker' && <CitationCheckerDemo />}
                 {currentTab === 'assistant' && <AIAssistantDemo />}
                 
                 {/* Overlay with CTA */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none flex items-end justify-center pb-8">
+                <div className="absolute inset-0 bg-white/80 pointer-events-none flex items-end justify-center pb-8">
                   <Link 
                     href="/auth/signin"
-                    className="pointer-events-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-2xl transform hover:scale-105 transition-all"
+                    className="pointer-events-auto bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all"
                   >
                     🚀 开始使用完整功能
                   </Link>
                 </div>
               </div>
             </div>
-
-            {/* Decorative Elements */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-3xl blur-2xl -z-10 opacity-50"></div>
           </div>
 
           {/* Description */}
@@ -113,7 +109,7 @@ export default function ProductShowcase() {
             </p>
             <Link
               href="/auth/signin"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105"
+              className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-all"
             >
               <span>开始使用</span>
               <span>→</span>
