@@ -177,12 +177,13 @@ export default function DashboardPage() {
     setQuery('')
     setLoading(true)
 
+    // 检测用户语言
+    const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
+
     // 添加用户消息
     setChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
 
     try {
-      // 检测用户语言
-      const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
       const language = isChinese ? 'Chinese' : 'English'
       
       const response = await fetch('/api/chat', {
