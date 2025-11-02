@@ -343,8 +343,8 @@ export const translations = {
     
     // Hero
     hero: {
-      title1: '秒级查找文献来源',
-      title2: '只引用真实文献',
+      title1: '秒级找源,',
+      title2: '只引真实文献。',
       subtitle: 'AI 驱动的引用验证和文献查找工具。检测虚假引用，验证参考文献，查找原始来源——让您的研究保持可信。',
       free: '永久完全免费！',
       findSources: '查找文献',

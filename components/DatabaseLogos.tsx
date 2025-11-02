@@ -1,6 +1,6 @@
 export default function DatabaseLogos() {
   return (
-    <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+    <div className="flex flex-wrap justify-center items-center gap-8 md:gap-10">
       {/* arXiv */}
       <div className="grayscale hover:grayscale-0 transition-all duration-300 hover:scale-110">
         <svg width="100" height="40" viewBox="0 0 100 40" fill="none">
