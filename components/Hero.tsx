@@ -67,20 +67,26 @@ export default function Hero() {
     <section className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto text-center">
         {/* Main Heading with Typewriter Effect */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight min-h-[4em] flex flex-col items-center justify-center">
-          <span className="inline-block">
-            {displayedText1}
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight min-h-[200px] md:min-h-[240px] lg:min-h-[280px]">
+          <div className="inline-block">
+            {displayedText1 || '\u00A0'}
             {phase === 'text1' && (
-              <span className={`inline-block w-0.5 h-[1em] align-middle ml-1 ${showCursor ? 'bg-gray-900' : 'bg-transparent'}`} style={{ animation: showCursor ? 'blink 1s infinite' : 'none' }} />
+              <span 
+                className={`inline-block w-[2px] h-[1em] align-middle ml-1 ${showCursor ? 'bg-gray-900' : 'bg-transparent'}`} 
+                style={{ animation: showCursor ? 'blink 1s infinite' : 'none' }} 
+              />
             )}
-          </span>
+          </div>
           {(phase === 'text2' || phase === 'complete') && (
             <>
               <br />
               <span className="relative inline-block text-blue-600">
-                {displayedText2}
+                {displayedText2 || '\u00A0'}
                 {phase === 'text2' && (
-                  <span className={`inline-block w-0.5 h-[1em] align-middle ml-1 ${showCursor ? 'bg-blue-600' : 'bg-transparent'}`} style={{ animation: showCursor ? 'blink 1s infinite' : 'none' }} />
+                  <span 
+                    className={`inline-block w-[2px] h-[1em] align-middle ml-1 ${showCursor ? 'bg-blue-600' : 'bg-transparent'}`} 
+                    style={{ animation: showCursor ? 'blink 1s infinite' : 'none' }} 
+                  />
                 )}
                 {/* Wavy Underline SVG - 只在完成时显示 */}
                 {phase === 'complete' && (
