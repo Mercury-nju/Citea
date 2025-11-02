@@ -107,15 +107,23 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
       // Complete all steps
       setSteps(prev => prev.map(step => ({ ...step, status: 'completed' as StepStatus })))
 
+      // 获取token
+      const token = localStorage.getItem('citea_auth_token')
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
       // Make API call
       const response = await fetch('/api/check-citations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ text }),
       })
 
       if (!response.ok) {
-        throw new Error('验证失败')
+        const errorData = await response.json()
+        throw new Error(errorData.error || '验证失败')
       }
 
       const data = await response.json()

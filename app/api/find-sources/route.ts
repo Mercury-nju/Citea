@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { verifyJwt } from '@/lib/auth'
+import { getUserByEmail } from '@/lib/userStore'
+import { consumeCredit, checkWordLimit, getPlanLimits } from '@/lib/credits'
 
 const TONGYI_API_KEY = process.env.TONGYI_API_KEY || 'sk-9bf19547ddbd4be1a87a7a43cf251097'
 
@@ -20,6 +24,29 @@ interface Source {
   verified: boolean
 }
 
+// 获取当前用户
+async function getCurrentUser(request: NextRequest) {
+  // 从 cookie 获取 token
+  const cookieStore = cookies()
+  let token = cookieStore.get('citea_auth')?.value
+
+  // 从 Authorization header 获取（备用）
+  if (!token) {
+    const authHeader = request.headers.get('Authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.substring(7)
+    }
+  }
+
+  if (!token) return null
+
+  const jwtUser = await verifyJwt(token)
+  if (!jwtUser) return null
+
+  const fullUser = await getUserByEmail(jwtUser.email)
+  return fullUser
+}
+
 // 支持流式响应，每个步骤实时返回
 export async function POST(request: NextRequest) {
   try {
@@ -32,21 +59,51 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 如果指定了步骤，执行对应的步骤
-    if (step !== undefined) {
-      return await executeStep(step, text)
+    // 验证用户并检查权限
+    const user = await getCurrentUser(request)
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
     }
 
-    // 如果没有指定步骤，返回完整流程（兼容旧代码）
-    const strategy = await analyzeUserIntent(text)
-    const sources = await intelligentSearch(strategy)
+    // 检查字数限制
+    const wordLimitCheck = checkWordLimit(user.plan, text.length)
+    if (!wordLimitCheck.valid) {
+      return NextResponse.json(
+        { error: wordLimitCheck.error },
+        { status: 400 }
+      )
+    }
 
-    return NextResponse.json({
-      success: true,
-      strategy,
-      sources,
-      totalFound: sources.length
-    })
+    // 如果是第一步，消耗积分
+    if (step === 1) {
+      const creditResult = await consumeCredit(user.email)
+      if (!creditResult.success) {
+        return NextResponse.json(
+          { error: creditResult.error || 'Insufficient credits' },
+          { status: 403 }
+        )
+      }
+    }
+
+    // 如果指定了步骤，执行对应的步骤
+    if (step !== undefined) {
+      return await executeStep(step, text, user)
+    }
+
+      // 如果没有指定步骤，返回完整流程（兼容旧代码）
+      const limits = getPlanLimits(user.plan)
+      const strategy = await analyzeUserIntent(text)
+      const sources = await intelligentSearch(strategy, limits.hasAdvancedDatabases)
+
+      return NextResponse.json({
+        success: true,
+        strategy,
+        sources,
+        totalFound: sources.length
+      })
   } catch (error: any) {
     console.error('Error in find-sources:', error)
     return NextResponse.json(
@@ -59,7 +116,9 @@ export async function POST(request: NextRequest) {
 /**
  * 执行特定步骤
  */
-async function executeStep(step: number, text: string): Promise<NextResponse> {
+async function executeStep(step: number, text: string, user: any): Promise<NextResponse> {
+  const limits = getPlanLimits(user.plan)
+  
   switch (step) {
     case 1:
       // Step 1: 智能分析用户意图，确定搜索策略
@@ -71,7 +130,7 @@ async function executeStep(step: number, text: string): Promise<NextResponse> {
       })
 
     case 2:
-      // Step 2: 搜索 CrossRef 数据库
+      // Step 2: 搜索 CrossRef 数据库（所有用户可用）
       const strategy2 = await analyzeUserIntent(text)
       const crossRefResults = await searchCrossRef(strategy2.keywords)
       return NextResponse.json({
@@ -82,10 +141,10 @@ async function executeStep(step: number, text: string): Promise<NextResponse> {
       })
 
     case 3:
-      // Step 3: 搜索 PubMed 数据库（如果是医学相关）
+      // Step 3: 搜索 PubMed 数据库（仅付费用户可用）
       const strategy3 = await analyzeUserIntent(text)
       let pubmedResults: Source[] = []
-      if (strategy3.searchType === 'medical' || strategy3.databases.includes('PubMed')) {
+      if (limits.hasAdvancedDatabases && (strategy3.searchType === 'medical' || strategy3.databases.includes('PubMed'))) {
         pubmedResults = await searchPubMed(strategy3.keywords)
       }
       return NextResponse.json({
@@ -96,7 +155,7 @@ async function executeStep(step: number, text: string): Promise<NextResponse> {
       })
 
     case 4:
-      // Step 4: 搜索 Semantic Scholar 数据库
+      // Step 4: 搜索 Semantic Scholar 数据库（所有用户可用）
       const strategy4 = await analyzeUserIntent(text)
       const semanticResults = await searchSemanticScholar(strategy4.keywords)
       return NextResponse.json({
@@ -109,7 +168,7 @@ async function executeStep(step: number, text: string): Promise<NextResponse> {
     case 5:
       // Step 5: 智能筛选和去重，返回最终结果
       const strategy5 = await analyzeUserIntent(text)
-      const allSources = await intelligentSearch(strategy5)
+      const allSources = await intelligentSearch(strategy5, limits.hasAdvancedDatabases)
       return NextResponse.json({
         step: 5,
         status: 'completed',
@@ -239,24 +298,32 @@ async function fallbackExtraction(text: string): Promise<SearchStrategy> {
 /**
  * 智能搜索：根据策略选择性搜索数据库
  */
-async function intelligentSearch(strategy: SearchStrategy): Promise<Source[]> {
+async function intelligentSearch(strategy: SearchStrategy, hasAdvancedDatabases: boolean = false): Promise<Source[]> {
   const searchPromises: Promise<Source[]>[] = []
 
-  // 根据策略智能选择数据库
-  if (strategy.databases.includes('CrossRef')) {
-    searchPromises.push(searchCrossRef(strategy.keywords))
-  }
-  
-  if (strategy.databases.includes('PubMed')) {
-    searchPromises.push(searchPubMed(strategy.keywords))
-  }
-  
-  if (strategy.databases.includes('Semantic Scholar')) {
-    searchPromises.push(searchSemanticScholar(strategy.keywords))
-  }
-
-  if (strategy.databases.includes('arXiv')) {
-    searchPromises.push(searchArxiv(strategy.keywords))
+  // 免费用户只能使用基础数据库
+  if (!hasAdvancedDatabases) {
+    // 免费用户只能使用 CrossRef 和 Semantic Scholar
+    if (strategy.databases.includes('CrossRef')) {
+      searchPromises.push(searchCrossRef(strategy.keywords))
+    }
+    if (strategy.databases.includes('Semantic Scholar')) {
+      searchPromises.push(searchSemanticScholar(strategy.keywords))
+    }
+  } else {
+    // 付费用户可以使用所有数据库
+    if (strategy.databases.includes('CrossRef')) {
+      searchPromises.push(searchCrossRef(strategy.keywords))
+    }
+    if (strategy.databases.includes('PubMed')) {
+      searchPromises.push(searchPubMed(strategy.keywords))
+    }
+    if (strategy.databases.includes('Semantic Scholar')) {
+      searchPromises.push(searchSemanticScholar(strategy.keywords))
+    }
+    if (strategy.databases.includes('arXiv')) {
+      searchPromises.push(searchArxiv(strategy.keywords))
+    }
   }
 
   const results = await Promise.all(searchPromises)

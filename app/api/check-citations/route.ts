@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import axios from 'axios'
+import { verifyJwt } from '@/lib/auth'
+import { getUserByEmail } from '@/lib/userStore'
+import { consumeCredit, checkWordLimit, getPlanLimits } from '@/lib/credits'
 
 const TONGYI_API_KEY = process.env.TONGYI_API_KEY || 'sk-9bf19547ddbd4be1a87a7a43cf251097'
 const TONGYI_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
@@ -257,12 +261,66 @@ async function verifyCitation(citation: string): Promise<Citation> {
   }
 }
 
+// 获取当前用户
+async function getCurrentUser(request: NextRequest) {
+  // 从 cookie 获取 token
+  const cookieStore = cookies()
+  let token = cookieStore.get('citea_auth')?.value
+
+  // 从 Authorization header 获取（备用）
+  if (!token) {
+    const authHeader = request.headers.get('Authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.substring(7)
+    }
+  }
+
+  if (!token) return null
+
+  const jwtUser = await verifyJwt(token)
+  if (!jwtUser) return null
+
+  const fullUser = await getUserByEmail(jwtUser.email)
+  return fullUser
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { text } = await req.json()
 
     if (!text) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 })
+    }
+
+    // 验证用户并检查权限
+    const user = await getCurrentUser(req)
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // 检查字数限制
+    const wordLimitCheck = checkWordLimit(user.plan, text.length)
+    if (!wordLimitCheck.valid) {
+      return NextResponse.json(
+        { error: wordLimitCheck.error },
+        { status: 400 }
+      )
+    }
+
+    // 检查数据库权限（免费用户只能使用基础数据库）
+    const limits = getPlanLimits(user.plan)
+    // 注意：引文验证对免费用户也开放，但可能使用更少的数据库
+
+    // 消耗积分
+    const creditResult = await consumeCredit(user.email)
+    if (!creditResult.success) {
+      return NextResponse.json(
+        { error: creditResult.error || 'Insufficient credits' },
+        { status: 403 }
+      )
     }
 
     // Extract citations

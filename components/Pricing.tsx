@@ -20,14 +20,19 @@ export default function Pricing() {
     t.pricing.features.noRestrictions,
   ]
 
+  // 确保翻译对象存在
+  if (!t || !t.pricing) {
+    return null
+  }
+
   return (
-    <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+    <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative z-10">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            {t.pricing.title}{' '}
-            <span className="text-green-600">{t.pricing.freeAccess}</span>
-            {' '}{t.pricing.forEveryone}
+            {t.pricing.title || 'Get your research to a new level with'}{' '}
+            <span className="text-green-600">{t.pricing.freeAccess || 'Free Access'}</span>
+            {' '}{t.pricing.forEveryone || 'for everyone.'}
           </h2>
         </div>
 
@@ -57,12 +62,20 @@ export default function Pricing() {
               ))}
             </ul>
 
-            <a
-              href="#tools"
-              className="block w-full bg-gray-900 text-white text-center px-8 py-5 rounded-xl hover:bg-gray-800 transition-all text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              {t.pricing.cta}
-            </a>
+            <div className="space-y-3">
+              <a
+                href="/pricing"
+                className="block w-full bg-gray-900 text-white text-center px-8 py-5 rounded-xl hover:bg-gray-800 transition-all text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                {t.pricing.viewAllPlans || '查看完整定价方案'}
+              </a>
+              <a
+                href="#tools"
+                className="block w-full bg-gray-100 text-gray-900 text-center px-8 py-5 rounded-xl hover:bg-gray-200 transition-all text-lg font-semibold"
+              >
+                {t.pricing.cta}
+              </a>
+            </div>
 
             <p className="text-center text-gray-600 mt-6 text-sm">
               {t.pricing.noRegistration}

@@ -1,6 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { verifyJwt } from '@/lib/auth'
+import { getUserByEmail } from '@/lib/userStore'
+import { consumeCredit, getPlanLimits } from '@/lib/credits'
 
 const TONGYI_API_KEY = process.env.TONGYI_API_KEY || 'sk-9bf19547ddbd4be1a87a7a43cf251097'
+
+// 获取当前用户
+async function getCurrentUser(request: NextRequest) {
+  // 从 cookie 获取 token
+  const cookieStore = cookies()
+  let token = cookieStore.get('citea_auth')?.value
+
+  // 从 Authorization header 获取（备用）
+  if (!token) {
+    const authHeader = request.headers.get('Authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.substring(7)
+    }
+  }
+
+  if (!token) return null
+
+  const jwtUser = await verifyJwt(token)
+  if (!jwtUser) return null
+
+  const fullUser = await getUserByEmail(jwtUser.email)
+  return fullUser
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,6 +35,33 @@ export async function POST(request: NextRequest) {
     
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'Messages are required' }, { status: 400 })
+    }
+
+    // 验证用户并检查权限
+    const user = await getCurrentUser(request)
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // 检查对话功能权限（仅付费用户可用）
+    const limits = getPlanLimits(user.plan)
+    if (!limits.hasChatAccess) {
+      return NextResponse.json(
+        { error: 'Chat feature is only available for paid users. Please upgrade your plan.' },
+        { status: 403 }
+      )
+    }
+
+    // 消耗积分
+    const creditResult = await consumeCredit(user.email)
+    if (!creditResult.success) {
+      return NextResponse.json(
+        { error: creditResult.error || 'Insufficient credits' },
+        { status: 403 }
+      )
     }
 
     // 根据用户语言设置系统提示

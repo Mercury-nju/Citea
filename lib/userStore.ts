@@ -50,6 +50,8 @@ if (process.env.REDIS_URL) {
 const DATA_DIR = path.join(process.cwd(), 'data')
 const USERS_FILE = path.join(DATA_DIR, 'users.json')
 
+export type PlanType = 'free' | 'weekly' | 'monthly' | 'yearly'
+
 export type StoredUser = AuthUser & { 
   passwordHash: string
   createdAt?: string
@@ -57,6 +59,11 @@ export type StoredUser = AuthUser & {
   emailVerified?: boolean
   verificationCode?: string
   verificationExpiry?: string
+  plan: PlanType
+  credits: number // 当前积分
+  creditsResetDate?: string // 积分重置日期（ISO string）
+  subscriptionStartDate?: string // 订阅开始日期
+  subscriptionEndDate?: string // 订阅结束日期
 }
 
 async function ensureDataFile() {
@@ -98,6 +105,10 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         emailVerified: (data.emailVerified as any) === 'true' || (data.emailVerified as any) === true || data.emailVerified === true,
         verificationCode: data.verificationCode as string | undefined,
         verificationExpiry: data.verificationExpiry as string | undefined,
+        credits: data.credits ? parseInt(data.credits as string, 10) : undefined,
+        creditsResetDate: data.creditsResetDate as string | undefined,
+        subscriptionStartDate: data.subscriptionStartDate as string | undefined,
+        subscriptionEndDate: data.subscriptionEndDate as string | undefined,
       }
       
       if (!user.passwordHash) {
@@ -137,6 +148,10 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         emailVerified: (data.emailVerified as any) === 'true' || (data.emailVerified as any) === true,
         verificationCode: data.verificationCode,
         verificationExpiry: data.verificationExpiry,
+        credits: data.credits ? parseInt(data.credits, 10) : undefined,
+        creditsResetDate: data.creditsResetDate,
+        subscriptionStartDate: data.subscriptionStartDate,
+        subscriptionEndDate: data.subscriptionEndDate,
       }
       
       if (!user.passwordHash) {
@@ -189,6 +204,10 @@ export async function createUser(user: StoredUser): Promise<void> {
         emailVerified: user.emailVerified ? 'true' : 'false',
         verificationCode: user.verificationCode || '',
         verificationExpiry: user.verificationExpiry || '',
+        credits: (user.credits || 0).toString(),
+        creditsResetDate: user.creditsResetDate || '',
+        subscriptionStartDate: user.subscriptionStartDate || '',
+        subscriptionEndDate: user.subscriptionEndDate || '',
       })
       return
     } catch (error) {
@@ -337,6 +356,78 @@ export async function updateUserLastLogin(email: string): Promise<void> {
   const user = json.users.find(u => u.email.toLowerCase() === email.toLowerCase())
   if (user) {
     user.lastLoginAt = new Date().toISOString()
+    await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
+  }
+}
+
+/**
+ * 更新用户信息（支持部分更新）
+ */
+export async function updateUser(email: string, updates: Partial<StoredUser>): Promise<void> {
+  const user = await getUserByEmail(email)
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const updatedUser = { ...user, ...updates }
+
+  // Check if KV is available
+  if (kv && process.env.KV_REST_API_URL) {
+    try {
+      await kv.hset(`user:${email.toLowerCase()}`, updatedUser)
+      return
+    } catch (error) {
+      console.error('KV update error:', error)
+      throw error
+    }
+  }
+
+  // Try Redis if available
+  if (redis) {
+    try {
+      const key = `user:${email.toLowerCase()}`
+      const dataToStore: any = {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        plan: updatedUser.plan,
+        passwordHash: updatedUser.passwordHash,
+        createdAt: updatedUser.createdAt || new Date().toISOString(),
+        lastLoginAt: updatedUser.lastLoginAt || new Date().toISOString(),
+        emailVerified: updatedUser.emailVerified ? 'true' : 'false',
+        verificationCode: updatedUser.verificationCode || '',
+        verificationExpiry: updatedUser.verificationExpiry || '',
+      }
+      
+      // 添加积分相关字段
+      if (updatedUser.credits !== undefined) {
+        dataToStore.credits = updatedUser.credits.toString()
+      }
+      if (updatedUser.creditsResetDate) {
+        dataToStore.creditsResetDate = updatedUser.creditsResetDate
+      }
+      if (updatedUser.subscriptionStartDate) {
+        dataToStore.subscriptionStartDate = updatedUser.subscriptionStartDate
+      }
+      if (updatedUser.subscriptionEndDate) {
+        dataToStore.subscriptionEndDate = updatedUser.subscriptionEndDate
+      }
+
+      await redis.hset(key, dataToStore)
+      return
+    } catch (error) {
+      console.error('Redis update error:', error)
+      throw error
+    }
+  }
+
+  // Fallback to file storage
+  await ensureDataFile()
+  const raw = await fs.readFile(USERS_FILE, 'utf8')
+  const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
+  const userIndex = json.users.findIndex(u => u.email.toLowerCase() === email.toLowerCase())
+  if (userIndex >= 0) {
+    json.users[userIndex] = { ...json.users[userIndex], ...updates }
     await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
   }
 }

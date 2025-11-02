@@ -28,12 +28,20 @@ export async function POST(req: Request) {
     const verificationCode = generateVerificationCode()
     const verificationExpiry = new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 分钟后过期
     
+    // 初始化免费用户的积分
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    
     const user = { 
       id: randomUUID(), 
       name, 
       email, 
       passwordHash, 
-      plan: 'free',
+      plan: 'free' as const,
+      credits: 3, // 免费用户每天3积分
+      creditsResetDate: tomorrow.toISOString(),
       createdAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),
       emailVerified: false,

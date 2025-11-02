@@ -186,9 +186,15 @@ export default function DashboardPage() {
     try {
       const language = isChinese ? 'Chinese' : 'English'
       
+      const token = localStorage.getItem('citea_auth_token')
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           messages: [
             {
@@ -200,7 +206,10 @@ export default function DashboardPage() {
         }),
       })
 
-      if (!response.ok) throw new Error('Chat failed')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Chat failed')
+      }
 
       const data = await response.json()
       
@@ -248,6 +257,29 @@ export default function DashboardPage() {
             </svg>
           </button>
         </div>
+
+        {/* User Info & Credits */}
+        {user && (
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="mb-2">
+              <p className="text-sm font-semibold text-gray-900">{user.name || user.email}</p>
+              <p className="text-xs text-gray-600 capitalize">{user.plan || 'free'} plan</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600">
+                {t.dashboard.credits || 'Credits'}: <span className="font-bold text-blue-600">{user.credits || 0}</span>
+              </span>
+              {(user.plan === 'free' || !user.plan) && (
+                <a
+                  href="/pricing"
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  {t.dashboard.upgrade || 'Upgrade'}
+                </a>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* New Document Button */}
         <div className="p-4">
@@ -425,6 +457,16 @@ export default function DashboardPage() {
 
             {activeTab === 'assistant' && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                {user && (user.plan === 'free' || !user.plan) && (
+                  <div className="bg-yellow-50 border-b border-yellow-200 p-4">
+                    <p className="text-sm text-yellow-800">
+                      {t.dashboard.chatUpgradeRequired || 'Chat feature is only available for paid users. '}
+                      <a href="/pricing" className="font-semibold underline">
+                        {t.dashboard.upgrade || 'Upgrade now'}
+                      </a>
+                    </p>
+                  </div>
+                )}
                 <div className="p-6">
                   {/* Chat Messages */}
                   <div className="space-y-4 mb-4 max-h-[400px] overflow-y-auto">
@@ -478,14 +520,19 @@ export default function DashboardPage() {
                           handleChatSubmit()
                         }
                       }}
-                      placeholder={t.dashboard.enterQuestion}
-                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      disabled={loading}
+                      placeholder={
+                        user && (user.plan === 'free' || !user.plan')
+                          ? (t.dashboard.chatUpgradeRequired || 'Upgrade to use chat')
+                          : t.dashboard.enterQuestion
+                      }
+                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                      disabled={loading || (user && (user.plan === 'free' || !user.plan))}
                     />
                     <button
                       onClick={handleChatSubmit}
-                      disabled={!query.trim() || loading}
+                      disabled={!query.trim() || loading || (user && (user.plan === 'free' || !user.plan))}
                       className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                      title={user && (user.plan === 'free' || !user.plan') ? (t.dashboard.chatUpgradeRequired || 'Upgrade required') : undefined}
                     >
                       <ArrowUp size={18} />
                     </button>

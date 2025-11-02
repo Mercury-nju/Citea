@@ -60,6 +60,13 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
     setCurrentStep(0)
     setSteps(SEARCH_STEPS.map(s => ({ ...s, status: 'pending' })))
 
+    // 获取token
+    const token = localStorage.getItem('citea_auth_token')
+    const headers: HeadersInit = { 'Content-Type': 'application/json' }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
     const allSources: Source[] = []
 
     try {
@@ -72,11 +79,14 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
       
       const step1Response = await fetch('/api/find-sources', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ text: query, step: 1 }),
       })
       
-      if (!step1Response.ok) throw new Error('Step 1 failed')
+      if (!step1Response.ok) {
+        const errorData = await step1Response.json()
+        throw new Error(errorData.error || 'Step 1 failed')
+      }
       
       const step1Data = await step1Response.json()
       setSteps(prev => prev.map((step, idx) => ({
@@ -88,7 +98,7 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
       // Step 2: 搜索 CrossRef 数据库
       const step2Response = await fetch('/api/find-sources', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ text: query, step: 2 }),
       })
       
@@ -115,7 +125,7 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
         
         const step3Response = await fetch('/api/find-sources', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ text: query, step: 3 }),
         })
         
@@ -144,7 +154,7 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
       // Step 4: 搜索 Semantic Scholar 数据库
       const step4Response = await fetch('/api/find-sources', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ text: query, step: 4 }),
       })
       
@@ -162,7 +172,7 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
       // Step 5: 智能筛选和去重，返回最终结果
       const step5Response = await fetch('/api/find-sources', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ text: query, step: 5 }),
       })
       

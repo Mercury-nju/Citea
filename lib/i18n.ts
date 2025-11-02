@@ -125,6 +125,7 @@ export const translations = {
         noRestrictions: 'No usage restrictions',
       },
       cta: 'Start Using Citea Free',
+      viewAllPlans: 'View All Plans',
       noRegistration: '✨ No registration required to start',
       contact: 'Questions about our free service? Contact us at',
     },
@@ -223,6 +224,9 @@ export const translations = {
       startConversation: 'Start conversation...',
       enterQuestion: 'Enter your question...',
       examples: 'Examples:',
+      credits: 'Credits',
+      upgrade: 'Upgrade',
+      chatUpgradeRequired: 'Chat feature is only available for paid users.',
     },
     
     // Source Finder Interface
@@ -429,6 +433,7 @@ export const translations = {
         noRestrictions: '无使用限制',
       },
       cta: '免费开始使用 Citea',
+      viewAllPlans: '查看完整定价方案',
       noRegistration: '✨ 无需注册即可开始',
       contact: '关于我们的免费服务有疑问？联系我们：',
     },
@@ -527,6 +532,9 @@ export const translations = {
       startConversation: '开始对话...',
       enterQuestion: '输入您的问题...',
       examples: '示例：',
+      credits: '积分',
+      upgrade: '升级',
+      chatUpgradeRequired: '对话功能仅限付费用户使用。',
     },
     
     // Source Finder Interface
@@ -721,6 +729,7 @@ export const translations = {
         noRestrictions: 'Sin restricciones de uso',
       },
       cta: 'Comenzar a Usar Citea Gratis',
+      viewAllPlans: 'Ver Todos los Planes',
       noRegistration: '✨ No se requiere registro para comenzar',
       contact: '¿Preguntas sobre nuestro servicio gratuito? Contáctanos en',
     },

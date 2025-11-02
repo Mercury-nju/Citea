@@ -4,6 +4,7 @@ import Features from '@/components/Features'
 import DetailedFeatures from '@/components/DetailedFeatures'
 import ProductShowcase from '@/components/ProductShowcase'
 import ToolsShowcase from '@/components/ToolsShowcase'
+import Pricing from '@/components/Pricing'
 import Testimonials from '@/components/Testimonials'
 import FAQ from '@/components/FAQ'
 import Footer from '@/components/Footer'
@@ -17,6 +18,7 @@ export default function Home() {
       <DetailedFeatures />
       <ProductShowcase />
       <ToolsShowcase />
+      <Pricing />
       <Testimonials />
       <FAQ />
       <Footer />
