@@ -126,17 +126,65 @@ export default function Features() {
             {/* Right: Visual Demo */}
             <div className="bg-white rounded-2xl p-8 shadow-2xl">
               <div className="space-y-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                      <Search size={20} className="text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-gray-300 rounded mb-2" style={{ width: i === 1 ? '100%' : i === 2 ? '85%' : i === 3 ? '70%' : '60%' }} />
-                      <div className="h-3 bg-gray-200 rounded" style={{ width: '50%' }} />
-                    </div>
+                {/* Result 1 */}
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition border border-gray-200">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Search size={20} className="text-white" />
                   </div>
-                ))}
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">
+                      Superconductivity at interfaces between conventional and unconventional superconductors
+                    </h4>
+                    <p className="text-xs text-gray-600 line-clamp-1">
+                      J C Inkson • Journal of Physics C: Solid State Physics • 1975
+                    </p>
+                  </div>
+                </div>
+
+                {/* Result 2 */}
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition border border-gray-200">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Search size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">
+                      Cooper pairing mechanisms in condensed matter systems
+                    </h4>
+                    <p className="text-xs text-gray-600 line-clamp-1">
+                      A. Smith, B. Johnson, C. Lee • Physical Review B • 2018
+                    </p>
+                  </div>
+                </div>
+
+                {/* Result 3 */}
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition border border-gray-200">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Search size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">
+                      High-temperature superconductivity mechanisms in cuprates
+                    </h4>
+                    <p className="text-xs text-gray-600 line-clamp-1">
+                      K. Watanabe, M. Tanaka • Nature Physics • 2021
+                    </p>
+                  </div>
+                </div>
+
+                {/* Result 4 */}
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition border border-gray-200">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Search size={20} className="text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">
+                      BCS theory and its extensions in modern condensed matter physics
+                    </h4>
+                    <p className="text-xs text-gray-600 line-clamp-1">
+                      R. Anderson, S. Cooper • Reviews of Modern Physics • 2019
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
