@@ -9,35 +9,48 @@ export default function Hero() {
   const { t } = useLanguage()
   
   return (
-    <section className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto text-center">
+    <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 via-white to-white overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto text-center relative z-10">
         {/* Main Heading */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight animate-fade-in">
           {t.hero.title1}
           <br />
           <span className="relative inline-block">
-            <span className="relative z-10 text-blue-600">{t.hero.title2}</span>
-            {/* Gradient underline */}
-            <span className="absolute left-0 right-0 bottom-0 h-3 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 opacity-30 rounded-sm -z-0"></span>
+            <span className="relative z-10 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
+              {t.hero.title2}
+            </span>
+            {/* Modern gradient highlight */}
+            <span className="absolute left-0 right-0 bottom-2 h-4 bg-gradient-to-r from-blue-200/40 via-blue-300/50 to-blue-400/40 rounded-lg blur-sm -z-0 transform -skew-x-12"></span>
           </span>
         </h1>
         
         {/* Subtitle */}
-        <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-150">
           {t.hero.subtitle}
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 animate-fade-in delay-300">
           <Link
             href="/auth/signin"
-            className="group bg-gray-900 text-white px-10 py-4 rounded-xl hover:bg-gray-800 transition-all text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="group relative bg-gradient-to-r from-gray-900 to-gray-800 text-white px-10 py-4 rounded-xl hover:from-gray-800 hover:to-gray-700 transition-all text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105 overflow-hidden"
           >
-            {t.hero.findSources}
+            <span className="relative z-10 flex items-center gap-2">
+              {t.hero.findSources}
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </Link>
           <Link
             href="/auth/signin"
-            className="group bg-white text-gray-900 border-2 border-gray-200 px-10 py-4 rounded-xl hover:border-gray-300 hover:shadow-md transition-all text-lg font-semibold"
+            className="group bg-white text-gray-900 border-2 border-gray-200 px-10 py-4 rounded-xl hover:border-blue-300 hover:shadow-lg hover:bg-gray-50 transition-all text-lg font-semibold transform hover:-translate-y-0.5"
           >
             {t.hero.checkCitations}
           </Link>
