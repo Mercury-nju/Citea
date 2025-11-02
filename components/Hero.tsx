@@ -70,16 +70,18 @@ export default function Hero() {
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight min-h-[4em] flex flex-col items-center justify-center">
           <span className="inline-block">
             {displayedText1}
-            {phase === 'text1' && showCursor && <span className="animate-pulse">|</span>}
-            {phase === 'text1' && !showCursor && <span className="opacity-0">|</span>}
+            {phase === 'text1' && (
+              <span className={`inline-block w-0.5 h-[1em] align-middle ml-1 ${showCursor ? 'bg-gray-900' : 'bg-transparent'}`} style={{ animation: showCursor ? 'blink 1s infinite' : 'none' }} />
+            )}
           </span>
           {(phase === 'text2' || phase === 'complete') && (
             <>
               <br />
               <span className="relative inline-block text-blue-600">
                 {displayedText2}
-                {phase === 'text2' && showCursor && <span className="animate-pulse">|</span>}
-                {phase === 'text2' && !showCursor && <span className="opacity-0">|</span>}
+                {phase === 'text2' && (
+                  <span className={`inline-block w-0.5 h-[1em] align-middle ml-1 ${showCursor ? 'bg-blue-600' : 'bg-transparent'}`} style={{ animation: showCursor ? 'blink 1s infinite' : 'none' }} />
+                )}
                 {/* Wavy Underline SVG - 只在完成时显示 */}
                 {phase === 'complete' && (
                   <svg 
