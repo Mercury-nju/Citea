@@ -16,7 +16,7 @@ export default function DetailedFeatures() {
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="text-gray-900">{t.detailedFeatures.title1}</span>
             <br />
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-blue-600">
               {t.detailedFeatures.title2}
             </span>
           </h2>
@@ -29,31 +29,27 @@ export default function DetailedFeatures() {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Source Finder - 真实功能展示 */}
           <Link href="/auth/signin" className="group block">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 transition-all duration-300">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-300">
               {/* 真实Dashboard截图预览 */}
               <div className="aspect-[16/10] bg-white relative overflow-hidden border-b border-gray-200">
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center p-6">
                   {/* 模拟真实界面截图 */}
-                  <div className="w-full h-full p-4">
-                    <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200">
-                      <div className="h-12 bg-white rounded border border-gray-200"></div>
+                  <div className="w-full h-full flex flex-col">
+                    {/* Input field */}
+                    <div className="bg-white rounded border border-gray-300 p-3 mb-4">
+                      <div className="h-8 bg-gray-50 rounded"></div>
                     </div>
-                    <div className="space-y-2">
-                      <div className="bg-white rounded-lg border border-blue-300 p-2">
-                        <div className="h-3 bg-blue-50 rounded w-3/4 mb-1"></div>
-                        <div className="h-2 bg-gray-50 rounded w-1/2"></div>
+                    {/* Results */}
+                    <div className="flex-1 space-y-3">
+                      <div className="bg-white rounded border border-gray-200 p-3">
+                        <div className="h-4 bg-gray-100 rounded w-full mb-2"></div>
+                        <div className="h-3 bg-gray-50 rounded w-4/5"></div>
                       </div>
-                      <div className="bg-white rounded-lg border border-gray-200 p-2">
-                        <div className="h-3 bg-gray-50 rounded w-2/3 mb-1"></div>
-                        <div className="h-2 bg-gray-50 rounded w-1/3"></div>
+                      <div className="bg-white rounded border border-gray-200 p-3">
+                        <div className="h-4 bg-gray-100 rounded w-5/6 mb-2"></div>
+                        <div className="h-3 bg-gray-50 rounded w-3/5"></div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                {/* 播放图标覆盖层 */}
-                <div className="absolute inset-0 bg-gray-900/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center">
-                    <Play className="text-white ml-1" size={24} fill="white" />
                   </div>
                 </div>
               </div>
@@ -61,12 +57,12 @@ export default function DetailedFeatures() {
               {/* 功能说明 */}
               <div className="p-6">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Search className="text-white" size={24} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">{t.detailedFeatures.sourceFinder}</h3>
-                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold mt-1">
+                    <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-semibold mt-1">
                       AI {t.detailedFeatures.aiPowered}
                     </span>
                   </div>
@@ -80,42 +76,38 @@ export default function DetailedFeatures() {
 
           {/* Citation Checker - 真实功能展示 */}
           <Link href="/auth/signin" className="group block">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-red-300 transition-all duration-300">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-300">
               {/* 真实Dashboard截图预览 */}
               <div className="aspect-[16/10] bg-white relative overflow-hidden border-b border-gray-200">
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center p-6">
                   {/* 模拟真实界面截图 */}
-                  <div className="w-full h-full p-4">
-                    <div className="grid grid-cols-3 gap-2 mb-3">
-                      <div className="bg-gray-50 rounded-lg p-2 text-center border border-gray-200">
-                        <div className="text-lg font-bold text-gray-900">2</div>
-                        <div className="text-[8px] text-gray-600">Verified</div>
+                  <div className="w-full h-full flex flex-col">
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="bg-gray-50 rounded border border-gray-200 p-3 text-center">
+                        <div className="text-xl font-bold text-gray-900">2</div>
+                        <div className="text-xs text-gray-600 mt-1">Verified</div>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-2 text-center border border-gray-200">
-                        <div className="text-lg font-bold text-gray-900">1</div>
-                        <div className="text-[8px] text-gray-600">Not Found</div>
+                      <div className="bg-gray-50 rounded border border-gray-200 p-3 text-center">
+                        <div className="text-xl font-bold text-gray-900">1</div>
+                        <div className="text-xs text-gray-600 mt-1">Not Found</div>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-2 text-center border border-gray-200">
-                        <div className="text-lg font-bold text-gray-900">67%</div>
-                        <div className="text-[8px] text-gray-600">Score</div>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="bg-white rounded-lg border-l-2 border-green-400 p-2 border border-gray-200">
-                        <div className="h-2 bg-gray-50 rounded w-3/4 mb-1"></div>
-                        <div className="h-1.5 bg-gray-50 rounded w-1/2"></div>
-                      </div>
-                      <div className="bg-white rounded-lg border-l-2 border-red-400 p-2 border border-gray-200">
-                        <div className="h-2 bg-gray-50 rounded w-2/3 mb-1"></div>
-                        <div className="h-1.5 bg-gray-50 rounded w-1/3"></div>
+                      <div className="bg-gray-50 rounded border border-gray-200 p-3 text-center">
+                        <div className="text-xl font-bold text-gray-900">67%</div>
+                        <div className="text-xs text-gray-600 mt-1">Score</div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                {/* 播放图标覆盖层 */}
-                <div className="absolute inset-0 bg-gray-900/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center">
-                    <Play className="text-white ml-1" size={24} fill="white" />
+                    {/* Citations */}
+                    <div className="flex-1 space-y-3">
+                      <div className="bg-white rounded border-l-2 border-green-500 border border-gray-200 p-3">
+                        <div className="h-4 bg-gray-50 rounded w-full mb-2"></div>
+                        <div className="h-3 bg-gray-50 rounded w-2/3"></div>
+                      </div>
+                      <div className="bg-white rounded border-l-2 border-red-500 border border-gray-200 p-3">
+                        <div className="h-4 bg-gray-50 rounded w-5/6 mb-2"></div>
+                        <div className="h-3 bg-gray-50 rounded w-1/2"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -123,12 +115,12 @@ export default function DetailedFeatures() {
               {/* 功能说明 */}
               <div className="p-6">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
                     <CheckCircle className="text-white" size={24} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">{t.detailedFeatures.citationChecker}</h3>
-                    <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 px-2 py-1 rounded-full text-xs font-semibold mt-1">
+                    <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-semibold mt-1">
                       {t.detailedFeatures.realTime}
                     </span>
                   </div>
@@ -142,39 +134,36 @@ export default function DetailedFeatures() {
 
           {/* AI Research Assistant - 真实功能展示 */}
           <Link href="/auth/signin" className="group block">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-purple-300 transition-all duration-300">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-300">
               {/* 真实Dashboard截图预览 */}
               <div className="aspect-[16/10] bg-white relative overflow-hidden border-b border-gray-200">
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center p-6">
                   {/* 模拟真实聊天界面截图 */}
-                  <div className="w-full h-full p-4 flex flex-col">
-                    <div className="bg-gray-900 rounded-lg p-2 mb-3">
+                  <div className="w-full h-full flex flex-col">
+                    {/* Input bar */}
+                    <div className="bg-gray-100 rounded border border-gray-200 p-3 mb-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-white rounded-lg"></div>
+                        <div className="w-8 h-8 bg-white rounded border border-gray-200"></div>
                         <div className="flex-1">
-                          <div className="h-2 bg-gray-700 rounded w-1/2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
                         </div>
                       </div>
                     </div>
-                    <div className="flex-1 space-y-2">
+                    {/* Messages */}
+                    <div className="flex-1 space-y-3">
                       <div className="flex justify-end">
-                        <div className="bg-gray-900 rounded-lg rounded-tr-sm p-2 max-w-[75%]">
-                          <div className="h-2 bg-gray-700 rounded w-full"></div>
+                        <div className="bg-gray-900 rounded-lg rounded-tr-sm p-3 max-w-[70%]">
+                          <div className="h-3 bg-gray-700 rounded w-full mb-1"></div>
+                          <div className="h-3 bg-gray-700 rounded w-4/5"></div>
                         </div>
                       </div>
                       <div className="flex justify-start">
-                        <div className="bg-white border border-gray-200 rounded-lg rounded-tl-sm p-2 max-w-[80%]">
-                          <div className="h-2 bg-gray-50 rounded w-full mb-1"></div>
-                          <div className="h-2 bg-gray-50 rounded w-3/4"></div>
+                        <div className="bg-white border border-gray-200 rounded-lg rounded-tl-sm p-3 max-w-[75%]">
+                          <div className="h-3 bg-gray-50 rounded w-full mb-1"></div>
+                          <div className="h-3 bg-gray-50 rounded w-5/6"></div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                {/* 播放图标覆盖层 */}
-                <div className="absolute inset-0 bg-gray-900/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center">
-                    <Play className="text-white ml-1" size={24} fill="white" />
                   </div>
                 </div>
               </div>
@@ -182,12 +171,12 @@ export default function DetailedFeatures() {
               {/* 功能说明 */}
               <div className="p-6">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
                     <MessageSquare className="text-white" size={24} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">{t.detailedFeatures.researchAssistant}</h3>
-                    <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-700 px-2 py-1 rounded-full text-xs font-semibold mt-1">
+                    <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-semibold mt-1">
                       AI {t.detailedFeatures.aiPowered}
                     </span>
                   </div>
@@ -203,3 +192,4 @@ export default function DetailedFeatures() {
     </section>
   )
 }
+
