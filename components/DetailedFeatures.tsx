@@ -32,22 +32,32 @@ export default function DetailedFeatures() {
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-300">
               {/* 真实Dashboard截图预览 */}
               <div className="aspect-[16/10] bg-white relative overflow-hidden border-b border-gray-200">
-                <div className="absolute inset-0 flex items-center justify-center p-6">
+                <div className="absolute inset-0 flex items-center justify-center p-4 overflow-hidden">
                   {/* 模拟真实界面截图 */}
                   <div className="w-full h-full flex flex-col">
                     {/* Input field */}
-                    <div className="bg-white rounded border border-gray-300 p-3 mb-4">
-                      <div className="h-8 bg-gray-50 rounded"></div>
+                    <div className="bg-gray-50 rounded border border-gray-200 p-2.5 mb-3">
+                      <p className="text-xs text-gray-600 line-clamp-2 leading-tight">
+                        BCS theory describes how electrons form Cooper pairs through phonon interactions, leading to superconductivity...
+                      </p>
                     </div>
                     {/* Results */}
-                    <div className="flex-1 space-y-3">
-                      <div className="bg-white rounded border border-gray-200 p-3">
-                        <div className="h-4 bg-gray-100 rounded w-full mb-2"></div>
-                        <div className="h-3 bg-gray-50 rounded w-4/5"></div>
+                    <div className="flex-1 space-y-2.5 overflow-hidden">
+                      <div className="bg-white rounded border border-gray-200 p-2.5">
+                        <p className="text-xs font-semibold text-gray-900 line-clamp-1 mb-1">
+                          Superconductivity at interfaces between conventional...
+                        </p>
+                        <p className="text-[10px] text-gray-600 line-clamp-1">
+                          J C Inkson • Journal of Physics C • 1975
+                        </p>
                       </div>
-                      <div className="bg-white rounded border border-gray-200 p-3">
-                        <div className="h-4 bg-gray-100 rounded w-5/6 mb-2"></div>
-                        <div className="h-3 bg-gray-50 rounded w-3/5"></div>
+                      <div className="bg-white rounded border border-gray-200 p-2.5">
+                        <p className="text-xs font-semibold text-gray-900 line-clamp-1 mb-1">
+                          Cooper pairing mechanisms in condensed matter...
+                        </p>
+                        <p className="text-[10px] text-gray-600 line-clamp-1">
+                          A. Smith, B. Johnson • Physical Review B • 2018
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -79,33 +89,37 @@ export default function DetailedFeatures() {
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-300">
               {/* 真实Dashboard截图预览 */}
               <div className="aspect-[16/10] bg-white relative overflow-hidden border-b border-gray-200">
-                <div className="absolute inset-0 flex items-center justify-center p-6">
+                <div className="absolute inset-0 flex items-center justify-center p-4 overflow-hidden">
                   {/* 模拟真实界面截图 */}
                   <div className="w-full h-full flex flex-col">
                     {/* Stats */}
-                    <div className="grid grid-cols-3 gap-3 mb-4">
-                      <div className="bg-gray-50 rounded border border-gray-200 p-3 text-center">
-                        <div className="text-xl font-bold text-gray-900">2</div>
-                        <div className="text-xs text-gray-600 mt-1">Verified</div>
+                    <div className="grid grid-cols-3 gap-2 mb-3">
+                      <div className="bg-gray-50 rounded border border-gray-200 p-2 text-center">
+                        <div className="text-lg font-bold text-gray-900">2</div>
+                        <div className="text-[10px] text-gray-600 mt-0.5">Verified</div>
                       </div>
-                      <div className="bg-gray-50 rounded border border-gray-200 p-3 text-center">
-                        <div className="text-xl font-bold text-gray-900">1</div>
-                        <div className="text-xs text-gray-600 mt-1">Not Found</div>
+                      <div className="bg-gray-50 rounded border border-gray-200 p-2 text-center">
+                        <div className="text-lg font-bold text-gray-900">1</div>
+                        <div className="text-[10px] text-gray-600 mt-0.5">Not Found</div>
                       </div>
-                      <div className="bg-gray-50 rounded border border-gray-200 p-3 text-center">
-                        <div className="text-xl font-bold text-gray-900">67%</div>
-                        <div className="text-xs text-gray-600 mt-1">Score</div>
+                      <div className="bg-gray-50 rounded border border-gray-200 p-2 text-center">
+                        <div className="text-lg font-bold text-gray-900">67%</div>
+                        <div className="text-[10px] text-gray-600 mt-0.5">Score</div>
                       </div>
                     </div>
                     {/* Citations */}
-                    <div className="flex-1 space-y-3">
-                      <div className="bg-white rounded border-l-2 border-green-500 border border-gray-200 p-3">
-                        <div className="h-4 bg-gray-50 rounded w-full mb-2"></div>
-                        <div className="h-3 bg-gray-50 rounded w-2/3"></div>
+                    <div className="flex-1 space-y-2.5 overflow-hidden">
+                      <div className="bg-white rounded border-l-2 border-green-500 border border-gray-200 p-2.5">
+                        <p className="text-xs text-gray-800 line-clamp-2 leading-tight mb-1">
+                          Smith, J., & Johnson, M. (2020). Machine learning in healthcare. Nature Medicine, 26(5), 123-130.
+                        </p>
+                        <span className="text-[10px] text-green-600 font-medium">✓ Verified</span>
                       </div>
-                      <div className="bg-white rounded border-l-2 border-red-500 border border-gray-200 p-3">
-                        <div className="h-4 bg-gray-50 rounded w-5/6 mb-2"></div>
-                        <div className="h-3 bg-gray-50 rounded w-1/2"></div>
+                      <div className="bg-white rounded border-l-2 border-red-500 border border-gray-200 p-2.5">
+                        <p className="text-xs text-gray-800 line-clamp-2 leading-tight mb-1">
+                          Brown, A. (2023). Fake research paper. Journal of Made Up Studies, 15(3), 45-67.
+                        </p>
+                        <span className="text-[10px] text-red-600 font-medium">✗ Not Found</span>
                       </div>
                     </div>
                   </div>
@@ -137,31 +151,36 @@ export default function DetailedFeatures() {
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-300">
               {/* 真实Dashboard截图预览 */}
               <div className="aspect-[16/10] bg-white relative overflow-hidden border-b border-gray-200">
-                <div className="absolute inset-0 flex items-center justify-center p-6">
+                <div className="absolute inset-0 flex items-center justify-center p-4 overflow-hidden">
                   {/* 模拟真实聊天界面截图 */}
                   <div className="w-full h-full flex flex-col">
-                    {/* Input bar */}
-                    <div className="bg-gray-100 rounded border border-gray-200 p-3 mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-white rounded border border-gray-200"></div>
-                        <div className="flex-1">
-                          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                        </div>
-                      </div>
-                    </div>
                     {/* Messages */}
-                    <div className="flex-1 space-y-3">
+                    <div className="flex-1 space-y-2.5 mb-3 overflow-hidden">
                       <div className="flex justify-end">
-                        <div className="bg-gray-900 rounded-lg rounded-tr-sm p-3 max-w-[70%]">
-                          <div className="h-3 bg-gray-700 rounded w-full mb-1"></div>
-                          <div className="h-3 bg-gray-700 rounded w-4/5"></div>
+                        <div className="bg-gray-900 rounded-lg rounded-tr-sm p-2 max-w-[75%]">
+                          <p className="text-xs text-white leading-tight">
+                            如何在APA格式中引用有多位作者的期刊文章？
+                          </p>
                         </div>
                       </div>
                       <div className="flex justify-start">
-                        <div className="bg-white border border-gray-200 rounded-lg rounded-tl-sm p-3 max-w-[75%]">
-                          <div className="h-3 bg-gray-50 rounded w-full mb-1"></div>
-                          <div className="h-3 bg-gray-50 rounded w-5/6"></div>
+                        <div className="bg-white border border-gray-200 rounded-lg rounded-tl-sm p-2 max-w-[80%]">
+                          <p className="text-xs text-gray-800 leading-tight mb-1">
+                            在APA格式中，对于多位作者：
+                          </p>
+                          <p className="text-[10px] text-gray-600 leading-tight">
+                            • 1-2位作者：列出所有作者<br/>
+                            • 3-20位作者：列出所有作者<br/>
+                            • 21+位：前19位 + "..." + 最后一位
+                          </p>
                         </div>
+                      </div>
+                    </div>
+                    {/* Input bar */}
+                    <div className="bg-gray-100 rounded border border-gray-200 p-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-white rounded border border-gray-200"></div>
+                        <p className="text-xs text-gray-500 flex-1">输入你的学术问题...</p>
                       </div>
                     </div>
                   </div>
