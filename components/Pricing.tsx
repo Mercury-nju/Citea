@@ -31,25 +31,6 @@ export default function Pricing() {
       popular: false
     },
     {
-      id: 'weekly',
-      name: isChinese ? '周费' : 'Weekly',
-      price: isChinese ? '¥35' : '$4.9',
-      period: isChinese ? '/周' : '/week',
-      credits: isChinese ? '每周35积分' : '35 credits/week',
-      wordLimit: '1000',
-      features: [
-        isChinese ? '每周35积分' : '35 credits per week',
-        isChinese ? '最多1000字输入' : 'Up to 1000 characters',
-        isChinese ? '专业数据库访问' : 'Advanced databases access',
-        isChinese ? '可使用对话功能' : 'Chat feature available',
-        isChinese ? '更快分析速度' : 'Faster analysis speed',
-      ],
-      limitations: [],
-      buttonText: isChinese ? '立即订阅' : 'Subscribe Now',
-      buttonStyle: 'bg-green-600 hover:bg-green-700',
-      popular: false
-    },
-    {
       id: 'monthly',
       name: isChinese ? '月费' : 'Monthly',
       price: isChinese ? '¥92' : '$12.9',
@@ -105,7 +86,7 @@ export default function Pricing() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -212,7 +193,7 @@ export default function Pricing() {
                   <td className="py-4 px-4">{isChinese ? '积分/周期' : 'Credits/Period'}</td>
                   <td className="text-center py-4 px-4">3/天</td>
                   <td className="text-center py-4 px-4">
-                    {isChinese ? '35/周，150/月，3000/年' : '35/week, 150/month, 3000/year'}
+                    {isChinese ? '150/月，3000/年' : '150/month, 3000/year'}
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100">
