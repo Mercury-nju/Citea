@@ -521,7 +521,7 @@ export default function DashboardPage() {
                         }
                       }}
                       placeholder={
-                        user && (user.plan === 'free' || !user.plan')
+                        user && (user.plan === 'free' || !user.plan)
                           ? (t.dashboard.chatUpgradeRequired || 'Upgrade to use chat')
                           : t.dashboard.enterQuestion
                       }
@@ -532,7 +532,7 @@ export default function DashboardPage() {
                       onClick={handleChatSubmit}
                       disabled={!query.trim() || loading || (user && (user.plan === 'free' || !user.plan))}
                       className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                      title={user && (user.plan === 'free' || !user.plan') ? (t.dashboard.chatUpgradeRequired || 'Upgrade required') : undefined}
+                      title={user && (user.plan === 'free' || !user.plan) ? (t.dashboard.chatUpgradeRequired || 'Upgrade required') : undefined}
                     >
                       <ArrowUp size={18} />
                     </button>
