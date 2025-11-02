@@ -137,11 +137,11 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
     }
   }
 
-  const exampleText = `[57]Anonymous. MTV, MTV & Verizon Team Up for an MTV VOD First on Verizon FiOS TV[J]. Network Weekly News, 2008.3-5.
+  const exampleText = `[60]Chen L., Park J. K. Exploring the Impact of Short-form Video Platforms on Youth Identity Formation[J]. Journal of Media and Communication Studies, 2023, 15(2): 112-129.
 
-[58]이차림. 대중음악 현상으로 본 한국 스트릿 댄스의 의미[J]. 우리춤과 과학기술, 2022, 18(3): 35-55.
+[61]山本玲奈. デジタル世代における宗教的自己表現の変化[J]. 現代社会研究, 2021, 27(4): 88-104.
 
-[59]Griffin C E. The trouble with class: researching youth, class and culture beyond the 'Birmingham School'[J]. Journal of youth studies, 2011, 14(3): 245-259.`
+[62]Johnson R. & Carter T. From Fandom to Activism: The Role of Online Communities in Social Movements[J]. Cultural Sociology Review, 2020, 8(1): 51-69.`
 
   const getSimilarityColor = (value: number) => {
     if (value >= 80) return 'text-green-600'
