@@ -459,6 +459,7 @@ export const translations = {
       product: '产品',
       tools: '工具',
       contact: '联系我们',
+      discord: 'Discord 社群',
       sourceFinder: '文献查找器',
       citationChecker: '引用检查器',
       aiAssistant: 'AI 助手',
