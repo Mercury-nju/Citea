@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const TONGYI_API_KEY = 'sk-9bf19547ddbd4be1a87a7a43cf251097'
+const TONGYI_API_KEY = process.env.TONGYI_API_KEY || 'sk-9bf19547ddbd4be1a87a7a43cf251097'
 
 export async function POST(request: NextRequest) {
   try {
