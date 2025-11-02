@@ -94,18 +94,22 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
       }
       
       // KV returns all fields as-is
+      const userPlan = ((data.plan as any) || 'free') as PlanType
+      const { getPlanLimits } = await import('./credits')
+      const defaultCredits = getPlanLimits(userPlan).maxCredits
+      
       const user = {
         id: data.id as string,
         name: data.name as string,
         email: data.email as string,
-        plan: (data.plan as any) || 'free',
+        plan: userPlan,
         passwordHash: data.passwordHash as string,
         createdAt: data.createdAt as string | undefined,
         lastLoginAt: data.lastLoginAt as string | undefined,
         emailVerified: (data.emailVerified as any) === 'true' || (data.emailVerified as any) === true || data.emailVerified === true,
         verificationCode: data.verificationCode as string | undefined,
         verificationExpiry: data.verificationExpiry as string | undefined,
-        credits: data.credits ? parseInt(data.credits as string, 10) : undefined,
+        credits: data.credits ? parseInt(data.credits as string, 10) : defaultCredits,
         creditsResetDate: data.creditsResetDate as string | undefined,
         subscriptionStartDate: data.subscriptionStartDate as string | undefined,
         subscriptionEndDate: data.subscriptionEndDate as string | undefined,
@@ -137,18 +141,22 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
       }
       
       // Redis returns string fields; parse where needed
+      const userPlan = ((data.plan as any) || 'free') as PlanType
+      const { getPlanLimits } = await import('./credits')
+      const defaultCredits = getPlanLimits(userPlan).maxCredits
+      
       const user = {
         id: data.id,
         name: data.name,
         email: data.email,
-        plan: (data.plan as any) || 'free',
+        plan: userPlan,
         passwordHash: data.passwordHash,
         createdAt: data.createdAt,
         lastLoginAt: data.lastLoginAt,
         emailVerified: (data.emailVerified as any) === 'true' || (data.emailVerified as any) === true,
         verificationCode: data.verificationCode,
         verificationExpiry: data.verificationExpiry,
-        credits: data.credits ? parseInt(data.credits, 10) : undefined,
+        credits: data.credits ? parseInt(data.credits, 10) : defaultCredits,
         creditsResetDate: data.creditsResetDate,
         subscriptionStartDate: data.subscriptionStartDate,
         subscriptionEndDate: data.subscriptionEndDate,
