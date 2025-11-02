@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [documents, setDocuments] = useState<any[]>([])
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([])
   
   // 从 localStorage 加载搜索历史
   useEffect(() => {
@@ -169,13 +170,53 @@ export default function DashboardPage() {
     }
   }
 
+  const handleChatSubmit = async () => {
+    if (!query.trim() || loading) return
+
+    const userMessage = query.trim()
+    setQuery('')
+    setLoading(true)
+
+    // 添加用户消息
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
+
+    try {
+      // 检测用户语言
+      const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
+      const language = isChinese ? 'Chinese' : 'English'
+      
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: userMessage
+            }
+          ],
+          language: language
+        }),
+      })
+
+      if (!response.ok) throw new Error('Chat failed')
+
+      const data = await response.json()
+      
+      // 添加 AI 回复
+      setChatMessages(prev => [...prev, { role: 'assistant', content: data.response || 'Sorry, I could not process your request.' }])
+    } catch (error) {
+      console.error('Chat error:', error)
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: isChinese ? '抱歉，处理您的请求时出现错误，请重试。' : 'Sorry, I encountered an error processing your request. Please try again.' 
+      }])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const examplePrompts = {
-    finder: [
-      'Bardeen-Cooper-Schrieffer (BCS) theory, where electrons form Cooper pairs through phonon interactions.',
-      'machine learning in healthcare applications',
-      'quantum computing recent advances',
-    ],
-    checker: 'Recent studies have shown significant progress (Smith et al., 2023). Machine learning algorithms improve accuracy (Johnson & Brown, 2022). The findings support earlier work (Davis, 2021).',
     assistant: [
       '如何引用网站？',
       'What is the difference between primary and secondary sources?',
@@ -383,29 +424,72 @@ export default function DashboardPage() {
 
             {activeTab === 'assistant' && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                {activeTab === 'assistant' && (
                 <div className="p-6">
-                  <textarea
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder={t.dashboard.pasteText}
-                    className="w-full h-64 p-4 border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400"
-                    maxLength={300}
-                  />
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <span className="text-sm text-gray-500">
-                      {query.length}/300 {t.dashboard.characterCount}
-                    </span>
+                  {/* Chat Messages */}
+                  <div className="space-y-4 mb-4 max-h-[400px] overflow-y-auto">
+                    {chatMessages.length === 0 ? (
+                      <div className="h-64 flex items-center justify-center text-gray-400">
+                        <div className="text-center">
+                          <MessageSquare className="mx-auto mb-3" size={48} />
+                          <p className="text-sm">{t.dashboard.startConversation}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      chatMessages.map((msg, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                              msg.role === 'user'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-900'
+                            }`}
+                          >
+                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    {loading && (
+                      <div className="flex justify-start">
+                        <div className="bg-gray-100 text-gray-900 rounded-lg px-4 py-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Input Area */}
+                  <div className="flex gap-2 pt-4 border-t border-gray-100">
+                    <input
+                      type="text"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && query.trim() && !loading) {
+                          e.preventDefault()
+                          handleChatSubmit()
+                        }
+                      }}
+                      placeholder={t.dashboard.enterQuestion}
+                      className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={loading}
+                    />
                     <button
-                      onClick={() => setLoading(true)}
-                      disabled={!query.trim()}
-                      className="bg-gray-900 text-white px-6 py-2.5 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                      onClick={handleChatSubmit}
+                      disabled={!query.trim() || loading}
+                      className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                     >
                       <ArrowUp size={18} />
                     </button>
                   </div>
-                  </div>
-                )}
+                </div>
               </div>
             )}
 
@@ -442,36 +526,25 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Example Prompts - Only show for checker and assistant */}
-            {activeTab !== 'finder' && (
+            {/* Example Prompts - Only show for assistant */}
+            {activeTab === 'assistant' && (
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="text-yellow-500" size={18} />
                 <span className="text-sm font-medium text-gray-700">{t.dashboard.examples}</span>
               </div>
-              
-              {activeTab === 'checker' && (
-                <button
-                  onClick={() => setQuery(examplePrompts.checker)}
-                  className="block w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all text-sm text-gray-700"
-                >
-                  {examplePrompts.checker}
-                </button>
-              )}
 
-              {activeTab === 'assistant' && (
-                <div className="space-y-2">
-                  {examplePrompts.assistant.map((prompt, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setQuery(prompt)}
-                      className="block w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all text-sm text-gray-700"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="space-y-2">
+                {examplePrompts.assistant.map((prompt, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setQuery(prompt)}
+                    className="block w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all text-sm text-gray-700"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
             )}
           </div>
