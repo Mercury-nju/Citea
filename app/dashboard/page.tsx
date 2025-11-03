@@ -429,16 +429,13 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setActiveTab('assistant')}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   activeTab === 'assistant'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                 }`}
               >
                 {t.dashboard.chat}
-                <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold">
-                  {t.dashboard.beta}
-                </span>
               </button>
             </div>
 
@@ -457,16 +454,7 @@ export default function DashboardPage() {
 
             {activeTab === 'assistant' && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                {user && (user.plan === 'free' || !user.plan) && (
-                  <div className="bg-yellow-50 border-b border-yellow-200 p-4">
-                    <p className="text-sm text-yellow-800">
-                      {t.dashboard.chatUpgradeRequired || 'Chat feature is only available for paid users. '}
-                      <a href="/pricing" className="font-semibold underline">
-                        {t.dashboard.upgrade || 'Upgrade now'}
-                      </a>
-                    </p>
-                  </div>
-                )}
+                {/* Chat is available to all users; consumes credits */}
                 <div className="p-6">
                   {/* Chat Messages */}
                   <div className="space-y-4 mb-4 max-h-[400px] overflow-y-auto">
@@ -520,19 +508,15 @@ export default function DashboardPage() {
                           handleChatSubmit()
                         }
                       }}
-                      placeholder={
-                        user && (user.plan === 'free' || !user.plan)
-                          ? (t.dashboard.chatUpgradeRequired || 'Upgrade to use chat')
-                          : t.dashboard.enterQuestion
-                      }
+                      placeholder={t.dashboard.enterQuestion}
                       className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-                      disabled={loading || (user && (user.plan === 'free' || !user.plan))}
+                      disabled={loading}
                     />
                     <button
                       onClick={handleChatSubmit}
-                      disabled={!query.trim() || loading || (user && (user.plan === 'free' || !user.plan))}
+                      disabled={!query.trim() || loading}
                       className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-all font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                      title={user && (user.plan === 'free' || !user.plan) ? (t.dashboard.chatUpgradeRequired || 'Upgrade required') : undefined}
+                      title={undefined}
                     >
                       <ArrowUp size={18} />
                     </button>

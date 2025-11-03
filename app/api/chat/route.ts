@@ -46,14 +46,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 检查对话功能权限（仅付费用户可用）
-    const limits = getPlanLimits(user.plan)
-    if (!limits.hasChatAccess) {
-      return NextResponse.json(
-        { error: 'Chat feature is only available for paid users. Please upgrade your plan.' },
-        { status: 403 }
-      )
-    }
+    // 对话功能向所有登录用户开放，后续仅按积分计费
 
     // 消耗积分
     const creditResult = await consumeCredit(user.email)
