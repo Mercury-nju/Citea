@@ -14,7 +14,7 @@ type Suggestion = {
 
 export default function DocumentAssistant() {
   const { t, language } = useLanguage()
-  const [started, setStarted] = useState(false)
+  const [started, setStarted] = useState(true)
   const [operation, setOperation] = useState<'generate' | 'suggest'>('generate')
   const [editorText, setEditorText] = useState('')
   const [instructions, setInstructions] = useState('')
@@ -28,12 +28,12 @@ export default function DocumentAssistant() {
   const examplePrompts = useMemo(() => (
     language === 'zh'
       ? [
-          '为“生成式AI在医学影像中的应用”撰写研究背景与意义（约300字）',
+          '为“生成式AI在医学影像中的应用”撰写研究背景与意义',
           '围绕“气候变化与农业产量”写一段相关工作综述（学术风格）',
           '根据提纲：1.问题定义 2.方法 3.实验 4.结论，生成摘要',
         ]
       : [
-          'Write a 300-word background on "Generative AI in medical imaging" (academic tone)',
+          'Write background for "Generative AI in medical imaging" (academic tone)',
           'Survey paragraph on "Climate change and crop yield" with citations placeholders',
           'Generate an abstract using outline: 1. Problem 2. Method 3. Experiments 4. Conclusion',
         ]
@@ -241,48 +241,15 @@ export default function DocumentAssistant() {
           </div>
         )}
         <div className="p-4 border-b border-gray-100 flex flex-wrap items-center gap-3">
-          <div className="inline-flex rounded-lg overflow-hidden border border-gray-200">
-            <button
-              className={`px-4 py-2 text-sm ${operation === 'generate' ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}
-              onClick={() => setOperation('generate')}
-            >{t?.documentAssistant?.generate || 'Generate'}</button>
-            <button
-              className={`px-4 py-2 text-sm border-l border-gray-200 ${operation === 'suggest' ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}
-              onClick={() => setOperation('suggest')}
-            >{t?.documentAssistant?.suggest || 'Suggest'}</button>
+          <span className="text-xs text-gray-500">{language === 'zh' ? '左边与 AI 对话，右边生成与编辑论文内容。' : 'Chat on the left; compose and edit paper on the right.'}</span>
+          <div className="flex items-center gap-2 ml-auto">
+            <button onClick={saveDocument} className="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
+              {language === 'zh' ? '保存' : 'Save'}
+            </button>
+            <button onClick={downloadDocument} className="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
+              {language === 'zh' ? '下载' : 'Download'}
+            </button>
           </div>
-          <span className="text-xs text-gray-500">{operation === 'generate' ? (language === 'zh' ? '根据需求生成首版文本' : 'Generate first draft from your prompt') : (language === 'zh' ? '分析当前文本并给出可应用的修改建议' : 'Analyze current text and return actionable suggestions')}</span>
-
-          {!started && (
-            <button
-              onClick={handleStart}
-              className="ml-auto inline-flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
-            >
-              <Sparkles size={16} /> {t?.documentAssistant?.start || 'Start using document assistant'}
-            </button>
-          )}
-
-          {started && (
-            <button
-              onClick={callAssistant}
-              disabled={loading}
-              className="ml-auto inline-flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
-              {operation === 'generate' ? (t?.documentAssistant?.generate || 'Generate') : (t?.documentAssistant?.getSuggestions || 'Get suggestions')}
-            </button>
-          )}
-
-          {started && (
-            <div className="flex items-center gap-2 ml-2">
-              <button onClick={saveDocument} className="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
-                {language === 'zh' ? '保存' : 'Save'}
-              </button>
-              <button onClick={downloadDocument} className="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
-                {language === 'zh' ? '下载' : 'Download'}
-              </button>
-            </div>
-          )}
         </div>
 
         <div className="p-4 grid lg:grid-cols-2 gap-6">
