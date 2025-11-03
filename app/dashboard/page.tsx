@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Logo from '@/components/Logo'
 import { 
   FileText, 
@@ -22,7 +23,7 @@ import CitationCheckerInterface from '@/components/CitationCheckerInterface'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [user, setUser] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
   const [query, setQuery] = useState('')
@@ -290,6 +291,12 @@ export default function DashboardPage() {
             <Plus size={20} />
             {t.dashboard.newDocument}
           </button>
+          <Link
+            href="/dashboard/document-assistant"
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all text-sm text-gray-700 bg-white"
+          >
+            <Sparkles size={18} /> {language === 'zh' ? '文档助手' : 'Document Assistant'}
+          </Link>
         </div>
 
         {/* Search */}
