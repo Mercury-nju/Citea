@@ -35,6 +35,7 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
   const [sources, setSources] = useState<Source[]>([])
   const [showResults, setShowResults] = useState(false)
   const [originalText, setOriginalText] = useState('')
+  const [needUpgrade, setNeedUpgrade] = useState(false)
 
   const SEARCH_STEPS: SearchStep[] = [
     { id: 1, title: t.sourceFinder.step1, description: t.sourceFinder.step1Desc, status: 'pending' },
@@ -83,6 +84,10 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
         body: JSON.stringify({ text: query, step: 1 }),
       })
       
+      if (step1Response.status === 403) {
+        setNeedUpgrade(true)
+        throw new Error('Insufficient credits')
+      }
       if (!step1Response.ok) {
         const errorData = await step1Response.json()
         throw new Error(errorData.error || 'Step 1 failed')
@@ -102,6 +107,10 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
         body: JSON.stringify({ text: query, step: 2 }),
       })
       
+      if (step2Response.status === 403) {
+        setNeedUpgrade(true)
+        throw new Error('Insufficient credits')
+      }
       if (step2Response.ok) {
         const step2Data = await step2Response.json()
         allSources.push(...(step2Data.sources || []))
@@ -129,6 +138,10 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
           body: JSON.stringify({ text: query, step: 3 }),
         })
         
+        if (step3Response.status === 403) {
+          setNeedUpgrade(true)
+          throw new Error('Insufficient credits')
+        }
         if (step3Response.ok) {
           const step3Data = await step3Response.json()
           allSources.push(...(step3Data.sources || []))
@@ -158,6 +171,10 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
         body: JSON.stringify({ text: query, step: 4 }),
       })
       
+      if (step4Response.status === 403) {
+        setNeedUpgrade(true)
+        throw new Error('Insufficient credits')
+      }
       if (step4Response.ok) {
         const step4Data = await step4Response.json()
         allSources.push(...(step4Data.sources || []))
@@ -176,6 +193,10 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
         body: JSON.stringify({ text: query, step: 5 }),
       })
       
+      if (step5Response.status === 403) {
+        setNeedUpgrade(true)
+        throw new Error('Insufficient credits')
+      }
       if (!step5Response.ok) throw new Error('Step 5 failed')
       
       const step5Data = await step5Response.json()
@@ -192,7 +213,9 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
       }
     } catch (error) {
       console.error('Search error:', error)
-      alert(t.sourceFinder.searchFailed)
+      if (!needUpgrade) {
+        alert(t.sourceFinder.searchFailed)
+      }
       setSteps(prev => prev.map(step => ({ ...step, status: 'pending' })))
     } finally {
       setIsSearching(false)
@@ -415,6 +438,18 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
 
   return (
     <div className="space-y-5">
+      {needUpgrade && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{t.pricing?.creditUsage || (t.sourceFinder?.searching || 'Insufficient Credits')}</h3>
+            <p className="text-sm text-gray-700 mb-4">{t.pricing?.upgradeDesc || 'Insufficient credits to proceed. Please upgrade your plan to continue.'}</p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setNeedUpgrade(false)} className="px-4 py-2 rounded-lg border border-gray-200 text-sm">{t.header?.cancel || 'Cancel'}</button>
+              <a href="/pricing" className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm">{t.pricing?.upgrade || 'Upgrade'}</a>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Input */}
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="p-5">
