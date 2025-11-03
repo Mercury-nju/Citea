@@ -64,8 +64,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 根据用户语言设置系统提示
-    const systemPrompt = language === 'Chinese' 
+    // 根据语言设置系统提示（支持 zh/Chinese/en/English 等值）
+    const lang = typeof language === 'string' ? language.toLowerCase() : 'en'
+    const isZh = lang === 'zh' || lang === 'zh-cn' || lang === 'chinese'
+    const systemPrompt = isZh 
       ? `你是 Citea 的 AI 研究助手，Citea 是一个免费的引用验证和文献查找工具。
 
 你的专业领域包括：

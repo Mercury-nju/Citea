@@ -430,11 +430,11 @@ export const translations = {
     
     // Hero
     hero: {
-      title1: 'Stop Guessing.',
-      title2: 'Start Citing Real.',
-      subtitle: 'Detect fake references, kill hallucinations, and publish with confidence.',
+      title1: '别再猜测。',
+      title2: '开始只引真实文献。',
+      subtitle: '识别虚假参考文献，消灭幻觉内容，自信发表。',
       free: '永久完全免费！',
-      findSources: 'Write It All. Trust It All.',
+      findSources: '写得放心，用得安心',
       checkCitations: '验证引用',
       watchDemo: '观看演示',
       databases: '集成主流学术数据库',
@@ -754,6 +754,16 @@ export const translations = {
   },
   
   es: {
+    hero: {
+      title1: 'Stop Guessing.',
+      title2: 'Start Citing Real.',
+      subtitle: 'Detect fake references, kill hallucinations, and publish with confidence.',
+      free: '¡Completamente Gratis Para Siempre!',
+      findSources: 'Write It All. Trust It All.',
+      checkCitations: 'Verificar Citas',
+      watchDemo: 'Ver Demo',
+      databases: 'Integrado con las principales bases de datos académicas',
+    },
     detailedFeatures: {
       title1: 'Todo lo que necesitas para',
       title2: 'investigación confiable',
@@ -889,6 +899,16 @@ export const translations = {
   },
   
   fr: {
+    hero: {
+      title1: 'Stop Guessing.',
+      title2: 'Start Citing Real.',
+      subtitle: 'Detect fake references, kill hallucinations, and publish with confidence.',
+      free: 'Complètement Gratuit Pour Toujours !',
+      findSources: 'Write It All. Trust It All.',
+      checkCitations: 'Vérifier les Citations',
+      watchDemo: 'Voir la Démo',
+      databases: 'Intégré aux principales bases de données académiques',
+    },
     detailedFeatures: {
       title1: 'Tout ce dont vous avez besoin pour',
       title2: 'des recherches fiables',
@@ -1023,6 +1043,16 @@ export const translations = {
   },
   
   de: {
+    hero: {
+      title1: 'Stop Guessing.',
+      title2: 'Start Citing Real.',
+      subtitle: 'Detect fake references, kill hallucinations, and publish with confidence.',
+      free: 'Komplett Kostenlos Für Immer!',
+      findSources: 'Write It All. Trust It All.',
+      checkCitations: 'Zitate prüfen',
+      watchDemo: 'Demo ansehen',
+      databases: 'Integriert mit führenden akademischen Datenbanken',
+    },
     detailedFeatures: {
       title1: 'Alles was Sie brauchen für',
       title2: 'zuverlässige Forschung',
@@ -1157,6 +1187,16 @@ export const translations = {
   },
   
   ja: {
+    hero: {
+      title1: 'Stop Guessing.',
+      title2: 'Start Citing Real.',
+      subtitle: 'Detect fake references, kill hallucinations, and publish with confidence.',
+      free: '完全無料、永久に！',
+      findSources: 'Write It All. Trust It All.',
+      checkCitations: '引用をチェック',
+      watchDemo: 'デモを見る',
+      databases: '主要な学術データベースと統合',
+    },
     detailedFeatures: {
       title1: '信頼できる研究に',
       title2: '必要なすべて',

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { Search, CheckCircle, MessageSquare, Loader2, ExternalLink, Download } from 'lucide-react'
 
 type ToolType = 'finder' | 'checker' | 'assistant'
@@ -23,6 +24,7 @@ interface Citation {
 }
 
 export default function Tools() {
+  const { language } = useLanguage()
   const [activeTab, setActiveTab] = useState<ToolType>('finder')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>('')
@@ -130,7 +132,7 @@ export default function Tools() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages })
+        body: JSON.stringify({ messages: newMessages, language })
       })
       
       if (!response.ok) {
