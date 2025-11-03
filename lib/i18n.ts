@@ -4,6 +4,20 @@ export type Language = 'en' | 'zh' | 'es' | 'fr' | 'de' | 'ja'
 
 export const translations = {
   en: {
+    documentAssistant: {
+      title: 'Document Assistant',
+      subtitle: 'Generate paragraphs and get live edit suggestions for academic writing.',
+      start: 'Start using document assistant',
+      generate: 'Generate',
+      suggest: 'Suggest',
+      getSuggestions: 'Get suggestions',
+      editorPlaceholder: 'Write or paste your text here...',
+      instructionPlaceholder: 'Optional: provide topic, outline, or tone preferences',
+      suggestions: 'Suggestions',
+      noSuggestions: 'No suggestions yet. Switch to Suggest mode to get edits.',
+      apply: 'Apply',
+      reject: 'Reject',
+    },
     detailedFeatures: {
       title1: 'Everything you need for',
       title2: 'reliable research',
@@ -365,6 +379,20 @@ export const translations = {
   },
   
   zh: {
+    documentAssistant: {
+      title: '智能文档助手',
+      subtitle: 'AI 生成段落并提供实时修改建议，提升学术写作质量。',
+      start: '开始使用文档助手',
+      generate: '生成',
+      suggest: '建议模式',
+      getSuggestions: '获取建议',
+      editorPlaceholder: '在此撰写或粘贴您的文本...',
+      instructionPlaceholder: '可选：输入主题、提纲或语气偏好',
+      suggestions: '修改建议',
+      noSuggestions: '暂无建议。切换到“建议模式”获取编辑建议。',
+      apply: '应用',
+      reject: '忽略',
+    },
     detailedFeatures: {
       title1: '可靠研究所需的',
       title2: '一切工具',
