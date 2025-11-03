@@ -116,12 +116,6 @@ export default function Header() {
             >
               {t.header.faq}
             </Link>
-            <Link 
-              href="#affiliate" 
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-            >
-              {t.header.affiliate}
-            </Link>
             <a 
               href="https://x.com/leo1692496?s=21"
               target="_blank"
