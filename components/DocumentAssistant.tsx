@@ -22,6 +22,7 @@ export default function DocumentAssistant() {
   const [error, setError] = useState('')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [feedback, setFeedback] = useState<{grammar?: string; logic?: string; clarity?: string; overall?: string}>({})
+  const [showHelp, setShowHelp] = useState(true)
   const examplePrompts = useMemo(() => (
     language === 'zh'
       ? [
@@ -209,6 +210,18 @@ export default function DocumentAssistant() {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+        {/* Onboarding helper */}
+        {showHelp && (
+          <div className="px-4 py-3 border-b border-gray-100 bg-blue-50/60 flex flex-col gap-1 text-sm">
+            <div className="flex items-center justify-between">
+              <p className="font-medium text-blue-900">{language === 'zh' ? '如何使用：' : 'How to use:'}</p>
+              <button onClick={() => setShowHelp(false)} className="text-xs text-blue-700 hover:underline">{language === 'zh' ? '我知道了' : 'Got it'}</button>
+            </div>
+            <p className="text-blue-900/90">1. {language === 'zh' ? '在下方“写作需求”中描述你要写的内容（主题、结构、字数）' : 'Describe your writing needs below (topic, structure, length).'} </p>
+            <p className="text-blue-900/90">2. {language === 'zh' ? '点击“生成”得到首版文本；可直接在左侧编辑区修改' : 'Click Generate to get the first draft; edit it in the left editor.'}</p>
+            <p className="text-blue-900/90">3. {language === 'zh' ? '切换到“建议模式”获取逐条修改建议，点击“应用/忽略”' : 'Switch to Suggest to get edit suggestions, then Apply/Reject them.'}</p>
+          </div>
+        )}
         <div className="p-4 border-b border-gray-100 flex flex-wrap items-center gap-3">
           <div className="inline-flex rounded-lg overflow-hidden border border-gray-200">
             <button
@@ -220,6 +233,7 @@ export default function DocumentAssistant() {
               onClick={() => setOperation('suggest')}
             >{t?.documentAssistant?.suggest || 'Suggest'}</button>
           </div>
+          <span className="text-xs text-gray-500">{operation === 'generate' ? (language === 'zh' ? '根据需求生成首版文本' : 'Generate first draft from your prompt') : (language === 'zh' ? '分析当前文本并给出可应用的修改建议' : 'Analyze current text and return actionable suggestions')}</span>
 
           {!started && (
             <button
@@ -335,7 +349,10 @@ export default function DocumentAssistant() {
               </div>
               <div className="p-3 max-h-[380px] overflow-y-auto space-y-2">
                 {suggestions.length === 0 && (
-                  <p className="text-sm text-gray-500">{t?.documentAssistant?.noSuggestions || 'No suggestions yet. Switch to Suggest mode to get edits.'}</p>
+                  <div className="text-sm text-gray-500">
+                    <p>{t?.documentAssistant?.noSuggestions || 'No suggestions yet. Switch to Suggest mode to get edits.'}</p>
+                    <p className="mt-1">{language === 'zh' ? '提示：点击上方“建议模式”，然后再次点击“获取建议”。' : 'Tip: Click Suggest mode above, then click Get suggestions.'}</p>
+                  </div>
                 )}
                 {suggestions.map((s) => (
                   <div key={s.id} className="border border-gray-200 rounded-lg p-3 bg-white">
