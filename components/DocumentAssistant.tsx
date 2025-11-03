@@ -267,8 +267,8 @@ export default function DocumentAssistant() {
           )}
         </div>
 
-        <div className="p-4 grid lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
+        <div className="p-4 grid lg:grid-cols-2 gap-6">
+          <div>
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <textarea
                 value={editorText}
@@ -313,71 +313,13 @@ export default function DocumentAssistant() {
           </div>
 
           <div>
-            {/* Feedback cards */}
-            {(feedback.grammar || feedback.logic || feedback.clarity || feedback.overall) && (
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                {feedback.overall && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-gray-700">{language === 'zh' ? '总体建议' : 'Overall'}</p>
-                    <p className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">{feedback.overall}</p>
-                  </div>
-                )}
-                {feedback.grammar && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-gray-700">{language === 'zh' ? '语法' : 'Grammar'}</p>
-                    <p className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">{feedback.grammar}</p>
-                  </div>
-                )}
-                {feedback.logic && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-gray-700">{language === 'zh' ? '逻辑' : 'Logic'}</p>
-                    <p className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">{feedback.logic}</p>
-                  </div>
-                )}
-                {feedback.clarity && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-gray-700">{language === 'zh' ? '清晰度' : 'Clarity'}</p>
-                    <p className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">{feedback.clarity}</p>
-                  </div>
-                )}
+            <div className="rounded-2xl border border-gray-200 bg-white">
+              <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-800">{language === 'zh' ? '文档预览' : 'Document Preview'}</span>
+                <span className="text-xs text-gray-500">{language === 'zh' ? '右侧为渲染预览，包含建议高亮' : 'Rendered preview with suggestion highlights'}</span>
               </div>
-            )}
-            <div className="rounded-xl border border-gray-200">
-              <div className="px-4 py-2 border-b border-gray-100 flex items-center gap-2">
-                <Lightbulb size={16} className="text-amber-500" />
-                <span className="text-sm font-semibold text-gray-800">{t?.documentAssistant?.suggestions || 'Suggestions'}</span>
-              </div>
-              <div className="p-3 max-h-[380px] overflow-y-auto space-y-2">
-                {suggestions.length === 0 && (
-                  <div className="text-sm text-gray-500">
-                    <p>{t?.documentAssistant?.noSuggestions || 'No suggestions yet. Switch to Suggest mode to get edits.'}</p>
-                    <p className="mt-1">{language === 'zh' ? '提示：点击上方“建议模式”，然后再次点击“获取建议”。' : 'Tip: Click Suggest mode above, then click Get suggestions.'}</p>
-                  </div>
-                )}
-                {suggestions.map((s) => (
-                  <div key={s.id} className="border border-gray-200 rounded-lg p-3 bg-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                        {s.type}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => applySuggestion(s)} className="inline-flex items-center gap-1 text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 px-2 py-1 rounded text-xs">
-                          <Check size={12} /> {t?.documentAssistant?.apply || 'Apply'}
-                        </button>
-                        <button onClick={() => rejectSuggestion(s.id)} className="inline-flex items-center gap-1 text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-2 py-1 rounded text-xs">
-                          <X size={12} /> {t?.documentAssistant?.reject || 'Reject'}
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap">{s.text}</p>
-                    {s.target && (
-                      <p className="mt-2 text-xs text-gray-500">Target: <span className="font-mono">{s.target}</span></p>
-                    )}
-                    {s.position && (
-                      <p className="mt-1 text-xs text-gray-500">Position: {s.position}</p>
-                    )}
-                  </div>
-                ))}
+              <div className="p-4 max-h-[520px] overflow-y-auto">
+                <div className="prose prose-sm max-w-none text-gray-900" dangerouslySetInnerHTML={{ __html: previewHtml }} />
               </div>
             </div>
           </div>
