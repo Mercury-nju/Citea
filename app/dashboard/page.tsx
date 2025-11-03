@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
+import DocumentAssistant from '@/components/DocumentAssistant'
 import CitationCheckerInterface from '@/components/CitationCheckerInterface'
 
 export default function DashboardPage() {
@@ -412,6 +413,10 @@ export default function DashboardPage() {
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50 px-8 py-8">
           <div className="max-w-5xl mx-auto">
+            {/* Document Assistant placed at top */}
+            <div className="mb-10">
+              <DocumentAssistant />
+            </div>
             {/* Tabs */}
             <div className="flex gap-1 mb-8">
               <button

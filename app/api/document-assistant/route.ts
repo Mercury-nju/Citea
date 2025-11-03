@@ -35,10 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    const limits = getPlanLimits(user.plan)
-    if (!limits.hasChatAccess) {
-      return NextResponse.json({ error: 'Document Assistant is only available for paid users.' }, { status: 403 })
-    }
+    // 文档助手对所有登录用户开放（只检查积分，不限制套餐）
 
     const creditResult = await consumeCredit(user.email)
     if (!creditResult.success) {

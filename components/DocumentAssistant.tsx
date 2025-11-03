@@ -29,9 +29,12 @@ export default function DocumentAssistant() {
     setError('')
     setSuggestions([])
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('citea_auth_token') : null
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
       const res = await fetch('/api/document-assistant', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           operation,
           inputText: editorText,
