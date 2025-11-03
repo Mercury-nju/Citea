@@ -20,6 +20,7 @@ export default function DocumentAssistant() {
   const [instructions, setInstructions] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [needUpgrade, setNeedUpgrade] = useState(false)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [feedback, setFeedback] = useState<{grammar?: string; logic?: string; clarity?: string; overall?: string}>({})
   const [showHelp, setShowHelp] = useState(true)
@@ -46,6 +47,7 @@ export default function DocumentAssistant() {
     setError('')
     setSuggestions([])
     setFeedback({})
+    setNeedUpgrade(false)
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('citea_auth_token') : null
       const headers: HeadersInit = { 'Content-Type': 'application/json' }
@@ -60,7 +62,20 @@ export default function DocumentAssistant() {
           language,
         })
       })
-      if (!res.ok) throw new Error('Request failed')
+      if (!res.ok) {
+        let msg = language === 'zh' ? '请求失败，请重试。' : 'Request failed, please try again.'
+        try {
+          const j = await res.json()
+          if (res.status === 403) {
+            setNeedUpgrade(true)
+            msg = j?.error || (language === 'zh' ? '积分不足，请前往升级套餐。' : 'Insufficient credits. Please upgrade your plan.')
+          } else if (j?.error) {
+            msg = j.error
+          }
+        } catch {}
+        setError(msg)
+        return
+      }
       const data = await res.json()
       const content: string = data.content || ''
 
@@ -252,6 +267,13 @@ export default function DocumentAssistant() {
           </div>
         </div>
 
+        {needUpgrade && (
+          <div className="mx-4 mt-3 mb-0 px-4 py-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm flex items-center justify-between">
+            <span>{language === 'zh' ? '积分不足：请升级套餐以继续使用文档助手。' : 'Insufficient credits: upgrade your plan to continue.'}</span>
+            <a href="/pricing" className="px-3 py-1 text-white bg-yellow-600 hover:bg-yellow-700 rounded-md text-xs">{language === 'zh' ? '去升级' : 'Upgrade'}</a>
+          </div>
+        )}
+
         <div className="p-4 grid lg:grid-cols-2 gap-6">
           <div>
             <div className="rounded-2xl border border-gray-200 bg-white h-full flex flex-col">
@@ -295,7 +317,7 @@ export default function DocumentAssistant() {
               </div>
             </div>
             {error && (
-              <div className="mt-3 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">{error}</div>
+              <div className="mt-3 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">{error} {needUpgrade && (<a href="/pricing" className="ml-2 underline text-red-800">{language === 'zh' ? '前往升级' : 'Upgrade'}</a>)}</div>
             )}
           </div>
 
