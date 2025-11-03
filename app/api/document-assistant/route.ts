@@ -61,8 +61,8 @@ Guidelines:
           ? `请根据以下主题或提纲，生成1-2段学术风格的文本：\n${instructions || inputText || ''}`
           : `Based on the topic or outline below, generate 1-2 paragraphs in an academic style:\n${instructions || inputText || ''}`)
       : (language === 'zh'
-          ? `请基于以下文本提供逐段可应用的建议（JSON数组，元素包含type: 'replace'|'add'|'delete', target/position, suggestion文本或replacement）。文本：\n${inputText || ''}`
-          : `Please provide per-paragraph, independently applicable suggestions (JSON array with items having type: 'replace'|'add'|'delete', target/position, and suggestion or replacement text). Text:\n${inputText || ''}`)
+          ? `请基于以下文本输出严格的 JSON 对象：{ "suggestions": Suggestion[], "feedback": {"grammar": string, "logic": string, "clarity": string, "overall": string} }。\nSuggestion 元素字段：{ "type": "replace"|"add"|"delete", "target"?: string, "position"?: string, "text": string }。\n- replace: 用 text 替换 target；add: 在 target 之后或 position 指定处插入 text（若无 target/position 则追加到文末）；delete: 删除 target。\n请勿输出任何解释性文字，仅输出 JSON。\n待分析文本：\n${inputText || ''}`
+          : `Return a strict JSON object: { "suggestions": Suggestion[], "feedback": {"grammar": string, "logic": string, "clarity": string, "overall": string} }.\nSuggestion: { "type": "replace"|"add"|"delete", "target"?: string, "position"?: string, "text": string }.\n- replace: replace target with text; add: insert text after target or at position (append to end if neither); delete: remove target.\nDo NOT include any prose outside JSON.\nText to review:\n${inputText || ''}`)
 
     // Construct messages for Tongyi
     const messages = [
