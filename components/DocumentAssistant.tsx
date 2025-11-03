@@ -23,6 +23,8 @@ export default function DocumentAssistant() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [feedback, setFeedback] = useState<{grammar?: string; logic?: string; clarity?: string; overall?: string}>({})
   const [showHelp, setShowHelp] = useState(true)
+  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
+  const [chatInput, setChatInput] = useState('')
   const examplePrompts = useMemo(() => (
     language === 'zh'
       ? [
@@ -117,6 +119,22 @@ export default function DocumentAssistant() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSendChat = async () => {
+    if (!chatInput.trim()) return
+    const userMsg = { role: 'user' as const, content: chatInput.trim() }
+    setChatMessages(prev => [...prev, userMsg])
+    setChatInput('')
+    // Use generate operation with chat intent
+    const prevOp = operation
+    if (operation !== 'generate') setOperation('generate')
+    setInstructions(userMsg.content)
+    await callAssistant()
+    // Append assistant message echo for history
+    const added = editorText.split('\n').slice(-3).join('\n')
+    setChatMessages(prev => [...prev, { role: 'assistant', content: added || (language === 'zh' ? '已生成内容，请在右侧查看。' : 'Content generated. See the document on the right.') }])
+    if (prevOp !== 'generate') setOperation(prevOp)
   }
 
   const escapeHtml = (str: string) =>
@@ -269,44 +287,46 @@ export default function DocumentAssistant() {
 
         <div className="p-4 grid lg:grid-cols-2 gap-6">
           <div>
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <textarea
-                value={editorText}
-                onChange={(e) => setEditorText(e.target.value)}
-                placeholder={t?.documentAssistant?.editorPlaceholder || 'Write or paste your text here...'}
-                className="w-full min-h-[320px] bg-transparent outline-none resize-y"
-              />
-            </div>
-
-            {/* Live suggestion preview */}
-            {suggestions.length > 0 && (
-              <div className="mt-3 border border-dashed border-gray-300 rounded-xl p-4 bg-white">
-                <p className="text-xs text-gray-500 mb-2">{language === 'zh' ? '实时建议预览（不改变原文）' : 'Live suggestions preview (non-destructive)'}</p>
-                <div className="prose prose-sm max-w-none text-gray-900" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            <div className="rounded-2xl border border-gray-200 bg-white h-full flex flex-col">
+              <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-800">{language === 'zh' ? 'AI 对话' : 'AI Chat'}</span>
+                <span className="text-xs text-gray-500">{language === 'zh' ? '在此描述需求，右侧生成论文内容' : 'Describe needs; right side shows the paper'}</span>
               </div>
-            )}
-
-            <div className="mt-3">
-              <input
-                value={instructions}
-                onChange={(e) => setInstructions(e.target.value)}
-                placeholder={t?.documentAssistant?.instructionPlaceholder || 'Optional: provide topic, outline, or tone preferences'}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg"
-              />
-              {/* Prompt suggestions */}
-              <div className="mt-2 flex flex-wrap gap-2">
-                {examplePrompts.map((p, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setInstructions(p)}
-                    className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100"
-                  >
-                    {p}
-                  </button>
+              <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                {chatMessages.length === 0 && (
+                  <div className="text-sm text-gray-500">
+                    {language === 'zh' ? '示例：为“联邦学习在医疗中的挑战”写研究背景（300字）。' : 'Example: Write background for "Federated learning in healthcare" (300 words).'}
+                  </div>
+                )}
+                {chatMessages.map((m, i) => (
+                  <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`${m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'} rounded-lg px-3 py-2 max-w-[80%] whitespace-pre-wrap text-sm`}>
+                      {m.content}
+                    </div>
+                  </div>
                 ))}
               </div>
+              <div className="p-3 border-t border-gray-100">
+                <div className="flex gap-2">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendChat(); } }}
+                    placeholder={language === 'zh' ? '输入写作需求，例如：撰写相关工作...' : 'Enter writing need, e.g., draft related work...'}
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg"
+                  />
+                  <button onClick={handleSendChat} disabled={!chatInput.trim() || loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50">
+                    {language === 'zh' ? '发送' : 'Send'}
+                  </button>
+                </div>
+                {/* Quick prompts */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {examplePrompts.map((p, idx) => (
+                    <button key={idx} onClick={() => setChatInput(p)} className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100">{p}</button>
+                  ))}
+                </div>
+              </div>
             </div>
-
             {error && (
               <div className="mt-3 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">{error}</div>
             )}
