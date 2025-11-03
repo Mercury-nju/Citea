@@ -791,16 +791,7 @@ export const translations = {
       getStarted: 'Comenzar',
       startFree: 'Empezar Gratis',
     },
-    hero: {
-      title1: 'Encuentra Fuentes en Segundos.',
-      title2: 'Cita Solo lo Real.',
-      subtitle: 'Herramienta de verificación de citas y buscador de fuentes con IA. Verifica citas falsas, valida referencias y encuentra fuentes originales, para que tu investigación se mantenga creíble.',
-      free: '¡Completamente Gratis Para Siempre!',
-      findSources: 'Buscar Fuentes',
-      checkCitations: 'Verificar Citas',
-      watchDemo: 'Ver Demo',
-      databases: 'Integrado con las principales bases de datos académicas',
-    },
+    
     features: {
       title: 'Herramientas de citación potentes para investigadores serios.',
       subtitle: 'Funciones avanzadas para optimizar tu flujo de trabajo de investigación y mantener la integridad académica.',
@@ -936,16 +927,7 @@ export const translations = {
       getStarted: 'Commencer',
       startFree: 'Commencer Gratuitement',
     },
-    hero: {
-      title1: 'Trouvez des Sources en Secondes.',
-      title2: 'Ne Citez que ce qui est Réel.',
-      subtitle: 'Outil de vérification de citations et de recherche de sources avec IA. Vérifiez les fausses citations, validez les références et trouvez les sources originales — pour que vos recherches restent crédibles.',
-      free: 'Complètement Gratuit Pour Toujours !',
-      findSources: 'Trouver des Sources',
-      checkCitations: 'Vérifier les Citations',
-      watchDemo: 'Voir la Démo',
-      databases: 'Intégré aux principales bases de données académiques',
-    },
+    
     features: {
       title: 'Des outils de citation puissants pour les chercheurs sérieux.',
       subtitle: 'Fonctionnalités avancées pour rationaliser votre flux de travail de recherche et maintenir l\'intégrité académique.',
@@ -1080,16 +1062,7 @@ export const translations = {
       getStarted: 'Loslegen',
       startFree: 'Kostenlos starten',
     },
-    hero: {
-      title1: 'Finden Sie Quellen in Sekunden.',
-      title2: 'Zitieren Sie nur Echtes.',
-      subtitle: 'KI-Zitationsprüfer und Quellensuche. Überprüfen Sie gefälschte Zitate, validieren Sie Referenzen und finden Sie Originalquellen — damit Ihre Forschung glaubwürdig bleibt.',
-      free: 'Komplett Kostenlos Für Immer!',
-      findSources: 'Quellen finden',
-      checkCitations: 'Zitate prüfen',
-      watchDemo: 'Demo ansehen',
-      databases: 'Integriert mit führenden akademischen Datenbanken',
-    },
+    
     features: {
       title: 'Leistungsstarke Zitationswerkzeuge für ernsthafte Forscher.',
       subtitle: 'Erweiterte Funktionen zur Optimierung Ihres Forschungsworkflows und zur Wahrung der akademischen Integrität.',
@@ -1224,16 +1197,7 @@ export const translations = {
       getStarted: '始める',
       startFree: '無料で始める',
     },
-    hero: {
-      title1: '数秒でソースを見つける',
-      title2: '本物だけを引用する',
-      subtitle: 'AI引用チェッカーとソース検索ツール。偽の引用をチェックし、参考文献を検証し、元のソースを見つける—研究の信頼性を保ちます。',
-      free: '完全無料、永久に！',
-      findSources: 'ソースを探す',
-      checkCitations: '引用をチェック',
-      watchDemo: 'デモを見る',
-      databases: '主要な学術データベースと統合',
-    },
+    
     features: {
       title: '真剣な研究者のための強力な引用ツール',
       subtitle: '研究ワークフローを効率化し、学術的誠実性を維持するための高度な機能。',
