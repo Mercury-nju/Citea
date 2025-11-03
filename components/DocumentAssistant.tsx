@@ -22,6 +22,19 @@ export default function DocumentAssistant() {
   const [error, setError] = useState('')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [feedback, setFeedback] = useState<{grammar?: string; logic?: string; clarity?: string; overall?: string}>({})
+  const examplePrompts = useMemo(() => (
+    language === 'zh'
+      ? [
+          '为“生成式AI在医学影像中的应用”撰写研究背景与意义（约300字）',
+          '围绕“气候变化与农业产量”写一段相关工作综述（学术风格）',
+          '根据提纲：1.问题定义 2.方法 3.实验 4.结论，生成摘要',
+        ]
+      : [
+          'Write a 300-word background on "Generative AI in medical imaging" (academic tone)',
+          'Survey paragraph on "Climate change and crop yield" with citations placeholders',
+          'Generate an abstract using outline: 1. Problem 2. Method 3. Experiments 4. Conclusion',
+        ]
+  ), [language])
 
   const handleStart = () => setStarted(true)
 
@@ -161,6 +174,33 @@ export default function DocumentAssistant() {
 
   const rejectSuggestion = (id: string) => setSuggestions(prev => prev.filter(i => i.id !== id))
 
+  const saveDocument = () => {
+    const title = editorText.trim().split('\n')[0]?.slice(0, 80) || (language === 'zh' ? '未命名文档' : 'Untitled Document')
+    const entry = { id: Date.now().toString(), title, content: editorText, createdAt: new Date().toISOString() }
+    try {
+      const key = 'citea_docs'
+      const existing = JSON.parse(localStorage.getItem(key) || '[]') as any[]
+      existing.unshift(entry)
+      localStorage.setItem(key, JSON.stringify(existing.slice(0, 100)))
+      alert(language === 'zh' ? '已保存到本地' : 'Saved locally')
+    } catch (e) {
+      alert(language === 'zh' ? '保存失败' : 'Save failed')
+    }
+  }
+
+  const downloadDocument = () => {
+    const blob = new Blob([editorText], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const name = (editorText.trim().split('\n')[0] || 'document').replace(/[^\w\u4e00-\u9fa5\- ]+/g, '').slice(0, 60)
+    a.href = url
+    a.download = `${name || 'document'}.txt`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-6 text-center">
@@ -200,6 +240,17 @@ export default function DocumentAssistant() {
               {operation === 'generate' ? (t?.documentAssistant?.generate || 'Generate') : (t?.documentAssistant?.getSuggestions || 'Get suggestions')}
             </button>
           )}
+
+          {started && (
+            <div className="flex items-center gap-2 ml-2">
+              <button onClick={saveDocument} className="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
+                {language === 'zh' ? '保存' : 'Save'}
+              </button>
+              <button onClick={downloadDocument} className="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">
+                {language === 'zh' ? '下载' : 'Download'}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="p-4 grid lg:grid-cols-3 gap-4">
@@ -228,6 +279,18 @@ export default function DocumentAssistant() {
                 placeholder={t?.documentAssistant?.instructionPlaceholder || 'Optional: provide topic, outline, or tone preferences'}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg"
               />
+              {/* Prompt suggestions */}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {examplePrompts.map((p, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setInstructions(p)}
+                    className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-100"
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {error && (
