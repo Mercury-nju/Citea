@@ -43,10 +43,10 @@ export async function middleware(request: NextRequest) {
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
   const isAuthPath = authPaths.some(path => pathname.startsWith(path))
   
-        // Dashboard 由客户端页面自己处理认证，不需要 middleware 拦截
-        if (pathname === '/dashboard') {
-          return NextResponse.next()
-        }
+  // Dashboard 路由由客户端自行处理认证，不在中间件拦截（含子路由）
+  if (pathname.startsWith('/dashboard')) {
+    return NextResponse.next()
+  }
   
   // 其他受保护路径的检查
   if (isProtectedPath && !isAuthenticated) {
