@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import Logo from '@/components/Logo'
 import { 
   FileText, 
@@ -19,14 +18,13 @@ import {
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
-import DocumentAssistant from '@/components/DocumentAssistant'
 import CitationCheckerInterface from '@/components/CitationCheckerInterface'
 
 export default function DashboardPage() {
   const router = useRouter()
   const { t, language } = useLanguage()
   const [user, setUser] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant' | 'docAssistant'>('finder')
+  const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [documents, setDocuments] = useState<any[]>([])
@@ -292,12 +290,6 @@ export default function DashboardPage() {
             <Plus size={20} />
             {t.dashboard.newDocument}
           </button>
-          <Link
-            href="/dashboard/document-assistant"
-            className="mt-3 inline-flex w-full items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all text-sm text-gray-700 bg-white"
-          >
-            <Sparkles size={18} /> {language === 'zh' ? '文档助手' : 'Document Assistant'}
-          </Link>
         </div>
 
         {/* Search */}
@@ -448,16 +440,6 @@ export default function DashboardPage() {
                   {t.dashboard.beta}
                 </span>
               </button>
-              <button
-                onClick={() => setActiveTab('docAssistant')}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'docAssistant'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
-              >
-                {language === 'zh' ? '文档助手' : 'Document Assistant'}
-              </button>
             </div>
 
             {/* Main Input Area */}
@@ -559,13 +541,7 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {activeTab === 'docAssistant' && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-6">
-                  <DocumentAssistant />
-                </div>
-              </div>
-            )}
+            
 
             {/* Example Prompts - Only show for assistant */}
             {activeTab === 'assistant' && (

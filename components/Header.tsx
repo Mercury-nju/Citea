@@ -111,12 +111,6 @@ export default function Header() {
               {t.header.pricing}
             </Link>
             <Link 
-              href="/dashboard/document-assistant" 
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-            >
-              {language === 'zh' ? '文档助手' : 'Document Assistant'}
-            </Link>
-            <Link 
               href="#faq" 
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
             >
