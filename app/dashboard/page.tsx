@@ -19,13 +19,14 @@ import {
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
+import DocumentAssistant from '@/components/DocumentAssistant'
 import CitationCheckerInterface from '@/components/CitationCheckerInterface'
 
 export default function DashboardPage() {
   const router = useRouter()
   const { t, language } = useLanguage()
   const [user, setUser] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
+  const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant' | 'docAssistant'>('finder')
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [documents, setDocuments] = useState<any[]>([])
@@ -447,12 +448,16 @@ export default function DashboardPage() {
                   {t.dashboard.beta}
                 </span>
               </button>
-              <Link
-                href="/dashboard/document-assistant"
-                className="px-5 py-2.5 rounded-lg text-sm font-medium transition-all text-gray-600 hover:text-gray-900 hover:bg-white/50"
+              <button
+                onClick={() => setActiveTab('docAssistant')}
+                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === 'docAssistant'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                }`}
               >
                 {language === 'zh' ? '文档助手' : 'Document Assistant'}
-              </Link>
+              </button>
             </div>
 
             {/* Main Input Area */}
@@ -550,6 +555,14 @@ export default function DashboardPage() {
                       <ArrowUp size={18} />
                     </button>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'docAssistant' && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="p-6">
+                  <DocumentAssistant />
                 </div>
               </div>
             )}
