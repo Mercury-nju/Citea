@@ -55,11 +55,11 @@ export const translations = {
     
     // Hero
     hero: {
-      title1: 'Find Sources in Seconds.',
-      title2: 'Cite Only What\'s Real.',
-      subtitle: 'AI citation checker and source finder tool. Check fake citations, verify references, and find original sources — so your research stays credible.',
+      title1: 'Stop Guessing.',
+      title2: 'Start Citing Real.',
+      subtitle: 'Detect fake references, kill hallucinations, and publish with confidence.',
       free: 'Completely Free Forever!',
-      findSources: 'Find Sources',
+      findSources: 'Write It All. Trust It All.',
       checkCitations: 'Check Citations',
       watchDemo: 'Watch Demo',
       databases: 'Integrated with leading academic databases',
@@ -430,11 +430,11 @@ export const translations = {
     
     // Hero
     hero: {
-      title1: '秒级找源,',
-      title2: '只引真实文献。',
-      subtitle: 'AI 驱动的引用验证和文献查找工具。检测虚假引用，验证参考文献，查找原始来源——让您的研究保持可信。',
+      title1: 'Stop Guessing.',
+      title2: 'Start Citing Real.',
+      subtitle: 'Detect fake references, kill hallucinations, and publish with confidence.',
       free: '永久完全免费！',
-      findSources: '查找文献',
+      findSources: 'Write It All. Trust It All.',
       checkCitations: '验证引用',
       watchDemo: '观看演示',
       databases: '集成主流学术数据库',
