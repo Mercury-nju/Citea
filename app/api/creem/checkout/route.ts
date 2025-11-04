@@ -49,10 +49,9 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Creem API: only product_id is required; return URLs are configured in product settings
     const payload: any = {
       product_id: productId,
-      // Creem API: some tenants only accept return_url; remove cancel_url to avoid 400
-      return_url: `${origin}/billing/success`,
     }
     if (userEmail) payload.metadata = { email: userEmail }
 
