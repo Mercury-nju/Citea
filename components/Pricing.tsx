@@ -133,7 +133,9 @@ export default function Pricing() {
                   if (plan.id === 'free') {
                     window.location.href = '/auth/signup'
                   } else {
-                    alert(t.pricing.paymentComingSoon)
+                    // 调用后端创建 Creem 结账并跳转（按产品ID区分月/年费）
+                    const targetPlan = plan.id === 'yearly' ? 'yearly' : 'monthly'
+                    window.location.href = `/api/creem/checkout?plan=${targetPlan}`
                   }
                 }}
               >

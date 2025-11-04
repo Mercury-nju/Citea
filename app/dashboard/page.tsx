@@ -399,6 +399,29 @@ export default function DashboardPage() {
             <p className="text-sm text-gray-600">
               {t.dashboard.researchSubtitle}
             </p>
+            {/* Plan & credits summary */}
+            {user && (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: user.plan === 'monthly' ? '#2563eb' : '#9ca3af' }} />
+                  Plan: {user.plan}
+                </span>
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                  {t.dashboard.credits || 'Credits'}: {user.credits ?? 0}
+                </span>
+                <button
+                  onClick={() => {
+                    const targetPlan = user.plan === 'yearly' ? 'yearly' : 'monthly'
+                    window.location.href = `/api/creem/checkout?plan=${targetPlan}`
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-gray-900 text-white hover:bg-gray-800"
+                >
+                  {user.plan === 'free'
+                    ? (t.dashboard.upgrade || 'Upgrade')
+                    : (t.dashboard.tryPro || 'Renew / Manage')}
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
