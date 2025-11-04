@@ -39,24 +39,26 @@ export async function GET(request: NextRequest) {
       }
     } catch {}
 
+    const payload: any = {
+      product_id: productId,
+      success_url: `${origin}/billing/success`,
+      cancel_url: `${origin}/billing/cancel`,
+    }
+    if (userEmail) payload.metadata = { email: userEmail }
+
     const resp = await fetch('https://api.creem.io/v1/checkouts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': CREEM_API_KEY,
       },
-      body: JSON.stringify({
-        product_id: productId,
-        success_url: `${origin}/billing/success`,
-        cancel_url: `${origin}/billing/cancel`,
-        metadata: userEmail ? { email: userEmail } : undefined,
-      }),
+      body: JSON.stringify(payload),
     })
 
     if (!resp.ok) {
       const text = await resp.text()
-      console.error('Creem checkout failed:', resp.status, text)
-      return NextResponse.json({ error: 'Failed to create checkout' }, { status: 500 })
+      console.error('Creem checkout failed:', { status: resp.status, body: text, productId, plan })
+      return NextResponse.json({ error: 'Failed to create checkout', detail: text, status: resp.status }, { status: 500 })
     }
 
     const data = (await resp.json()) as { checkout_url?: string }
