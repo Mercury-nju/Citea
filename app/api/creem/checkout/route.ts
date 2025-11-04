@@ -39,6 +39,16 @@ export async function GET(request: NextRequest) {
       }
     } catch {}
 
+    // Optional debug: /api/creem/checkout?plan=monthly&debug=1  → 返回解析结果而不调用 Creem
+    if (searchParams.get('debug') === '1') {
+      return NextResponse.json({
+        plan: plan || null,
+        productId,
+        hasApiKey: !!CREEM_API_KEY,
+        origin,
+      })
+    }
+
     const payload: any = {
       product_id: productId,
       success_url: `${origin}/billing/success`,
