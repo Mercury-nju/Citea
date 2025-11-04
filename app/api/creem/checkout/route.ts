@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
 
     const payload: any = {
       product_id: productId,
-      success_url: `${origin}/billing/success`,
-      cancel_url: `${origin}/billing/cancel`,
+      // Creem API: some tenants only accept return_url; remove cancel_url to avoid 400
+      return_url: `${origin}/billing/success`,
     }
     if (userEmail) payload.metadata = { email: userEmail }
 
