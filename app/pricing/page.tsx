@@ -135,11 +135,11 @@ export default function PricingPage() {
                 <button
                   className={`w-full ${plan.buttonStyle} text-white py-3 px-6 rounded-xl font-semibold transition-all`}
                   onClick={() => {
-                    // TODO: 集成支付平台
                     if (plan.id === 'free') {
                       window.location.href = '/auth/signup'
                     } else {
-                      alert(t.pricing.paymentComingSoon)
+                      const targetPlan = plan.id === 'yearly' ? 'yearly' : 'monthly'
+                      window.location.href = `/api/creem/checkout?plan=${targetPlan}`
                     }
                   }}
                 >
