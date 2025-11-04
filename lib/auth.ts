@@ -11,8 +11,13 @@ export type AuthUser = {
   plan?: string
 }
 
-// 确保 JWT_SECRET 存在，如果未设置，使用一个固定的默认值
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me'
+// 确保 JWT_SECRET 存在
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production environment')
+}
+// 开发环境使用默认值（仅用于本地开发）
+const JWT_SECRET_FINAL = JWT_SECRET || 'dev-secret-change-me'
 
 // 在模块加载时输出 JWT_SECRET 状态（用于调试）
 if (typeof process !== 'undefined' && process.env) {
@@ -28,8 +33,8 @@ const AUTH_COOKIE = 'citea_auth'
 
 export async function signJwt(user: AuthUser): Promise<string> {
   console.log('[signJwt] 生成 token for user:', user.email)
-  console.log('[signJwt] JWT_SECRET from env:', process.env.JWT_SECRET ? '已设置' : '未设置（使用默认值）')
-  console.log('[signJwt] JWT_SECRET length:', JWT_SECRET.length)
+    console.log('[signJwt] JWT_SECRET from env:', process.env.JWT_SECRET ? '已设置' : '未设置（使用默认值）')
+    console.log('[signJwt] JWT_SECRET length:', JWT_SECRET_FINAL.length)
   console.log('[signJwt] User 对象:', JSON.stringify(user, null, 2))
   
   // 确保 payload 结构正确
@@ -44,7 +49,7 @@ export async function signJwt(user: AuthUser): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(expirationTime)
-    .sign(encoder.encode(JWT_SECRET))
+    .sign(encoder.encode(JWT_SECRET_FINAL))
   
   console.log('[signJwt] Token 生成成功，长度:', token.length)
   console.log('[signJwt] Token 前50字符:', token.substring(0, 50))
@@ -55,10 +60,10 @@ export async function signJwt(user: AuthUser): Promise<string> {
 export async function verifyJwt(token: string): Promise<AuthUser | null> {
   try {
     console.log('[verifyJwt] 开始验证 token')
-    console.log('[verifyJwt] JWT_SECRET 存在:', !!JWT_SECRET)
-    console.log('[verifyJwt] JWT_SECRET 长度:', JWT_SECRET?.length || 0)
+    console.log('[verifyJwt] JWT_SECRET 存在:', !!JWT_SECRET_FINAL)
+    console.log('[verifyJwt] JWT_SECRET 长度:', JWT_SECRET_FINAL?.length || 0)
     
-    const { payload } = await jwtVerify(token, encoder.encode(JWT_SECRET))
+    const { payload } = await jwtVerify(token, encoder.encode(JWT_SECRET_FINAL))
     
     console.log('[verifyJwt] Token 验证成功')
     console.log('[verifyJwt] Payload keys:', Object.keys(payload))
@@ -108,13 +113,12 @@ export async function setAuthCookie(token: string) {
 }
 
 export function setAuthCookieInResponse(response: NextResponse, token: string) {
-  // 暂时禁用 secure，因为可能导致 cookie 无法设置
-  // Vercel 使用 HTTPS，但某些情况下 secure cookie 可能有问题
-  // TODO: 确认生产环境 HTTPS 后可以重新启用 secure
+  // 生产环境使用 secure cookie（HTTPS 必须）
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
   
   response.cookies.set(AUTH_COOKIE, token, {
     httpOnly: true,
-    secure: false, // 暂时禁用 secure 以调试
+    secure: isProduction, // 生产环境启用 secure
     sameSite: 'lax',
     path: '/',
     maxAge: JWT_EXPIRES_SECONDS,

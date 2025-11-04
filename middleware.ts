@@ -8,7 +8,11 @@ const protectedPaths = ['/dashboard']
 // 已登录用户不应访问的路径
 const authPaths = ['/auth/signin', '/auth/signup']
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me'
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production environment')
+}
+const JWT_SECRET_FINAL = JWT_SECRET || 'dev-secret-change-me'
 const encoder = new TextEncoder()
 
 export async function middleware(request: NextRequest) {
@@ -28,7 +32,7 @@ export async function middleware(request: NextRequest) {
   let isAuthenticated = false
   if (token) {
     try {
-      await jwtVerify(token, encoder.encode(JWT_SECRET))
+      await jwtVerify(token, encoder.encode(JWT_SECRET_FINAL))
       isAuthenticated = true
       console.log('[Middleware] Token 验证成功')
     } catch (error) {
