@@ -25,9 +25,9 @@ export async function sendVerificationEmail(email: string, code: string, name: s
     const sendSmtpEmail = new brevo.SendSmtpEmail()
     
     sendSmtpEmail.to = [{ email, name }]
-    // 优先使用环境变量，否则使用Brevo默认邮箱（需要验证）
+    // 优先使用环境变量，否则使用已验证的邮箱
     // 重要：发件邮箱必须在Brevo账户中验证
-    const senderEmail = process.env.BREVO_FROM_EMAIL || 'noreply@brevo.com'
+    const senderEmail = process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com'
     console.log('[Email] 发送验证码邮件:', { to: email, from: senderEmail })
     sendSmtpEmail.sender = {
       email: senderEmail,
