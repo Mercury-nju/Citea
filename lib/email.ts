@@ -25,8 +25,12 @@ export async function sendVerificationEmail(email: string, code: string, name: s
     const sendSmtpEmail = new brevo.SendSmtpEmail()
     
     sendSmtpEmail.to = [{ email, name }]
+    // 优先使用环境变量，否则使用Brevo默认邮箱（需要验证）
+    // 重要：发件邮箱必须在Brevo账户中验证
+    const senderEmail = process.env.BREVO_FROM_EMAIL || 'noreply@brevo.com'
+    console.log('[Email] 发送验证码邮件:', { to: email, from: senderEmail })
     sendSmtpEmail.sender = {
-      email: process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com',
+      email: senderEmail,
       name: 'Citea'
     }
     // 更强的事务性主题，提升送达率（包含验证码）
@@ -84,12 +88,19 @@ export async function sendVerificationEmail(email: string, code: string, name: s
     `
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    
+    // 记录完整的响应信息，包括 messageId
+    const messageId = (result as any)?.messageId || (result as any)?.body?.messageId || 'unknown'
     console.log('邮件发送成功:', {
-      messageId: (result as any).messageId || 'sent',
+      messageId,
       to: email,
-      code: code.substring(0, 2) + '****'
+      from: sendSmtpEmail.sender.email,
+      subject: sendSmtpEmail.subject,
+      code: code.substring(0, 2) + '****',
+      fullResponse: JSON.stringify(result, null, 2)
     })
-    return { success: true, data: result as any }
+    
+    return { success: true, data: result as any, messageId }
   } catch (error: any) {
     console.error('邮件发送异常:', {
       error: error.message,
