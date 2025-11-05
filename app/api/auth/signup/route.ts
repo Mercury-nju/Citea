@@ -52,6 +52,49 @@ export async function POST(req: Request) {
     // 保存用户
     await createUser(user)
     
+    // 临时方案：如果设置了环境变量，跳过邮件验证（用于紧急修复）
+    const skipEmailVerification = process.env.SKIP_EMAIL_VERIFICATION === 'true'
+    
+    if (skipEmailVerification) {
+      console.warn('[Signup] 跳过邮件验证（SKIP_EMAIL_VERIFICATION=true）')
+      // 直接标记为已验证
+      const Redis = require('ioredis')
+      if (process.env.REDIS_URL && process.env.REDIS_URL.startsWith('redis://')) {
+        try {
+          const redis = new Redis(process.env.REDIS_URL)
+          await redis.hset(`user:${email.toLowerCase()}`, {
+            emailVerified: 'true',
+            verificationCode: '',
+            verificationExpiry: ''
+          })
+          await redis.quit()
+        } catch (err) {
+          console.error('Redis update failed:', err)
+        }
+      }
+      if (process.env.KV_REST_API_URL) {
+        try {
+          const kv = require('@vercel/kv')
+          await kv.hset(`user:${email.toLowerCase()}`, {
+            emailVerified: true,
+            verificationCode: '',
+            verificationExpiry: ''
+          })
+        } catch (err) {
+          console.error('KV update failed:', err)
+        }
+      }
+      // 自动登录
+      const token = await signJwt({ id: user.id, email: user.email, name: user.name, plan: user.plan })
+      setAuthCookie(token)
+      return NextResponse.json({ 
+        user: { id: user.id, name: user.name, email: user.email, plan: user.plan, emailVerified: true },
+        message: '注册成功！',
+        token,
+        autoVerified: true
+      }, { status: 201 })
+    }
+    
     // 发送验证邮件
     const emailResult = await sendVerificationEmail(email, verificationCode, name)
     
