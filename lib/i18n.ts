@@ -198,8 +198,8 @@ export const translations = {
     
     // Testimonials
     testimonials: {
-      title: 'Trusted by researchers worldwide.',
-      subtitle: 'See how Citea is helping students, academics, and researchers maintain the highest standards of citation integrity in their work.',
+      title: 'Trusted by Early Adopters in Academia',
+      subtitle: 'Citea helps researchers, students, and educators verify citation authenticity and discover credible sources — faster, smarter, and more reliably.',
     },
     
     // FAQ

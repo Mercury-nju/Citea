@@ -1,51 +1,23 @@
 'use client'
 
-import { Star } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
-const testimonials = [
-  [
-    {
-      quote: "Citea has revolutionized how I verify citations in student papers. The AI detection of fabricated references is incredibly accurate and saves me hours of manual checking.",
-      author: "Dr. Sarah Chen",
-      role: "Professor of Biology, Stanford University",
-      rating: 5
-    },
-    {
-      quote: "Citea helped me avoid citing fake papers that I found online. The real-time verification as I write has made my research process so much more reliable.",
-      author: "Emily Thompson",
-      role: "Undergraduate Researcher, UCLA",
-      rating: 5
-    }
-  ],
-  [
-    {
-      quote: "As someone writing a dissertation, Citea gives me confidence that every citation in my work is legitimate. The database integration is seamless and the verification reports are thorough.",
-      author: "Sophia Rodriguez",
-      role: "PhD Candidate, MIT",
-      rating: 5
-    },
-    {
-      quote: "I recommend Citea to all researchers in our institution. The integration with existing reference managers and the comprehensive source verification make it indispensable.",
-      author: "Dr. Aisha Patel",
-      role: "Research Librarian, Oxford University",
-      rating: 5
-    }
-  ],
-  [
-    {
-      quote: "For our large research team, Citea ensures consistency in citation standards across all publications. The collaborative features make it easy to maintain our citation library.",
-      author: "Prof. Elena Kowalski",
-      role: "Research Director, Max Planck Institute",
-      rating: 5
-    },
-    {
-      quote: "Citea has become an essential tool in our peer review process. It helps us quickly identify submissions with questionable citations, maintaining the integrity of published research.",
-      author: "Marcus Lee",
-      role: "Journal Editor, Nature Communications",
-      rating: 5
-    }
-  ]
+const earlyAccessQuotes = [
+  {
+    quote: 'Finally, a tool that can tell whether my citation actually exists — this saves hours.',
+    author: 'Dr. Maria K.',
+    role: 'Early Beta Researcher'
+  },
+  {
+    quote: 'Citea has become part of my daily writing workflow. It’s like fact-checking for references.',
+    author: 'John P.',
+    role: 'Graduate Student, Early Access'
+  },
+  {
+    quote: 'As someone reviewing student papers, I love how quickly Citea flags fabricated sources.',
+    author: 'Dr. L. Nguyen',
+    role: 'Lecturer, Early Access'
+  }
 ]
 
 export default function Testimonials() {
@@ -64,39 +36,32 @@ export default function Testimonials() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {testimonials.map((column, colIndex) => (
-            <div key={colIndex} className="space-y-6">
-              {column.map((testimonial, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-8 rounded-2xl border border-gray-200 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group"
-                >
-                  {/* Stars */}
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-
-                  {/* Quote */}
-                  <p className="text-gray-700 mb-6 leading-relaxed italic">
-                    "{testimonial.quote}"
-                  </p>
-
-                  {/* Author */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
-                      {testimonial.author.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{testimonial.author}</p>
-                      <p className="text-sm text-gray-600">{testimonial.role}</p>
-                    </div>
-                  </div>
+          {earlyAccessQuotes.map((item, index) => (
+            <div
+              key={index}
+              className="bg-white p-8 rounded-2xl border border-gray-200 hover:shadow-xl hover:border-blue-200 transition-all duration-300"
+            >
+              <p className="text-gray-800 mb-6 leading-relaxed">“{item.quote}”</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
+                  {item.author.charAt(0)}
                 </div>
-              ))}
+                <div>
+                  <p className="font-semibold text-gray-900">{item.author}</p>
+                  <p className="text-sm text-gray-600">{item.role}</p>
+                </div>
+              </div>
             </div>
           ))}
+        </div>
+
+        <p className="text-center text-sm text-gray-500 mt-10">
+          Based on early feedback from beta users and research professionals.
+        </p>
+
+        <div className="text-center mt-12">
+          <h3 className="text-2xl font-semibold text-gray-900 mb-2">Join the Citea Early Access Program</h3>
+          <p className="text-gray-600">Help us shape the future of academic integrity.</p>
         </div>
       </div>
     </section>
