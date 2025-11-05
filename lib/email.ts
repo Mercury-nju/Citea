@@ -26,7 +26,7 @@ export async function sendVerificationEmail(email: string, code: string, name: s
     
     sendSmtpEmail.to = [{ email, name }]
     sendSmtpEmail.sender = {
-      email: process.env.BREVO_FROM_EMAIL || 'noreply@brevo.com',
+      email: process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com',
       name: 'Citea'
     }
     sendSmtpEmail.subject = '验证您的 Citea 账号'
@@ -128,7 +128,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
     
     sendSmtpEmail.to = [{ email, name }]
     sendSmtpEmail.sender = {
-      email: process.env.BREVO_FROM_EMAIL || 'noreply@brevo.com',
+      email: process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com',
       name: 'Citea'
     }
     sendSmtpEmail.subject = '欢迎加入 Citea!'
