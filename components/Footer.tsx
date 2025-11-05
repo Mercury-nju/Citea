@@ -79,6 +79,17 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">{t.footer.contact}</h4>
             <ul className="space-y-3">
               <li>
+                <a
+                  href="mailto:lihongyangnju@gmail.com"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z"/>
+                  </svg>
+                  <span>citea@connect..com</span>
+                </a>
+              </li>
+              <li>
                 <a 
                   href="https://discord.gg/GQZDMRYhGC" 
                   target="_blank" 
