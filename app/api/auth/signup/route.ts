@@ -91,7 +91,7 @@ export async function POST(req: Request) {
       }
       
       // 生成 token 并自动登录
-      const token = signJwt({ userId: user.id, email: user.email })
+      const token = await signJwt({ id: user.id, email: user.email, name: user.name, plan: user.plan })
       setAuthCookie(token)
       
       return NextResponse.json({ 
