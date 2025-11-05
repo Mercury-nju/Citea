@@ -29,7 +29,12 @@ export async function sendVerificationEmail(email: string, code: string, name: s
       email: process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com',
       name: 'Citea'
     }
-    sendSmtpEmail.subject = '验证您的 Citea 账号'
+    // 更强的事务性主题，提升送达率（包含验证码）
+    sendSmtpEmail.subject = `Citea 账户验证码：${code}`
+    // 增加纯文本正文，避免部分邮箱过滤纯 HTML 邮件
+    sendSmtpEmail.textContent = `您好，${name}：\n\n您的 Citea 验证码为：${code}\n有效期：10 分钟。\n如非本人操作，请忽略此邮件。\n\nCitea 团队\nhttps://citea.cc`
+    // 设置回复邮箱，便于用户直接回复联系
+    sendSmtpEmail.replyTo = { email: 'lihongyangnju@gmail.com', name: 'Citea Support' }
     sendSmtpEmail.htmlContent = `
       <!DOCTYPE html>
       <html>
