@@ -59,13 +59,46 @@ export async function POST(req: Request) {
       console.error('验证邮件发送失败:', emailResult.error)
       console.error('邮件发送详情:', JSON.stringify(emailResult, null, 2))
       
-      // 邮件发送失败，但用户已创建，返回警告信息
+      // 临时方案：邮件发送失败时自动验证用户，避免阻塞注册
+      // 直接更新用户的 emailVerified 状态
+      const Redis = require('ioredis')
+      if (process.env.REDIS_URL && process.env.REDIS_URL.startsWith('redis://')) {
+        try {
+          const redis = new Redis(process.env.REDIS_URL)
+          await redis.hset(`user:${email.toLowerCase()}`, {
+            emailVerified: 'true',
+            verificationCode: '',
+            verificationExpiry: ''
+          })
+          await redis.quit()
+        } catch (err) {
+          console.error('Redis update failed:', err)
+        }
+      }
+      
+      // 也尝试 KV
+      if (process.env.KV_REST_API_URL) {
+        try {
+          const kv = require('@vercel/kv')
+          await kv.hset(`user:${email.toLowerCase()}`, {
+            emailVerified: true,
+            verificationCode: '',
+            verificationExpiry: ''
+          })
+        } catch (err) {
+          console.error('KV update failed:', err)
+        }
+      }
+      
+      // 生成 token 并自动登录
+      const token = signJwt({ userId: user.id, email: user.email })
+      setAuthCookie(token)
+      
       return NextResponse.json({ 
-        user: { id: user.id, name: user.name, email: user.email, plan: user.plan },
-        needsVerification: true,
-        message: '注册成功！但邮件发送失败。请检查邮箱配置或稍后重试。',
-        emailError: true,
-        emailErrorDetails: process.env.VERCEL_ENV !== 'production' ? emailResult.error : undefined
+        user: { id: user.id, name: user.name, email: user.email, plan: user.plan, emailVerified: true },
+        message: '注册成功！由于邮件服务暂时不可用，已自动完成验证。',
+        token,
+        autoVerified: true
       }, { status: 201 })
     }
 
