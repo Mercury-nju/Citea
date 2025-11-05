@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   creator: 'Citea',
   publisher: 'Citea',
   robots: 'index, follow',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',

@@ -18,13 +18,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // 从 localStorage 读取语言偏好
     const savedLang = localStorage.getItem('language') as Language
-    if (savedLang && (savedLang === 'en' || savedLang === 'zh')) {
+    if (savedLang && ['en','zh','es','fr','de','ja'].includes(savedLang)) {
       setLanguageState(savedLang)
       setT(getTranslation(savedLang))
     } else {
-      // 检测浏览器语言
+      // 检测浏览器语言并匹配支持的语言
       const browserLang = navigator.language.toLowerCase()
-      const detectedLang = browserLang.startsWith('zh') ? 'zh' : 'en'
+      let detectedLang: Language = 'en'
+      if (browserLang.startsWith('zh')) detectedLang = 'zh'
+      else if (browserLang.startsWith('es')) detectedLang = 'es'
+      else if (browserLang.startsWith('fr')) detectedLang = 'fr'
+      else if (browserLang.startsWith('de')) detectedLang = 'de'
+      else if (browserLang.startsWith('ja')) detectedLang = 'ja'
       setLanguageState(detectedLang)
       setT(getTranslation(detectedLang))
     }
