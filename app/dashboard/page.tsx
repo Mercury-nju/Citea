@@ -449,38 +449,94 @@ export default function DashboardPage() {
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50 px-8 py-8">
           <div className="max-w-5xl mx-auto">
-            {/* Tabs */}
-            <div className="flex gap-1 mb-8">
-              <button
-                onClick={() => setActiveTab('finder')}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'finder'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
-              >
-                {t.dashboard.findSources}
-              </button>
-              <button
-                onClick={() => setActiveTab('checker')}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'checker'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
-              >
-                {t.dashboard.verifyCitations}
-              </button>
-              <button
-                onClick={() => setActiveTab('assistant')}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'assistant'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
-              >
-                {t.dashboard.chat}
-              </button>
+            {/* Quick Actions */}
+            <div className="mb-8">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Find Sources Card */}
+                <button
+                  onClick={() => setActiveTab('finder')}
+                  className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 ${
+                    activeTab === 'finder' 
+                      ? 'shadow-xl scale-105' 
+                      : 'shadow-lg hover:shadow-xl hover:scale-105'
+                  }`}
+                  style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                  }}
+                >
+                  <div className="relative z-10">
+                    <div className="mb-3">
+                      <Search size={32} className="text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                      <Search size={20} />
+                      Find Sources
+                    </h3>
+                    <p className="text-sm text-white/90">
+                      Search academic databases and discover credible sources
+                    </p>
+                  </div>
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                </button>
+
+                {/* Verify Citations Card */}
+                <button
+                  onClick={() => setActiveTab('checker')}
+                  className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 ${
+                    activeTab === 'checker' 
+                      ? 'shadow-xl scale-105' 
+                      : 'shadow-lg hover:shadow-xl hover:scale-105'
+                  }`}
+                  style={{
+                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                  }}
+                >
+                  <div className="relative z-10">
+                    <div className="mb-3">
+                      <CheckCircle size={32} className="text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                      <CheckCircle size={20} />
+                      Verify Citations
+                    </h3>
+                    <p className="text-sm text-white/90">
+                      Check citation authenticity and detect fake references
+                    </p>
+                  </div>
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                </button>
+
+                {/* Chat Assistant Card */}
+                <button
+                  onClick={() => setActiveTab('assistant')}
+                  className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 ${
+                    activeTab === 'assistant' 
+                      ? 'shadow-xl scale-105' 
+                      : 'shadow-lg hover:shadow-xl hover:scale-105'
+                  }`}
+                  style={{
+                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+                  }}
+                >
+                  <div className="relative z-10">
+                    <div className="mb-3">
+                      <MessageSquare size={32} className="text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                      <MessageSquare size={20} />
+                      Chat Assistant
+                    </h3>
+                    <p className="text-sm text-white/90">
+                      Get help with citations, formatting, and research questions
+                    </p>
+                  </div>
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                </button>
+              </div>
             </div>
 
             {/* Main Input Area */}
