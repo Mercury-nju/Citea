@@ -121,6 +121,38 @@ export const translations = {
         tryQuestions: 'Try these questions:',
         error: 'Unable to reach AI assistant. Please try again.',
       },
+      
+      // Showcase specific
+      showcase: {
+        finderTitle: 'AI Literature Finder',
+        literatureVerification: 'Literature Source Verification',
+        literatureVerificationDesc: 'Tracing and validating academic sources',
+        scanningDatabases: 'Scanning academic databases',
+        scanningDatabasesDesc: 'Connecting to PubMed, CrossRef, and ArXiv',
+        crossrefVerified: 'CrossRef Verified',
+        startFinding: 'Start Finding Sources',
+        
+        checkerTitle: 'Citation Verification Tool',
+        verified: '✓ Verified - Found in CrossRef database',
+        notFound: '✗ Not Found - Possibly a fabricated citation',
+        verifyNow: 'Verify Your Citations',
+        
+        assistantTitle: 'AI Research Assistant',
+        beta: 'BETA',
+        startChat: 'Start Conversation',
+        exampleQuestion: 'How do I cite a journal article with multiple authors?',
+        exampleAnswer: 'In APA format, for journal articles with multiple authors:',
+        exampleRule1: '• 1-2 authors: List all authors',
+        exampleRule2: '• 3-20 authors: List all authors',
+        exampleRule3: '• 21 or more: List first 19, then "...", then last one',
+        
+        feature1Title: 'Unlimited Citation Checks',
+        feature1Desc: 'Find unlimited sources in all major academic databases',
+        feature2Title: 'Real-time Verification',
+        feature2Desc: 'Instantly validate citations from authoritative sources',
+        feature3Title: 'AI Research Assistant Chat',
+        feature3Desc: 'Get instant help with citation questions and research',
+      },
     },
     
     // Pricing
@@ -631,6 +663,38 @@ export const translations = {
         startConversation: '开始对话！询问关于引用、文献来源或研究问题。',
         tryQuestions: '试试这些问题：',
         error: '无法连接 AI 助手。请重试。',
+      },
+      
+      // Showcase specific
+      showcase: {
+        finderTitle: 'AI 文献查找器',
+        literatureVerification: '文献来源验证',
+        literatureVerificationDesc: '追踪和验证学术来源',
+        scanningDatabases: '扫描学术数据库',
+        scanningDatabasesDesc: '连接到 PubMed、CrossRef 和 ArXiv',
+        crossrefVerified: 'CrossRef验证',
+        startFinding: '开始查找文献',
+        
+        checkerTitle: '引用验证工具',
+        verified: '✓ 已验证 - 在 CrossRef 数据库中找到',
+        notFound: '✗ 未找到 - 可能是伪造的引用',
+        verifyNow: '验证您的引用',
+        
+        assistantTitle: 'AI 研究助手',
+        beta: 'BETA',
+        startChat: '开始对话',
+        exampleQuestion: '如何引用一篇有多个作者的期刊文章？',
+        exampleAnswer: '在APA格式中，对于有多个作者的期刊文章：',
+        exampleRule1: '• 1-2位作者：列出所有作者',
+        exampleRule2: '• 3-20位作者：列出所有作者',
+        exampleRule3: '• 21位或以上：列出前19位，然后用"..."，最后列出最后一位',
+        
+        feature1Title: '无限次引用检查',
+        feature1Desc: '在所有主要学术数据库中查找无限来源',
+        feature2Title: '实时验证',
+        feature2Desc: '即时验证权威来源的引用',
+        feature3Title: 'AI 研究助手对话',
+        feature3Desc: '获得有关引用问题和研究的即时帮助',
       },
     },
     

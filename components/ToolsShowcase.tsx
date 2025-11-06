@@ -10,9 +10,9 @@ export default function ToolsShowcase() {
   const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
 
   const tabs = [
-    { id: 'finder' as const, label: '文献查找', icon: Search },
-    { id: 'checker' as const, label: '引用验证', icon: CheckCircle },
-    { id: 'assistant' as const, label: 'AI 助手', icon: MessageSquare },
+    { id: 'finder' as const, label: t.tools.finder.tab, icon: Search },
+    { id: 'checker' as const, label: t.tools.checker.tab, icon: CheckCircle },
+    { id: 'assistant' as const, label: t.tools.assistant.tab, icon: MessageSquare },
   ]
 
   return (
@@ -20,10 +20,10 @@ export default function ToolsShowcase() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-            立即开始验证引用
+            {t.tools.title}
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            准备好确保您研究中的每个引用都是真实的了吗？现在开始使用 Citea 的强大工具。
+            {t.tools.subtitle}
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export default function ToolsShowcase() {
           {activeTab === 'finder' && (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">AI 文献查找器</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{t.tools.showcase.finderTitle}</h3>
                 
                 {/* Example Query */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -70,8 +70,8 @@ export default function ToolsShowcase() {
                       <CheckCircle className="text-white" size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">Literature Source Verification</p>
-                      <p className="text-xs text-gray-600">Tracing and validating academic sources</p>
+                      <p className="text-sm font-semibold text-gray-900">{t.tools.showcase.literatureVerification}</p>
+                      <p className="text-xs text-gray-600">{t.tools.showcase.literatureVerificationDesc}</p>
                     </div>
                   </div>
                   
@@ -80,8 +80,8 @@ export default function ToolsShowcase() {
                       <Search className="text-white" size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">Scanning academic databases</p>
-                      <p className="text-xs text-gray-600">Connecting to PubMed, CrossRef, and ArXiv</p>
+                      <p className="text-sm font-semibold text-gray-900">{t.tools.showcase.scanningDatabases}</p>
+                      <p className="text-xs text-gray-600">{t.tools.showcase.scanningDatabasesDesc}</p>
                     </div>
                   </div>
                 </div>
@@ -91,7 +91,7 @@ export default function ToolsShowcase() {
                   <div className="flex items-center gap-2 mb-3">
                     <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-bold">
                       <CheckCircle size={12} />
-                      CrossRef验证
+                      {t.tools.showcase.crossrefVerified}
                     </span>
                     <div className="ml-auto flex gap-1.5">
                       <button className="p-1.5 hover:bg-gray-200 rounded transition">
@@ -116,7 +116,7 @@ export default function ToolsShowcase() {
                   href="/auth/signin"
                   className="mt-6 w-full bg-gray-900 text-white px-4 py-3 rounded-lg hover:bg-gray-800 transition font-medium text-sm flex items-center justify-center gap-2"
                 >
-                  开始查找文献
+                  {t.tools.showcase.startFinding}
                   <Sparkles size={16} />
                 </Link>
               </div>
@@ -127,7 +127,7 @@ export default function ToolsShowcase() {
           {activeTab === 'checker' && (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">引用验证工具</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{t.tools.showcase.checkerTitle}</h3>
                 
                 {/* Example Citations */}
                 <div className="space-y-4 mb-6">
@@ -141,7 +141,7 @@ export default function ToolsShowcase() {
                         <p className="text-sm text-gray-700 mb-2">
                           Smith, J., & Johnson, M. (2020). Machine learning in healthcare. Nature Medicine, 26(5), 123-130.
                         </p>
-                        <p className="text-xs font-semibold text-green-700">✓ 已验证 - 在 CrossRef 数据库中找到</p>
+                        <p className="text-xs font-semibold text-green-700">{t.tools.showcase.verified}</p>
                       </div>
                     </div>
                   </div>
@@ -156,7 +156,7 @@ export default function ToolsShowcase() {
                         <p className="text-sm text-gray-700 mb-2">
                           Brown, A. (2023). Fake research paper. Journal of Made Up Studies, 15(3), 45-67.
                         </p>
-                        <p className="text-xs font-semibold text-red-700">✗ 未找到 - 可能是伪造的引用</p>
+                        <p className="text-xs font-semibold text-red-700">{t.tools.showcase.notFound}</p>
                       </div>
                     </div>
                   </div>
@@ -167,7 +167,7 @@ export default function ToolsShowcase() {
                   href="/auth/signin"
                   className="w-full bg-gray-900 text-white px-4 py-3 rounded-lg hover:bg-gray-800 transition font-medium text-sm flex items-center justify-center gap-2"
                 >
-                  验证您的引用
+                  {t.tools.showcase.verifyNow}
                   <CheckCircle size={16} />
                 </Link>
               </div>
@@ -179,8 +179,8 @@ export default function ToolsShowcase() {
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  AI 研究助手
-                  <span className="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded font-bold">BETA</span>
+                  {t.tools.showcase.assistantTitle}
+                  <span className="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded font-bold">{t.tools.showcase.beta}</span>
                 </h3>
                 
                 {/* Chat Example */}
@@ -188,7 +188,7 @@ export default function ToolsShowcase() {
                   {/* User Message */}
                   <div className="flex justify-end">
                     <div className="bg-blue-600 text-white rounded-lg px-4 py-2 max-w-[80%]">
-                      <p className="text-sm">如何引用一篇有多个作者的期刊文章？</p>
+                      <p className="text-sm">{t.tools.showcase.exampleQuestion}</p>
                     </div>
                   </div>
 
@@ -196,15 +196,15 @@ export default function ToolsShowcase() {
                   <div className="flex justify-start">
                     <div className="bg-gray-100 rounded-lg px-4 py-3 max-w-[80%]">
                       <p className="text-sm text-gray-800 leading-relaxed">
-                        在APA格式中，对于有多个作者的期刊文章：
+                        {t.tools.showcase.exampleAnswer}
                       </p>
                       <ul className="mt-2 space-y-1 text-sm text-gray-700">
-                        <li>• 1-2位作者：列出所有作者</li>
-                        <li>• 3-20位作者：列出所有作者</li>
-                        <li>• 21位或以上：列出前19位，然后用"..."，最后列出最后一位</li>
+                        <li>{t.tools.showcase.exampleRule1}</li>
+                        <li>{t.tools.showcase.exampleRule2}</li>
+                        <li>{t.tools.showcase.exampleRule3}</li>
                       </ul>
                       <p className="mt-2 text-xs text-gray-600 italic">
-                        例如：Smith, J., Johnson, M., & Williams, K. (2023). Title. Journal, 15(3), 123-130.
+                        {t.lang === 'zh' ? '例如：' : 'Example: '}Smith, J., Johnson, M., & Williams, K. (2023). Title. Journal, 15(3), 123-130.
                       </p>
                     </div>
                   </div>
@@ -215,7 +215,7 @@ export default function ToolsShowcase() {
                   href="/auth/signin"
                   className="w-full bg-gray-900 text-white px-4 py-3 rounded-lg hover:bg-gray-800 transition font-medium text-sm flex items-center justify-center gap-2"
                 >
-                  开始对话
+                  {t.tools.showcase.startChat}
                   <MessageSquare size={16} />
                 </Link>
               </div>
@@ -228,22 +228,22 @@ export default function ToolsShowcase() {
               <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
                 <Search className="text-blue-600" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-gray-900 mb-1">无限次引用检查</h4>
-              <p className="text-xs text-gray-600">在所有主要学术数据库中查找无限来源</p>
+              <h4 className="font-bold text-sm text-gray-900 mb-1">{t.tools.showcase.feature1Title}</h4>
+              <p className="text-xs text-gray-600">{t.tools.showcase.feature1Desc}</p>
             </div>
             <div className="bg-white rounded-lg p-5 border border-gray-200">
               <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center mb-3">
                 <CheckCircle className="text-purple-600" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-gray-900 mb-1">实时验证</h4>
-              <p className="text-xs text-gray-600">即时验证权威来源的引用</p>
+              <h4 className="font-bold text-sm text-gray-900 mb-1">{t.tools.showcase.feature2Title}</h4>
+              <p className="text-xs text-gray-600">{t.tools.showcase.feature2Desc}</p>
             </div>
             <div className="bg-white rounded-lg p-5 border border-gray-200">
               <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
                 <MessageSquare className="text-amber-600" size={20} />
               </div>
-              <h4 className="font-bold text-sm text-gray-900 mb-1">AI 研究助手对话</h4>
-              <p className="text-xs text-gray-600">获得有关引用问题和研究的即时帮助</p>
+              <h4 className="font-bold text-sm text-gray-900 mb-1">{t.tools.showcase.feature3Title}</h4>
+              <p className="text-xs text-gray-600">{t.tools.showcase.feature3Desc}</p>
             </div>
           </div>
         </div>
