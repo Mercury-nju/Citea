@@ -6,9 +6,7 @@ import {
   ArrowLeft, 
   Home, 
   Edit3, 
-  FileText, 
-  Square, 
-  Circle,
+  FileText,
   Save,
   Download,
   MessageSquare,
@@ -18,7 +16,8 @@ import {
   Maximize,
   RotateCcw,
   Printer,
-  Menu
+  Menu,
+  Search
 } from 'lucide-react'
 import Logo from '@/components/Logo'
 
@@ -40,6 +39,7 @@ export default function WriteEditorPage() {
   const [chatInput, setChatInput] = useState('')
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isChatLoading, setIsChatLoading] = useState(false)
 
   useEffect(() => {
     // Load document from localStorage
@@ -77,18 +77,66 @@ export default function WriteEditorPage() {
   }
 
   const handleChatSubmit = async () => {
-    if (!chatInput.trim()) return
+    if (!chatInput.trim() || isChatLoading) return
     
     const userMessage = chatInput.trim()
     setChatInput('')
-    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
+    const newMessages = [...chatMessages, { role: 'user' as const, content: userMessage }]
+    setChatMessages(newMessages)
+    setIsChatLoading(true)
     
-    setTimeout(() => {
+    try {
+      // Get auth token
+      const token = localStorage.getItem('citea_auth_token')
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
+      // Detect language
+      const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
+      const language = isChinese ? 'Chinese' : 'English'
+
+      // Add document context to the message
+      const contextMessage = `I'm writing a document titled "${document?.title}". ${userMessage}`
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: contextMessage
+            }
+          ],
+          language: language
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Chat failed')
+      }
+
+      const data = await response.json()
+      
       setChatMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'I can help you with your writing. What would you like to improve?' 
+        content: data.response || 'Sorry, I could not process your request.' 
       }])
-    }, 1000)
+    } catch (error) {
+      console.error('Chat error:', error)
+      const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: isChinese 
+          ? '抱歉，处理您的请求时出现错误。请重试。' 
+          : 'Sorry, I encountered an error. Please try again.' 
+      }])
+    } finally {
+      setIsChatLoading(false)
+    }
   }
 
   if (!document) {
@@ -102,31 +150,86 @@ export default function WriteEditorPage() {
   return (
     <div className="min-h-screen bg-white flex">
       {/* Left Sidebar */}
-      <aside className={`${isSidebarOpen ? 'w-14' : 'w-0'} bg-gray-50 border-r border-gray-200 flex flex-col items-center py-4 transition-all`}>
+      <aside className={`${isSidebarOpen ? 'w-16' : 'w-0'} bg-gray-50 border-r border-gray-200 flex flex-col items-center py-4 transition-all`}>
         {isSidebarOpen && (
           <>
-            <button className="p-3 hover:bg-gray-200 rounded-lg transition mb-2">
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-3 hover:bg-gray-200 rounded-lg transition mb-4"
+              title="Hide sidebar"
+            >
               <Menu size={20} className="text-gray-700" />
             </button>
+            
+            <div className="border-t border-gray-300 w-10 mb-4" />
+            
             <button 
               onClick={() => router.push('/dashboard')}
-              className="p-3 hover:bg-blue-100 rounded-lg transition mb-2"
+              className="p-3 hover:bg-blue-100 rounded-lg transition mb-2 group relative"
+              title="Back to Dashboard"
             >
               <Home size={20} className="text-gray-700" />
+              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                Dashboard
+              </span>
             </button>
-            <button className="p-3 hover:bg-gray-200 rounded-lg transition mb-2">
-              <Edit3 size={20} className="text-gray-700" />
-            </button>
-            <button className="p-3 hover:bg-gray-200 rounded-lg transition mb-2">
+            
+            <button 
+              onClick={() => router.push('/dashboard/write')}
+              className="p-3 hover:bg-gray-200 rounded-lg transition mb-2 group relative"
+              title="My Documents"
+            >
               <FileText size={20} className="text-gray-700" />
+              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                Documents
+              </span>
             </button>
-            <button className="p-3 hover:bg-gray-200 rounded-lg transition mb-2">
-              <Square size={20} className="text-gray-700" />
+            
+            <button 
+              onClick={handleSave}
+              className="p-3 hover:bg-green-100 rounded-lg transition mb-2 group relative"
+              title="Save Document"
+            >
+              <Save size={20} className="text-gray-700" />
+              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                Save
+              </span>
             </button>
-            <button className="p-3 hover:bg-gray-200 rounded-lg transition mb-2">
-              <Circle size={20} className="text-gray-700" />
+            
+            <div className="border-t border-gray-300 w-10 my-4" />
+            
+            <button 
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={`p-3 rounded-lg transition mb-2 group relative ${
+                isChatOpen ? 'bg-blue-100' : 'hover:bg-gray-200'
+              }`}
+              title="AI Assistant"
+            >
+              <MessageSquare size={20} className={isChatOpen ? 'text-blue-600' : 'text-gray-700'} />
+              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                AI Chat
+              </span>
+            </button>
+            
+            <button 
+              className="p-3 hover:bg-gray-200 rounded-lg transition mb-2 group relative"
+              title="Find & Replace"
+            >
+              <Search size={20} className="text-gray-700" />
+              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                Find
+              </span>
             </button>
           </>
+        )}
+        {!isSidebarOpen && (
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 hover:bg-gray-200 rounded-lg transition"
+            title="Show sidebar"
+          >
+            <Menu size={16} className="text-gray-700" />
+          </button>
         )}
       </aside>
 
@@ -312,48 +415,60 @@ export default function WriteEditorPage() {
               <div className="flex-1 overflow-y-auto p-6">
                 {chatMessages.length === 0 ? (
                   <div className="space-y-6">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        Hello! I am your AI research assistant. I have access to <span className="font-semibold">your sources</span> and <span className="font-semibold">the web</span>. Try asking me some questions about your research topic or try some of these prompts.
+                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
+                      <p className="text-sm text-gray-800 leading-relaxed mb-2">
+                        👋 <strong>Hello! I'm your AI writing assistant.</strong>
+                      </p>
+                      <p className="text-xs text-gray-600 leading-relaxed">
+                        I can help you improve your writing, suggest sources, check grammar, and answer questions about your document titled "<strong>{document.title}</strong>".
                       </p>
                     </div>
 
-                    <div className="space-y-3">
-                      <button 
-                        onClick={() => setChatInput('What is Write Feature?')}
-                        className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm flex items-center gap-2"
-                      >
-                        <Edit3 size={14} className="text-gray-500" />
-                        <span>What is Write Feature?</span>
-                      </button>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-700 mb-3">💡 Quick suggestions:</p>
+                      <div className="space-y-2">
+                        <button 
+                          onClick={() => setChatInput('How can I improve the introduction?')}
+                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm"
+                        >
+                          ✍️ Improve introduction
+                        </button>
 
-                      <button 
-                        onClick={() => setChatInput('How to use Write Feature?')}
-                        className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm flex items-center gap-2"
-                      >
-                        <span className="text-gray-500">?</span>
-                        <span>How to use Write Feature?</span>
-                      </button>
+                        <button 
+                          onClick={() => setChatInput('Make this more academic and formal')}
+                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm"
+                        >
+                          🎓 Make it more academic
+                        </button>
 
-                      <button 
-                        onClick={() => setChatInput('Summarize in a paragraph')}
-                        className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm flex items-center gap-2"
-                      >
-                        <FileText size={14} className="text-gray-500" />
-                        <span>Summarize in a paragraph</span>
-                      </button>
-                    </div>
+                        <button 
+                          onClick={() => setChatInput('Suggest some credible sources for this topic')}
+                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm"
+                        >
+                          📚 Find credible sources
+                        </button>
 
-                    <div className="text-center text-sm text-gray-500">
-                      or explore these options
+                        <button 
+                          onClick={() => setChatInput('Check this text for grammar and clarity issues')}
+                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm"
+                        >
+                          ✅ Check grammar
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex gap-2">
-                      <button className="flex-1 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-sm font-medium">
-                        view sources ↗
+                      <button 
+                        onClick={() => router.push('/dashboard?tab=finder')}
+                        className="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-xs font-medium"
+                      >
+                        🔍 Find Sources
                       </button>
-                      <button className="flex-1 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-sm font-medium">
-                        add sources ↗
+                      <button 
+                        onClick={() => router.push('/dashboard?tab=checker')}
+                        className="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-xs font-medium"
+                      >
+                        ✓ Verify Citations
                       </button>
                     </div>
                   </div>
@@ -365,16 +480,28 @@ export default function WriteEditorPage() {
                         className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                          className={`max-w-[85%] rounded-xl px-4 py-3 ${
                             msg.role === 'user'
                               ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-900'
+                              : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
                           }`}
                         >
-                          <p className="text-sm leading-relaxed">{msg.content}</p>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                         </div>
                       </div>
                     ))}
+                    
+                    {isChatLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -387,16 +514,18 @@ export default function WriteEditorPage() {
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter' && chatInput.trim()) {
+                      if (e.key === 'Enter' && !e.shiftKey && chatInput.trim() && !isChatLoading) {
+                        e.preventDefault()
                         handleChatSubmit()
                       }
                     }}
-                    placeholder="Ask here or type @ to search sources"
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="Ask me anything about your writing..."
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm disabled:bg-gray-50"
+                    disabled={isChatLoading}
                   />
                   <button
                     onClick={handleChatSubmit}
-                    disabled={!chatInput.trim()}
+                    disabled={!chatInput.trim() || isChatLoading}
                     className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Sparkles size={18} />
