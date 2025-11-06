@@ -95,11 +95,18 @@ export default function WriteDocumentsPage() {
         })
 
         if (!response.ok) {
-          throw new Error('Failed to generate outline')
+          const errorData = await response.json().catch(() => ({}))
+          console.error('API Error:', errorData)
+          throw new Error(errorData.error || 'Failed to generate outline')
         }
 
         const data = await response.json()
+        console.log('AI Response:', data)
         const aiResponse = data.response || ''
+        
+        if (!aiResponse) {
+          throw new Error('Empty response from AI')
+        }
 
         // Parse AI response
         const titleMatch = aiResponse.match(/(?:Title|标题)[：:]\s*(.+?)(?:\n|$)/i)
@@ -147,7 +154,8 @@ export default function WriteDocumentsPage() {
       router.push(`/dashboard/write/${newDoc.id}`)
     } catch (error) {
       console.error('Generation error:', error)
-      alert('Failed to generate document. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to generate document: ${errorMessage}\n\nPlease try again or use "Start with Heading" mode.`)
     } finally {
       setIsGenerating(false)
     }
