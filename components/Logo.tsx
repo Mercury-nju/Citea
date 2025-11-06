@@ -1,4 +1,8 @@
-export default function Logo() {
+interface LogoProps {
+  variant?: 'light' | 'dark'
+}
+
+export default function Logo({ variant = 'light' }: LogoProps) {
   return (
     <div className="flex items-center gap-2">
       {/* Logo Icon */}
@@ -37,7 +41,11 @@ export default function Logo() {
       </div>
       
       {/* Logo Text */}
-      <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+      <span className={`text-xl font-bold ${
+        variant === 'dark' 
+          ? 'text-white' 
+          : 'bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'
+      }`}>
         Citea
       </span>
     </div>
