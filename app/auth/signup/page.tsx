@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Logo from '@/components/Logo'
-import { Mail, Lock, User, ArrowRight } from 'lucide-react'
+import { Mail, Lock, User, ArrowRight, Check } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function SignUpPage() {
@@ -53,121 +53,188 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <Link href="/" className="flex justify-center mb-8">
-          <Logo />
-        </Link>
+    <div className="min-h-screen flex">
+      {/* Left Side - Promotional Content */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-12 flex-col justify-between text-white">
+        <div>
+          <Link href="/">
+            <Logo variant="dark" />
+          </Link>
+        </div>
 
-        {/* Sign Up Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
-            {t.auth.signUp.title}
-          </h1>
-          <p className="text-gray-600 mb-8 text-center">
-            {t.auth.signUp.subtitle}
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t.auth.signUp.nameLabel}
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder={t.auth.signUp.namePlaceholder}
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t.auth.signUp.emailLabel}
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder={t.auth.signUp.emailPlaceholder}
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t.auth.signUp.passwordLabel}
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder={t.auth.signUp.passwordPlaceholder}
-                  minLength={8}
-                />
-              </div>
-              <p className="mt-2 text-sm text-gray-500">{t.auth.signUp.passwordHint}</p>
-            </div>
-
-            {/* Terms */}
-            <label className="flex items-start">
-              <input type="checkbox" required className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1" />
-              <span className="ml-2 text-sm text-gray-600">
-                {t.auth.signUp.agreePrefix}{' '}
-                <Link href="/terms" className="text-blue-600 hover:underline">{t.auth.signUp.termsOfService}</Link>
-                {' '}{t.auth.signUp.and}{' '}
-                <Link href="/privacy" className="text-blue-600 hover:underline">{t.auth.signUp.privacyPolicy}</Link>
-              </span>
-            </label>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  {t.auth.signUp.createButton}
-                  <ArrowRight size={20} />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-4">
+              {t.auth.signUp.heroTitle || 'Verify Citations, Find Credible Sources'}
+            </h1>
+            <p className="text-xl text-blue-100">
+              {t.auth.signUp.heroSubtitle || 'Your AI-powered research integrity assistant'}
+            </p>
           </div>
 
-          {/* Sign In Link */}
-          <p className="text-center text-gray-600">
-            {t.auth.signUp.hasAccount}{' '}
-            <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 font-semibold">
-              {t.auth.signUp.signInLink}
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-400 flex items-center justify-center mt-1">
+                <Check size={16} className="text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">
+                  {t.auth.signUp.feature1Title || 'Detect Fake References'}
+                </h3>
+                <p className="text-blue-100">
+                  {t.auth.signUp.feature1Desc || 'Instantly verify citation authenticity across academic databases'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-400 flex items-center justify-center mt-1">
+                <Check size={16} className="text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">
+                  {t.auth.signUp.feature2Title || 'Find Credible Sources'}
+                </h3>
+                <p className="text-blue-100">
+                  {t.auth.signUp.feature2Desc || 'Access CrossRef, PubMed, arXiv, and Semantic Scholar databases'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-400 flex items-center justify-center mt-1">
+                <Check size={16} className="text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">
+                  {t.auth.signUp.feature3Title || 'AI Writing Assistant'}
+                </h3>
+                <p className="text-blue-100">
+                  {t.auth.signUp.feature3Desc || 'Generate outlines and get help with academic writing'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-blue-100 text-sm">
+          © 2024 Citea. All rights reserved.
+        </div>
+      </div>
+
+      {/* Right Side - Sign Up Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex justify-center mb-8">
+            <Link href="/">
+              <Logo />
             </Link>
-          </p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                {t.auth.signUp.title}
+              </h2>
+              <p className="text-gray-600">
+                {t.auth.signUp.subtitle}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.auth.signUp.nameLabel}
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder={t.auth.signUp.namePlaceholder}
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.auth.signUp.emailLabel}
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder={t.auth.signUp.emailPlaceholder}
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.auth.signUp.passwordLabel}
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder={t.auth.signUp.passwordPlaceholder}
+                    minLength={8}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs text-gray-500">{t.auth.signUp.passwordHint}</p>
+              </div>
+
+              {/* Terms */}
+              <label className="flex items-start">
+                <input type="checkbox" required className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5" />
+                <span className="ml-2 text-sm text-gray-600">
+                  {t.auth.signUp.agreePrefix}{' '}
+                  <Link href="/terms" className="text-blue-600 hover:underline">{t.auth.signUp.termsOfService}</Link>
+                  {' '}{t.auth.signUp.and}{' '}
+                  <Link href="/privacy" className="text-blue-600 hover:underline">{t.auth.signUp.privacyPolicy}</Link>
+                </span>
+              </label>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    {t.auth.signUp.createButton}
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Sign In Link */}
+            <p className="mt-6 text-center text-sm text-gray-600">
+              {t.auth.signUp.hasAccount}{' '}
+              <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 font-semibold">
+                {t.auth.signUp.signInLink}
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
