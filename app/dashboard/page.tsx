@@ -128,7 +128,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/dashboard/write')}
                 className="group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
                 style={{
-                  background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                 }}
               >
                 <div className="relative z-10">
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
                 }`}
                 style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
                 }}
               >
                 <div className="relative z-10">
@@ -172,7 +172,7 @@ export default function DashboardPage() {
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
                 }`}
                 style={{
-                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                  background: 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)'
                 }}
               >
                 <div className="relative z-10">
@@ -194,7 +194,7 @@ export default function DashboardPage() {
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
                 }`}
                 style={{
-                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+                  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)'
                 }}
               >
                 <div className="relative z-10">
