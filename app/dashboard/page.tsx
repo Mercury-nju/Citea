@@ -16,10 +16,7 @@ import {
   MessageSquare,
   ArrowUp,
   Edit3,
-  X,
-  Save,
-  Download,
-  Home
+  X
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
@@ -35,14 +32,8 @@ export default function DashboardPage() {
   const [documents, setDocuments] = useState<any[]>([])
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([])
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false)
-  const [writeStep, setWriteStep] = useState<'prompt' | 'editor'>('prompt')
   const [writePrompt, setWritePrompt] = useState('')
   const [writeStartMode, setWriteStartMode] = useState<'heading' | 'outline'>('heading')
-  const [currentDocument, setCurrentDocument] = useState<any>(null)
-  const [isWriteChatOpen, setIsWriteChatOpen] = useState(false)
-  const [writeChatMessages, setWriteChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([])
-  const [writeChatInput, setWriteChatInput] = useState('')
-  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
   
   // 从 localStorage 加载搜索历史
   useEffect(() => {
@@ -263,12 +254,14 @@ export default function DashboardPage() {
         updatedAt: Date.now()
       }
       
-      setCurrentDocument(newDoc)
-      setWriteStep('editor')
-      
       const savedDocs = JSON.parse(localStorage.getItem('citea_documents') || '[]')
       savedDocs.unshift(newDoc)
       localStorage.setItem('citea_documents', JSON.stringify(savedDocs.slice(0, 50)))
+      
+      // Close modal and navigate to editor page
+      setIsWriteModalOpen(false)
+      setWritePrompt('')
+      router.push(`/dashboard/write/${newDoc.id}`)
     } catch (error) {
       console.error('Generation error:', error)
       alert('Failed to generate document. Please try again.')
@@ -277,50 +270,9 @@ export default function DashboardPage() {
     }
   }
 
-  const handleWriteSave = () => {
-    if (!currentDocument) return
-    
-    const savedDocs = JSON.parse(localStorage.getItem('citea_documents') || '[]')
-    const index = savedDocs.findIndex((d: any) => d.id === currentDocument.id)
-    
-    if (index >= 0) {
-      savedDocs[index] = { ...currentDocument, updatedAt: Date.now() }
-    } else {
-      savedDocs.unshift({ ...currentDocument, updatedAt: Date.now() })
-    }
-    
-    localStorage.setItem('citea_documents', JSON.stringify(savedDocs.slice(0, 50)))
-    alert('Document saved successfully!')
-  }
-
-  const handleWriteExport = (format: string) => {
-    if (!currentDocument) return
-    alert(`Exporting as ${format.toUpperCase()}...`)
-    setIsExportMenuOpen(false)
-  }
-
-  const handleWriteChatSubmit = async () => {
-    if (!writeChatInput.trim()) return
-    
-    const userMessage = writeChatInput.trim()
-    setWriteChatInput('')
-    setWriteChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
-    
-    setTimeout(() => {
-      setWriteChatMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'I can help you with your writing. What would you like to improve?' 
-      }])
-    }, 1000)
-  }
-
   const handleCloseWriteModal = () => {
     setIsWriteModalOpen(false)
-    setWriteStep('prompt')
     setWritePrompt('')
-    setCurrentDocument(null)
-    setIsWriteChatOpen(false)
-    setWriteChatMessages([])
   }
 
   const examplePrompts = {
@@ -784,9 +736,8 @@ export default function DashboardPage() {
           
           {/* Modal Content */}
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            {writeStep === 'prompt' ? (
-              <>
-                {/* Prompt Step */}
+            <>
+              {/* Prompt Step */}
                 <div className="p-8 overflow-y-auto">
                   <div className="text-center mb-8">
                     <button
@@ -889,157 +840,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </>
-            ) : (
-              <>
-                {/* Editor Step */}
-                <div className="flex flex-col h-full">
-                  {/* Editor Header */}
-                  <div className="border-b border-gray-200 px-6 py-3 flex items-center justify-between bg-white">
-                    <button
-                      onClick={handleCloseWriteModal}
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg transition text-sm"
-                    >
-                      <Home size={16} />
-                      <span>Back to Dashboard</span>
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleWriteSave}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm"
-                      >
-                        <Save size={16} />
-                        Save
-                      </button>
-                      
-                      <div className="relative">
-                        <button
-                          onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-                          className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-lg transition text-sm"
-                        >
-                          <Download size={16} />
-                          Export
-                        </button>
-                        
-                        {isExportMenuOpen && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                            <button onClick={() => handleWriteExport('pdf')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
-                              <FileText size={16} />PDF (.PDF)
-                            </button>
-                            <button onClick={() => handleWriteExport('md')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
-                              <FileText size={16} />Markdown (.MD)
-                            </button>
-                            <button onClick={() => handleWriteExport('latex')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
-                              <FileText size={16} />Latex (.TEX)
-                            </button>
-                            <button onClick={() => handleWriteExport('docx')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
-                              <FileText size={16} />WORD (.DOCX)
-                            </button>
-                            <button onClick={() => handleWriteExport('html')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
-                              <FileText size={16} />HTML (.HTML)
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={() => setIsWriteChatOpen(!isWriteChatOpen)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
-                      >
-                        <MessageSquare size={16} />
-                        Chat
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Editor Content */}
-                  <div className="flex-1 flex overflow-hidden">
-                    <div className="flex-1 overflow-y-auto px-8 py-6">
-                      <h1 className="text-3xl font-bold text-gray-900 mb-6 focus:outline-none" contentEditable>
-                        {currentDocument?.title}
-                      </h1>
-
-                      <div className="space-y-6">
-                        {currentDocument?.outline.map((section: string, index: number) => (
-                          <div key={index}>
-                            <h2 className="text-xl font-bold text-gray-900 mb-2">{section}</h2>
-                            <ul className="list-disc list-inside text-gray-700 space-y-1 text-sm">
-                              {section === 'Introduction' && (
-                                <>
-                                  <li>Background information</li>
-                                  <li>Research objectives</li>
-                                </>
-                              )}
-                              {section === 'Background and Context' && (
-                                <>
-                                  <li>Historical perspective</li>
-                                  <li>Current state of research</li>
-                                </>
-                              )}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Chat Sidebar */}
-                    {isWriteChatOpen && (
-                      <div className="w-80 border-l border-gray-200 bg-gray-50 flex flex-col">
-                        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                          <h3 className="font-semibold text-gray-900 text-sm">AI Writing Assistant</h3>
-                          <button onClick={() => setIsWriteChatOpen(false)} className="p-1 hover:bg-gray-200 rounded transition">
-                            <X size={18} />
-                          </button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                          {writeChatMessages.length === 0 ? (
-                            <div className="text-center text-gray-500 mt-8">
-                              <MessageSquare className="mx-auto mb-2" size={40} />
-                              <p className="text-xs">Ask me anything about your writing</p>
-                            </div>
-                          ) : (
-                            writeChatMessages.map((msg, idx) => (
-                              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] rounded-lg px-3 py-2 text-xs ${
-                                  msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white text-gray-900 border border-gray-200'
-                                }`}>
-                                  {msg.content}
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
-
-                        <div className="p-3 border-t border-gray-200">
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={writeChatInput}
-                              onChange={(e) => setWriteChatInput(e.target.value)}
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter' && writeChatInput.trim()) {
-                                  handleWriteChatSubmit()
-                                }
-                              }}
-                              placeholder="Ask for help..."
-                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                            />
-                            <button
-                              onClick={handleWriteChatSubmit}
-                              disabled={!writeChatInput.trim()}
-                              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                            >
-                              <Sparkles size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
           </div>
         </div>
       )}
