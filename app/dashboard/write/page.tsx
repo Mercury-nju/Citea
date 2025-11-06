@@ -109,10 +109,10 @@ export default function WriteDocumentsPage() {
         const outlineMatches = aiResponse.match(/(?:Outline|大纲)[：:]?\s*\n([\s\S]+)/i)
         if (outlineMatches) {
           const outlineText = outlineMatches[1]
-          const lines = outlineText.split('\n').filter(line => line.trim())
+          const lines = outlineText.split('\n').filter((line: string) => line.trim())
           outline = lines
-            .map(line => line.replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').trim())
-            .filter(line => line.length > 0)
+            .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').trim())
+            .filter((line: string) => line.length > 0)
             .slice(0, 6) // Limit to 6 sections
         }
 
