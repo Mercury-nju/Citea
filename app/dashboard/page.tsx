@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Search, 
@@ -18,6 +18,18 @@ export default function DashboardPage() {
   const router = useRouter()
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
+  
+  useEffect(() => {
+    const handleSetActiveTab = (event: CustomEvent) => {
+      setActiveTab(event.detail)
+    }
+    
+    window.addEventListener('setActiveTab', handleSetActiveTab as EventListener)
+    
+    return () => {
+      window.removeEventListener('setActiveTab', handleSetActiveTab as EventListener)
+    }
+  }, [])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([])

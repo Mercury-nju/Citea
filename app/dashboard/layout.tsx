@@ -230,7 +230,13 @@ export default function DashboardLayout({
               </button>
 
               <button
-                onClick={() => router.push('/dashboard#finder')}
+                onClick={() => {
+                  router.push('/dashboard')
+                  setTimeout(() => {
+                    const event = new CustomEvent('setActiveTab', { detail: 'finder' })
+                    window.dispatchEvent(event)
+                  }, 100)
+                }}
                 className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 transition group flex items-center gap-3 text-gray-700"
               >
                 <Search size={18} />
@@ -238,7 +244,13 @@ export default function DashboardLayout({
               </button>
 
               <button
-                onClick={() => router.push('/dashboard#checker')}
+                onClick={() => {
+                  router.push('/dashboard')
+                  setTimeout(() => {
+                    const event = new CustomEvent('setActiveTab', { detail: 'checker' })
+                    window.dispatchEvent(event)
+                  }, 100)
+                }}
                 className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 transition group flex items-center gap-3 text-gray-700"
               >
                 <CheckCircle size={18} />
@@ -246,7 +258,13 @@ export default function DashboardLayout({
               </button>
 
               <button
-                onClick={() => router.push('/dashboard#chat')}
+                onClick={() => {
+                  router.push('/dashboard')
+                  setTimeout(() => {
+                    const event = new CustomEvent('setActiveTab', { detail: 'assistant' })
+                    window.dispatchEvent(event)
+                  }, 100)
+                }}
                 className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 transition group flex items-center gap-3 text-gray-700"
               >
                 <MessageSquare size={18} />
