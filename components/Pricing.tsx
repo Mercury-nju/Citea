@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, X, Zap } from 'lucide-react'
+import { Check, X, Sparkles, Zap, Crown } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Pricing() {
@@ -15,6 +15,8 @@ export default function Pricing() {
       period: '',
       credits: t.pricing.freeCredits,
       wordLimit: '300',
+      icon: Sparkles,
+      gradient: 'from-gray-50 to-gray-100',
       features: [
         t.pricing.creditsPerDay,
         t.pricing.upTo300Chars,
@@ -26,7 +28,7 @@ export default function Pricing() {
         t.pricing.noChatFeature,
       ],
       buttonText: t.pricing.getStarted,
-      buttonStyle: 'bg-gray-900 hover:bg-gray-800',
+      buttonStyle: 'bg-gray-900 hover:bg-gray-800 shadow-lg',
       popular: false
     },
     {
@@ -36,6 +38,8 @@ export default function Pricing() {
       period: t.pricing.perMonth,
       credits: t.pricing.monthlyCredits,
       wordLimit: '1000',
+      icon: Zap,
+      gradient: 'from-blue-50 to-indigo-50',
       features: [
         t.pricing.creditsPerMonth,
         t.pricing.upTo1000Chars,
@@ -46,7 +50,7 @@ export default function Pricing() {
       ],
       limitations: [],
       buttonText: t.pricing.subscribeNow,
-      buttonStyle: 'bg-blue-600 hover:bg-blue-700',
+      buttonStyle: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg',
       popular: true
     },
     {
@@ -56,6 +60,8 @@ export default function Pricing() {
       period: t.pricing.perYear,
       credits: t.pricing.yearlyCredits,
       wordLimit: '1000',
+      icon: Crown,
+      gradient: 'from-purple-50 to-pink-50',
       features: [
         t.pricing.yearlyCredits,
         t.pricing.upTo1000Chars,
@@ -66,7 +72,7 @@ export default function Pricing() {
       ],
       limitations: [],
       buttonText: t.pricing.subscribeNow,
-      buttonStyle: 'bg-purple-600 hover:bg-purple-700',
+      buttonStyle: 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg',
       popular: false
     },
   ]
@@ -85,66 +91,92 @@ export default function Pricing() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`relative bg-white rounded-xl border-2 p-8 transition-all ${
-                plan.popular
-                  ? 'border-blue-500 scale-105'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-                    {t.pricing.mostPopular}
-                  </span>
-                </div>
-              )}
-
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                  {plan.period && (
-                    <span className="text-gray-600">{plan.period}</span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-500 mt-2">{plan.credits}</p>
-              </div>
-
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">{feature}</span>
-                  </li>
-                ))}
-                {plan.limitations.map((limitation, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-500 text-sm line-through">{limitation}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                className={`w-full ${plan.buttonStyle} text-white py-3 px-6 rounded-xl font-semibold transition-all`}
-                onClick={() => {
-                  if (plan.id === 'free') {
-                    window.location.href = '/auth/signup'
-                  } else {
-                    // 调用后端创建 Creem 结账并跳转（按产品ID区分月/年费）
-                    const targetPlan = plan.id === 'yearly' ? 'yearly' : 'monthly'
-                    window.location.href = `/api/creem/checkout?plan=${targetPlan}`
-                  }
-                }}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {plans.map((plan) => {
+            const IconComponent = plan.icon
+            return (
+              <div
+                key={plan.id}
+                className={`relative rounded-2xl transition-all duration-300 overflow-hidden ${
+                  plan.popular
+                    ? 'shadow-2xl scale-105 ring-2 ring-blue-500'
+                    : 'shadow-lg hover:shadow-xl hover:scale-102'
+                }`}
               >
-                {plan.buttonText}
-              </button>
-            </div>
-          ))}
+                {/* Background Gradient */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${plan.gradient} opacity-50`} />
+                
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                      <Zap size={12} />
+                      {t.pricing.mostPopular}
+                    </div>
+                  </div>
+                )}
+
+                {/* Card Content */}
+                <div className="relative bg-white/80 backdrop-blur-sm p-8">
+                  {/* Header with Icon */}
+                  <div className="text-center mb-6">
+                    <div className="inline-flex items-center justify-center w-14 h-14 bg-white rounded-2xl shadow-md mb-4">
+                      <IconComponent className={`w-7 h-7 ${
+                        plan.id === 'free' ? 'text-gray-700' :
+                        plan.id === 'monthly' ? 'text-blue-600' :
+                        'text-purple-600'
+                      }`} />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <div className="flex items-baseline justify-center gap-1 mb-1">
+                      <span className="text-5xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                        {plan.price}
+                      </span>
+                      {plan.period && (
+                        <span className="text-gray-600 text-lg">{plan.period}</span>
+                      )}
+                    </div>
+                    <p className="text-sm font-medium text-gray-500">{plan.credits}</p>
+                  </div>
+
+                  {/* Features List */}
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                          <Check className="w-3 h-3 text-green-600" />
+                        </div>
+                        <span className="text-gray-700 text-sm leading-relaxed">{feature}</span>
+                      </li>
+                    ))}
+                    {plan.limitations.map((limitation, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center mt-0.5">
+                          <X className="w-3 h-3 text-red-600" />
+                        </div>
+                        <span className="text-gray-500 text-sm line-through leading-relaxed">{limitation}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA Button */}
+                  <button
+                    className={`w-full ${plan.buttonStyle} text-white py-3.5 px-6 rounded-xl font-semibold transition-all transform hover:scale-105`}
+                    onClick={() => {
+                      if (plan.id === 'free') {
+                        window.location.href = '/auth/signup'
+                      } else {
+                        const targetPlan = plan.id === 'yearly' ? 'yearly' : 'monthly'
+                        window.location.href = `/api/creem/checkout?plan=${targetPlan}`
+                      }
+                    }}
+                  >
+                    {plan.buttonText}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
 
         {/* Credit Usage Info */}
