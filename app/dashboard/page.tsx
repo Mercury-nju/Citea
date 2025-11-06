@@ -24,31 +24,17 @@ import CitationCheckerInterface from '@/components/CitationCheckerInterface'
 export default function DashboardPage() {
   const router = useRouter()
   const { t } = useLanguage()
-  const [user, setUser] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
-  const [documents, setDocuments] = useState<any[]>([])
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([])
   
-  // 从 localStorage 加载搜索历史
-  useEffect(() => {
-    if (user) {
-      const savedHistory = localStorage.getItem(`citea_search_history_${user.email}`)
-      if (savedHistory) {
-        try {
-          const history = JSON.parse(savedHistory)
-          setDocuments(history)
-        } catch (e) {
-          console.error('Failed to load search history:', e)
-        }
-      }
-    }
-  }, [user])
+  // User and documents are now handled by layout
   
-  // 保存搜索历史到 localStorage
+  // Save search history
   const saveSearchHistory = (searchType: 'finder' | 'checker', query: string, results?: any) => {
-    if (!user) return
+    const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
+    if (!user.email) return
     
     const newDoc = {
       id: Date.now().toString(),
@@ -60,114 +46,14 @@ export default function DashboardPage() {
       timestamp: Date.now()
     }
     
-    const updated = [newDoc, ...documents.filter(d => d.id !== newDoc.id)].slice(0, 50) // 最多保存50条
-    setDocuments(updated)
+    const savedHistory = localStorage.getItem(`citea_search_history_${user.email}`)
+    const history = savedHistory ? JSON.parse(savedHistory) : []
+    const updated = [newDoc, ...history.filter((d: any) => d.id !== newDoc.id)].slice(0, 50)
     
     try {
       localStorage.setItem(`citea_search_history_${user.email}`, JSON.stringify(updated))
     } catch (e) {
       console.error('Failed to save search history:', e)
-    }
-  }
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      // 从 localStorage 获取 token
-      const token = localStorage.getItem('citea_auth_token')
-      
-      console.log('[Dashboard] 开始认证检查，token 存在:', !!token)
-      
-      if (!token) {
-        console.log('[Dashboard] ❌ 没有 token，跳转到登录页')
-        router.push('/auth/signin')
-        return
-      }
-      
-      console.log('[Dashboard] Token 长度:', token.length)
-      
-      // 尝试从 localStorage 恢复用户信息（先显示，提升体验）
-      const savedUser = localStorage.getItem('citea_user')
-      if (savedUser) {
-        try {
-          const userData = JSON.parse(savedUser)
-          console.log('[Dashboard] 从 localStorage 恢复用户信息:', userData.email)
-          setUser(userData)
-        } catch (e) {
-          console.error('[Dashboard] 解析用户信息失败:', e)
-        }
-      }
-      
-      // 验证 token
-      try {
-        // 先测试 token 是否有效
-        console.log('[Dashboard] 先测试 token 有效性...')
-        const testRes = await fetch('/api/auth/test-token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ token })
-        })
-        const testData = await testRes.json()
-        console.log('[Dashboard] Token 测试结果:', JSON.stringify(testData, null, 2))
-        
-        console.log('[Dashboard] 发送认证请求到 /api/auth/me')
-        const res = await fetch('/api/auth/me', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-        
-        console.log('[Dashboard] 认证响应状态:', res.status)
-        const data = await res.json()
-        console.log('[Dashboard] 认证响应数据:', JSON.stringify(data, null, 2))
-        
-        if (data.user) {
-          console.log('[Dashboard] ✅ 认证成功，用户:', data.user.email)
-          // 更新用户信息
-          setUser(data.user)
-          localStorage.setItem('citea_user', JSON.stringify(data.user))
-        } else {
-          console.error('[Dashboard] ❌ Token 验证失败')
-          console.error('[Dashboard] 错误信息:', data.error)
-          console.error('[Dashboard] 完整响应:', JSON.stringify(data, null, 2))
-          
-          // 如果验证失败，清除 token 并跳转
-          localStorage.removeItem('citea_auth_token')
-          localStorage.removeItem('citea_user')
-          console.log('[Dashboard] 清除 token，跳转到登录页')
-          router.push('/auth/signin')
-        }
-      } catch (error) {
-        console.error('[Dashboard] ❌ 认证检查异常:', error)
-        console.error('[Dashboard] 异常详情:', error instanceof Error ? error.stack : String(error))
-        // 清除 token 并跳转
-        localStorage.removeItem('citea_auth_token')
-        localStorage.removeItem('citea_user')
-        router.push('/auth/signin')
-      }
-    }
-    
-    checkAuth()
-  }, [router])
-
-  const handleLogout = async () => {
-    await fetch('/api/auth/signout', { method: 'POST' })
-    router.push('/')
-  }
-
-  const handleNewDocument = () => {
-    // 切换到对应的 tab 并清空输入
-    setActiveTab('finder')
-    setQuery('')
-  }
-  
-  const handleHistoryClick = (doc: any) => {
-    if (doc.type === 'finder') {
-      setActiveTab('finder')
-    } else if (doc.type === 'checker') {
-      setActiveTab('checker')
     }
   }
 
@@ -234,14 +120,6 @@ export default function DashboardPage() {
       'What is the difference between primary and secondary sources?',
       '如何判断期刊是否正规？',
     ]
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
   }
 
   return (
