@@ -57,12 +57,12 @@ export const translations = {
     hero: {
       title1: 'Stop Guessing.',
       title2: 'Start Citing Real.',
-      subtitle: 'Detect fake references, kill hallucinations, and publish with confidence.',
+      subtitle: 'Verify citations, find credible sources, and maintain academic integrity.',
       free: 'Free plan available',
       findSources: 'Start Writing with AI',
       checkCitations: 'Check Citations',
       watchDemo: 'Watch Demo',
-      databases: 'Integrated with leading academic databases',
+      databases: 'Integrated with academic databases',
     },
     
     // Features
@@ -551,12 +551,12 @@ export const translations = {
     hero: {
       title1: '别再猜测。',
       title2: '开始只引真实文献。',
-      subtitle: '识别虚假参考文献，消灭幻觉内容，自信发表。',
+      subtitle: '验证引用、发现可信来源、维护学术诚信。',
       free: '提供免费计划',
       findSources: 'Start Writing with AI',
       checkCitations: '验证引用',
       watchDemo: '观看演示',
-      databases: '集成主流学术数据库',
+      databases: '集成学术数据库',
     },
     
     // Features
