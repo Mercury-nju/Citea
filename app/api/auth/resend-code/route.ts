@@ -40,9 +40,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '邮件发送失败' }, { status: 500 })
     }
 
+    // 在受控环境下暴露验证码（仅用于紧急排障）
+    const expose = process.env.EXPOSE_VERIFICATION_CODE === 'true'
     return NextResponse.json({ 
       success: true,
-      message: '验证码已重新发送！'
+      message: '验证码已重新发送！',
+      code: expose ? verificationCode : undefined
     })
   } catch (error) {
     console.error('Resend code error:', error)
