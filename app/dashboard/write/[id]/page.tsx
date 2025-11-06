@@ -227,6 +227,9 @@ export default function WriteEditorPage() {
                 className="text-5xl font-bold text-gray-900 mb-12 focus:outline-none leading-tight"
                 contentEditable
                 suppressContentEditableWarning
+                onBlur={(e) => {
+                  setDocument(prev => prev ? {...prev, title: e.currentTarget.textContent || prev.title} : null)
+                }}
               >
                 {document.title}
               </h1>
@@ -235,41 +238,54 @@ export default function WriteEditorPage() {
               <div className="space-y-10">
                 {document.outline.map((section, index) => (
                   <div key={index}>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                    <h2 
+                      className="text-3xl font-bold text-gray-900 mb-4 focus:outline-none"
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => {
+                        const newOutline = [...document.outline]
+                        newOutline[index] = e.currentTarget.textContent || section
+                        setDocument(prev => prev ? {...prev, outline: newOutline} : null)
+                      }}
+                    >
                       {section}
                     </h2>
-                    <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                    <div 
+                      className="text-gray-700 space-y-2 ml-4 leading-relaxed focus:outline-none"
+                      contentEditable
+                      suppressContentEditableWarning
+                    >
                       {section === 'Introduction' && (
-                        <>
-                          <li className="leading-relaxed">Background information</li>
-                          <li className="leading-relaxed">Research objectives</li>
-                        </>
+                        <ul className="list-disc list-inside">
+                          <li>Background information</li>
+                          <li>Research objectives</li>
+                        </ul>
                       )}
                       {section === 'Background and Context' && (
-                        <>
-                          <li className="leading-relaxed">Historical perspective</li>
-                          <li className="leading-relaxed">Current state of research</li>
-                        </>
+                        <ul className="list-disc list-inside">
+                          <li>Historical perspective</li>
+                          <li>Current state of research</li>
+                        </ul>
                       )}
                       {section === 'Main Analysis' && (
-                        <>
-                          <li className="leading-relaxed">Methodology</li>
-                          <li className="leading-relaxed">Data analysis</li>
-                        </>
+                        <ul className="list-disc list-inside">
+                          <li>Methodology</li>
+                          <li>Data analysis</li>
+                        </ul>
                       )}
                       {section === 'Key Findings' && (
-                        <>
-                          <li className="leading-relaxed">Primary results</li>
-                          <li className="leading-relaxed">Secondary observations</li>
-                        </>
+                        <ul className="list-disc list-inside">
+                          <li>Primary results</li>
+                          <li>Secondary observations</li>
+                        </ul>
                       )}
                       {section === 'Conclusion' && (
-                        <>
-                          <li className="leading-relaxed">Summary of findings</li>
-                          <li className="leading-relaxed">Future directions</li>
-                        </>
+                        <ul className="list-disc list-inside">
+                          <li>Summary of findings</li>
+                          <li>Future directions</li>
+                        </ul>
                       )}
-                    </ul>
+                    </div>
                   </div>
                 ))}
               </div>

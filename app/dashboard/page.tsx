@@ -15,8 +15,7 @@ import {
   CheckCircle,
   MessageSquare,
   ArrowUp,
-  Edit3,
-  X
+  Edit3
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
@@ -31,9 +30,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false)
   const [documents, setDocuments] = useState<any[]>([])
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([])
-  const [isWriteModalOpen, setIsWriteModalOpen] = useState(false)
-  const [writePrompt, setWritePrompt] = useState('')
-  const [writeStartMode, setWriteStartMode] = useState<'heading' | 'outline'>('heading')
   
   // 从 localStorage 加载搜索历史
   useEffect(() => {
@@ -231,49 +227,6 @@ export default function DashboardPage() {
     }
   }
 
-  const handleWriteGenerate = async () => {
-    if (!writePrompt.trim()) return
-
-    setLoading(true)
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      const newDoc = {
-        id: Date.now().toString(),
-        title: writeStartMode === 'heading' ? writePrompt : `Document about ${writePrompt}`,
-        outline: [
-          'Introduction',
-          'Background and Context',
-          'Main Analysis',
-          'Key Findings',
-          'Conclusion'
-        ],
-        content: '',
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      }
-      
-      const savedDocs = JSON.parse(localStorage.getItem('citea_documents') || '[]')
-      savedDocs.unshift(newDoc)
-      localStorage.setItem('citea_documents', JSON.stringify(savedDocs.slice(0, 50)))
-      
-      // Close modal and navigate to editor page
-      setIsWriteModalOpen(false)
-      setWritePrompt('')
-      router.push(`/dashboard/write/${newDoc.id}`)
-    } catch (error) {
-      console.error('Generation error:', error)
-      alert('Failed to generate document. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCloseWriteModal = () => {
-    setIsWriteModalOpen(false)
-    setWritePrompt('')
-  }
 
   const examplePrompts = {
     assistant: [
@@ -504,7 +457,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Write Card */}
                 <button
-                  onClick={() => setIsWriteModalOpen(true)}
+                  onClick={() => router.push('/dashboard/write')}
                   className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
                   style={{
                     background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
@@ -725,124 +678,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Write Modal */}
-      {isWriteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop with blur */}
-          <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={handleCloseWriteModal}
-          />
-          
-          {/* Modal Content */}
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <>
-              {/* Prompt Step */}
-                <div className="p-8 overflow-y-auto">
-                  <div className="text-center mb-8">
-                    <button
-                      onClick={handleCloseWriteModal}
-                      className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition"
-                    >
-                      <X size={20} />
-                    </button>
-                    
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-cyan-400 mb-4">
-                      <Edit3 className="text-white" size={32} />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                      What are you writing today? <span className="text-red-500">*</span>
-                    </h2>
-                    <button
-                      onClick={handleCloseWriteModal}
-                      className="text-gray-500 hover:text-gray-700 text-sm"
-                    >
-                      Skip ⏭
-                    </button>
-                  </div>
-
-                  {/* Input Area */}
-                  <div className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4 mb-4">
-                    <textarea
-                      value={writePrompt}
-                      onChange={(e) => setWritePrompt(e.target.value)}
-                      placeholder="e.g., write an essay about history of the United States"
-                      className="w-full h-32 p-3 bg-transparent border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400"
-                      maxLength={500}
-                    />
-                    <div className="pt-3 border-t border-gray-200">
-                      <span className="text-sm text-gray-500">
-                        {writePrompt.length}/500
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Weak Prompt Notice */}
-                  {writePrompt.length > 0 && writePrompt.length < 20 && (
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex-1 bg-gray-200 h-1 rounded-full">
-                          <div className="bg-orange-500 h-1 rounded-full" style={{ width: '20%' }} />
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        Weak Prompt: add more context for higher quality generations
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Start Mode Selection */}
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <button
-                      onClick={() => setWriteStartMode('heading')}
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${
-                        writeStartMode === 'heading'
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 bg-gray-50 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Edit3 className={writeStartMode === 'heading' ? 'text-blue-600' : 'text-gray-400'} size={20} />
-                        <div>
-                          <h3 className="font-semibold text-sm text-gray-900 mb-1">Start with Heading</h3>
-                          <p className="text-xs text-gray-600">Generate title, and write upon it</p>
-                        </div>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setWriteStartMode('outline')}
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${
-                        writeStartMode === 'outline'
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 bg-gray-50 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <FileText className={writeStartMode === 'outline' ? 'text-blue-600' : 'text-gray-400'} size={20} />
-                        <div>
-                          <h3 className="font-semibold text-sm text-gray-900 mb-1">Start with Outline</h3>
-                          <p className="text-xs text-gray-600">AI will generate outline for you</p>
-                        </div>
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Next Button */}
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleWriteGenerate}
-                      disabled={!writePrompt.trim() || loading}
-                      className="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? 'Generating...' : 'Next'}
-                    </button>
-                  </div>
-                </div>
-              </>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
