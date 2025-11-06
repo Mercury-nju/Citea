@@ -38,9 +38,9 @@ export default function SignUpPage() {
       
       // 注册成功，跳转到验证页面
       if (data.needsVerification) {
-        // 直接跳转到验证页面，不显示 alert
-        // 验证页面会显示相关提示
-        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)
+        // 若后端在应急模式下返回验证码，则携带到验证页
+        const codeParam = data.verificationCode ? `&code=${encodeURIComponent(data.verificationCode)}` : ''
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}${codeParam}`)
       } else {
         // 旧用户或不需要验证
         router.push('/dashboard')

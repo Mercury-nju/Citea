@@ -10,6 +10,7 @@ function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const emailParam = searchParams.get('email')
+  const codeParam = searchParams.get('code')
   
   const [email, setEmail] = useState(emailParam || '')
   const [code, setCode] = useState('')
@@ -21,8 +22,13 @@ function VerifyEmailContent() {
   useEffect(() => {
     if (emailParam) {
       setEmail(emailParam)
-      // 显示初始提示
-      setMessage('✅ 注册成功！验证码已发送到您的邮箱，请查收。')
+      // 如果通过应急模式携带了验证码，直接填入并提示
+      if (codeParam) {
+        setCode(codeParam)
+        setMessage('✅ 验证码已生成并自动填入，请直接点击“验证邮箱”。')
+      } else {
+        setMessage('✅ 注册成功！验证码已发送到您的邮箱，请查收。')
+      }
     }
   }, [emailParam])
 
