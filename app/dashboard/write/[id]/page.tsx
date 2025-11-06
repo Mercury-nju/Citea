@@ -60,14 +60,27 @@ export default function WriteEditorPage() {
     const savedDocs = JSON.parse(localStorage.getItem('citea_documents') || '[]')
     const index = savedDocs.findIndex((d: Document) => d.id === document.id)
     
+    const updatedDoc = { ...document, updatedAt: Date.now() }
+    
     if (index >= 0) {
-      savedDocs[index] = { ...document, updatedAt: Date.now() }
+      savedDocs[index] = updatedDoc
     } else {
-      savedDocs.unshift({ ...document, updatedAt: Date.now() })
+      savedDocs.unshift(updatedDoc)
     }
     
     localStorage.setItem('citea_documents', JSON.stringify(savedDocs.slice(0, 50)))
-    alert('Document saved successfully!')
+    
+    // Show success toast
+    const toast = document.createElement('div')
+    toast.className = 'fixed top-20 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2'
+    toast.innerHTML = '<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Document saved'
+    document.body.appendChild(toast)
+    
+    setTimeout(() => {
+      toast.style.transition = 'opacity 0.3s'
+      toast.style.opacity = '0'
+      setTimeout(() => toast.remove(), 300)
+    }, 2000)
   }
 
   const handleExport = (format: string) => {
@@ -208,16 +221,6 @@ export default function WriteEditorPage() {
               <MessageSquare size={20} className={isChatOpen ? 'text-blue-600' : 'text-gray-700'} />
               <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
                 AI Chat
-              </span>
-            </button>
-            
-            <button 
-              className="p-3 hover:bg-gray-200 rounded-lg transition mb-2 group relative"
-              title="Find & Replace"
-            >
-              <Search size={20} className="text-gray-700" />
-              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                Find
               </span>
             </button>
           </>

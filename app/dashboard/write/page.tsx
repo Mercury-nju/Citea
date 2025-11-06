@@ -51,20 +51,89 @@ export default function WriteDocumentsPage() {
     setIsGenerating(true)
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      let title = ''
+      let outline: string[] = []
       
-      const newDoc: Document = {
-        id: Date.now().toString(),
-        title: writeStartMode === 'heading' ? writePrompt : `Document about ${writePrompt}`,
-        outline: [
+      if (writeStartMode === 'heading') {
+        // Start with heading: Use user input as title directly
+        title = writePrompt.trim()
+        outline = [
           'Introduction',
           'Background and Context',
           'Main Analysis',
           'Key Findings',
           'Conclusion'
-        ],
+        ]
+      } else {
+        // Start with outline: Generate both title and outline using AI
+        const token = localStorage.getItem('citea_auth_token')
+        const headers: HeadersInit = { 'Content-Type': 'application/json' }
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+
+        // Detect language
+        const isChinese = /[\u4e00-\u9fa5]/.test(writePrompt)
+        const language = isChinese ? 'Chinese' : 'English'
+
+        const promptMessage = isChinese
+          ? `请根据以下主题生成一个学术文档的标题和大纲。主题：${writePrompt}\n\n请按以下格式返回：\n标题：[标题内容]\n大纲：\n1. [章节1]\n2. [章节2]\n3. [章节3]\n4. [章节4]\n5. [章节5]`
+          : `Generate a title and outline for an academic document based on this topic: ${writePrompt}\n\nPlease return in this format:\nTitle: [title content]\nOutline:\n1. [Section 1]\n2. [Section 2]\n3. [Section 3]\n4. [Section 4]\n5. [Section 5]`
+
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            messages: [
+              {
+                role: 'user',
+                content: promptMessage
+              }
+            ],
+            language: language
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to generate outline')
+        }
+
+        const data = await response.json()
+        const aiResponse = data.response || ''
+
+        // Parse AI response
+        const titleMatch = aiResponse.match(/(?:Title|标题)[：:]\s*(.+?)(?:\n|$)/i)
+        title = titleMatch ? titleMatch[1].trim() : `Document about ${writePrompt}`
+
+        // Extract outline sections
+        const outlineMatches = aiResponse.match(/(?:Outline|大纲)[：:]?\s*\n([\s\S]+)/i)
+        if (outlineMatches) {
+          const outlineText = outlineMatches[1]
+          const lines = outlineText.split('\n').filter(line => line.trim())
+          outline = lines
+            .map(line => line.replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').trim())
+            .filter(line => line.length > 0)
+            .slice(0, 6) // Limit to 6 sections
+        }
+
+        // Fallback if outline extraction failed
+        if (outline.length === 0) {
+          outline = [
+            'Introduction',
+            'Background and Context',
+            'Main Analysis',
+            'Key Findings',
+            'Conclusion'
+          ]
+        }
+      }
+      
+      const newDoc: Document = {
+        id: Date.now().toString(),
+        title: title,
+        outline: outline,
         content: '',
-        preview: 'Background information, Research objectives, Historical perspective...',
+        preview: outline.slice(0, 3).join(', ') + '...',
         createdAt: Date.now(),
         updatedAt: Date.now()
       }
