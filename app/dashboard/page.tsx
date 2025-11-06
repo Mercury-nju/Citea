@@ -14,7 +14,8 @@ import {
   BookOpen,
   CheckCircle,
   MessageSquare,
-  ArrowUp
+  ArrowUp,
+  Edit3
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SourceFinderInterface from '@/components/SourceFinderInterface'
@@ -452,7 +453,31 @@ export default function DashboardPage() {
             {/* Quick Actions */}
             <div className="mb-8">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Write Card */}
+                <button
+                  onClick={() => router.push('/dashboard/document-assistant')}
+                  className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                  style={{
+                    background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+                  }}
+                >
+                  <div className="relative z-10">
+                    <div className="mb-3">
+                      <Edit3 size={32} className="text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                      <Edit3 size={20} />
+                      Write
+                    </h3>
+                    <p className="text-sm text-white/90">
+                      Paraphrase, rewrite, auto-cite, and more
+                    </p>
+                  </div>
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                </button>
+
                 {/* Find Sources Card */}
                 <button
                   onClick={() => setActiveTab('finder')}
