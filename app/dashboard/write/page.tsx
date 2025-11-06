@@ -40,8 +40,19 @@ export default function WriteDocumentsPage() {
   }, [])
 
   const loadDocuments = () => {
-    const savedDocs = JSON.parse(localStorage.getItem('citea_documents') || '[]')
-    setDocuments(savedDocs)
+    try {
+      const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
+      if (!user.email) {
+        setDocuments([])
+        return
+      }
+      
+      const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+      setDocuments(savedDocs)
+    } catch (error) {
+      console.error('Failed to load documents:', error)
+      setDocuments([])
+    }
   }
 
   const handleGenerate = async () => {
@@ -144,9 +155,14 @@ export default function WriteDocumentsPage() {
         updatedAt: Date.now()
       }
       
-      const savedDocs = JSON.parse(localStorage.getItem('citea_documents') || '[]')
+      const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
+      if (!user.email) {
+        throw new Error('User email not found')
+      }
+      
+      const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
       savedDocs.unshift(newDoc)
-      localStorage.setItem('citea_documents', JSON.stringify(savedDocs.slice(0, 50)))
+      localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
       
       setIsModalOpen(false)
       setWritePrompt('')
@@ -163,10 +179,17 @@ export default function WriteDocumentsPage() {
   const handleDeleteDocument = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
     if (confirm('Are you sure you want to delete this document?')) {
-      const savedDocs = JSON.parse(localStorage.getItem('citea_documents') || '[]')
-      const filtered = savedDocs.filter((d: Document) => d.id !== id)
-      localStorage.setItem('citea_documents', JSON.stringify(filtered))
-      loadDocuments()
+      try {
+        const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
+        if (!user.email) return
+        
+        const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+        const filtered = savedDocs.filter((d: Document) => d.id !== id)
+        localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(filtered))
+        loadDocuments()
+      } catch (error) {
+        console.error('Failed to delete document:', error)
+      }
     }
   }
 
