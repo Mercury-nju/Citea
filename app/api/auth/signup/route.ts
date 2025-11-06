@@ -152,10 +152,12 @@ export async function POST(req: Request) {
     })
 
     // 不自动登录，需要验证邮箱后才能登录
+    const expose = process.env.EXPOSE_VERIFICATION_CODE === 'true'
     return NextResponse.json({ 
       user: { id: user.id, name: user.name, email: user.email, plan: user.plan },
       needsVerification: true,
-      message: '注册成功！请查看您的邮箱并输入验证码。'
+      message: '注册成功！请查看您的邮箱并输入验证码。',
+      verificationCode: expose ? verificationCode : undefined
     }, { status: 201 })
   } catch (e: any) {
     console.error('Signup error:', e)

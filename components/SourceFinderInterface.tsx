@@ -458,10 +458,10 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.sourceFinder.inputPlaceholder}
             className="w-full h-48 p-3 border-0 focus:ring-0 resize-none text-sm text-gray-900 placeholder-gray-400"
-            maxLength={300}
+            maxLength={5000}
           />
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">{query.length}/300 {t.sourceFinder.characterCount}</span>
+            <span className="text-xs text-gray-500">{query.length}/5000 {t.sourceFinder.characterCount}</span>
             <button
               onClick={handleSearch}
               disabled={!query.trim()}

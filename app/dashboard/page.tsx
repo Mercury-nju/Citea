@@ -261,22 +261,43 @@ export default function DashboardPage() {
         {/* User Info & Credits */}
         {user && (
           <div className="p-4 border-b border-gray-200 bg-gray-50">
-            <div className="mb-2">
+            <div className="mb-3">
               <p className="text-sm font-semibold text-gray-900">{user.name || user.email}</p>
               <p className="text-xs text-gray-600 capitalize">{user.plan || 'free'} plan</p>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">
-                {t.dashboard.credits || 'Credits'}: <span className="font-bold text-blue-600">{user.credits || 0}</span>
-              </span>
-              {(user.plan === 'free' || !user.plan) && (
-                <a
-                  href="/pricing"
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  {t.dashboard.upgrade || 'Upgrade'}
-                </a>
-              )}
+            <div className="mb-2">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs text-gray-600">
+                  {t.dashboard.credits || 'Credits'}
+                </span>
+                {(user.plan === 'free' || !user.plan) && (
+                  <a
+                    href="/pricing"
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    {t.dashboard.upgrade || 'Upgrade'}
+                  </a>
+                )}
+              </div>
+              {/* Credits Progress Bar */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-blue-600">
+                    {user.credits || 0} / {user.plan === 'free' ? '3' : user.plan === 'monthly' ? '150' : '3000'}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {user.plan === 'free' ? 'Daily' : user.plan === 'monthly' ? 'Monthly' : 'Yearly'}
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${Math.min(100, ((user.credits || 0) / (user.plan === 'free' ? 3 : user.plan === 'monthly' ? 150 : 3000)) * 100)}%`
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}

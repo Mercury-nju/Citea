@@ -362,10 +362,10 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
             onChange={(e) => setText(e.target.value)}
             placeholder="粘贴您的引用列表进行验证..."
             className="w-full h-64 p-3 border-0 focus:ring-0 resize-none text-sm text-gray-900 placeholder-gray-400"
-            maxLength={5000}
+            maxLength={300}
           />
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">{text.length}/5000 字符</span>
+            <span className="text-xs text-gray-500">{text.length}/300 字符</span>
             <button
               onClick={handleCheck}
               disabled={!text.trim() || isChecking}
