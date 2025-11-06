@@ -29,6 +29,19 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const checkAuth = async () => {
+      // 首先检查 URL 参数中是否有来自 Google OAuth 的 token 和 user
+      const searchParams = new URLSearchParams(window.location.search)
+      const urlToken = searchParams.get('token')
+      const urlUser = searchParams.get('user')
+      
+      if (urlToken && urlUser) {
+        // 保存到 localStorage
+        localStorage.setItem('citea_auth_token', urlToken)
+        localStorage.setItem('citea_user', urlUser)
+        // 清除 URL 参数
+        window.history.replaceState({}, '', pathname)
+      }
+      
       const token = localStorage.getItem('citea_auth_token')
       
       if (!token) {

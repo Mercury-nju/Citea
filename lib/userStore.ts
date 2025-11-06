@@ -64,6 +64,9 @@ export type StoredUser = AuthUser & {
   creditsResetDate?: string // 积分重置日期（ISO string）
   subscriptionStartDate?: string // 订阅开始日期
   subscriptionEndDate?: string // 订阅结束日期
+  authProvider?: 'email' | 'google' // 认证提供者
+  googleId?: string // Google 用户 ID
+  avatar?: string // 用户头像 URL
 }
 
 async function ensureDataFile() {
@@ -113,6 +116,9 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         creditsResetDate: data.creditsResetDate as string | undefined,
         subscriptionStartDate: data.subscriptionStartDate as string | undefined,
         subscriptionEndDate: data.subscriptionEndDate as string | undefined,
+        authProvider: (data.authProvider as 'email' | 'google') || 'email',
+        googleId: data.googleId as string | undefined,
+        avatar: data.avatar as string | undefined,
       }
       
       if (!user.passwordHash) {
@@ -160,6 +166,9 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         creditsResetDate: data.creditsResetDate,
         subscriptionStartDate: data.subscriptionStartDate,
         subscriptionEndDate: data.subscriptionEndDate,
+        authProvider: (data.authProvider as 'email' | 'google') || 'email',
+        googleId: data.googleId,
+        avatar: data.avatar,
       }
       
       if (!user.passwordHash) {
@@ -216,6 +225,9 @@ export async function createUser(user: StoredUser): Promise<void> {
         creditsResetDate: user.creditsResetDate || '',
         subscriptionStartDate: user.subscriptionStartDate || '',
         subscriptionEndDate: user.subscriptionEndDate || '',
+        authProvider: user.authProvider || 'email',
+        googleId: user.googleId || '',
+        avatar: user.avatar || '',
       })
       return
     } catch (error) {
