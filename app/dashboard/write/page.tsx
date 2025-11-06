@@ -12,7 +12,6 @@ import {
   Star,
   Filter,
   Search,
-  Sparkles,
   X
 } from 'lucide-react'
 import Logo from '@/components/Logo'
@@ -191,10 +190,7 @@ export default function WriteDocumentsPage() {
       <main className="px-8 py-8">
         {/* Header Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Edit3 size={24} className="text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Write</h1>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Write</h1>
           <p className="text-gray-600">Create and manage your documents with AI assistance</p>
         </div>
 
@@ -214,39 +210,19 @@ export default function WriteDocumentsPage() {
             <Filter size={18} />
           </button>
         </div>
-        {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-8 max-w-4xl">
-          {/* New Document Card */}
+        {/* Action Card - New Document Only */}
+        <div className="mb-8 max-w-2xl">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="group bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all text-left"
+            className="group w-full bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all text-left"
           >
-            <div className="flex items-start gap-4">
+            <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition">
                 <Edit3 size={24} className="text-blue-600" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">New document</h3>
                 <p className="text-sm text-gray-600">Get AI help as you write</p>
-              </div>
-            </div>
-          </button>
-
-          {/* Generate Draft Card */}
-          <button
-            onClick={() => {
-              setWriteStartMode('outline')
-              setIsModalOpen(true)
-            }}
-            className="group bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-purple-500 hover:shadow-lg transition-all text-left"
-          >
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition">
-                <Sparkles size={24} className="text-purple-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">Generate a draft</h3>
-                <p className="text-sm text-gray-600">Create a draft using AI</p>
               </div>
             </div>
           </button>
