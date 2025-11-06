@@ -126,16 +126,13 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <button
                 onClick={() => router.push('/dashboard/write')}
-                className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                className="group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
                 style={{
                   background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
                 }}
               >
                 <div className="relative z-10">
-                  <div className="mb-3">
-                    <Edit3 size={32} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
                     <Edit3 size={20} />
                     Write
                   </h3>
@@ -143,12 +140,11 @@ export default function DashboardPage() {
                     Paraphrase, rewrite, auto-cite, and more
                   </p>
                 </div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
               </button>
 
               <button
                 onClick={() => setActiveTab('finder')}
-                className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 ${
+                className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
                   activeTab === 'finder' 
                     ? 'shadow-xl scale-105' 
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
@@ -158,10 +154,7 @@ export default function DashboardPage() {
                 }}
               >
                 <div className="relative z-10">
-                  <div className="mb-3">
-                    <Search size={32} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
                     <Search size={20} />
                     Find Sources
                   </h3>
@@ -169,12 +162,11 @@ export default function DashboardPage() {
                     Search academic databases and discover credible sources
                   </p>
                 </div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
               </button>
 
               <button
                 onClick={() => setActiveTab('checker')}
-                className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 ${
+                className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
                   activeTab === 'checker' 
                     ? 'shadow-xl scale-105' 
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
@@ -184,10 +176,7 @@ export default function DashboardPage() {
                 }}
               >
                 <div className="relative z-10">
-                  <div className="mb-3">
-                    <CheckCircle size={32} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
                     <CheckCircle size={20} />
                     Verify Citations
                   </h3>
@@ -195,12 +184,11 @@ export default function DashboardPage() {
                     Check citation authenticity and detect fake references
                   </p>
                 </div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
               </button>
 
               <button
                 onClick={() => setActiveTab('assistant')}
-                className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 ${
+                className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
                   activeTab === 'assistant' 
                     ? 'shadow-xl scale-105' 
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
@@ -210,10 +198,7 @@ export default function DashboardPage() {
                 }}
               >
                 <div className="relative z-10">
-                  <div className="mb-3">
-                    <MessageSquare size={32} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
                     <MessageSquare size={20} />
                     Chat Assistant
                   </h3>
@@ -221,7 +206,6 @@ export default function DashboardPage() {
                     Get help with citations, formatting, and research questions
                   </p>
                 </div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
               </button>
             </div>
           </div>
