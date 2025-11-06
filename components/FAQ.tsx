@@ -30,7 +30,7 @@ const faqs = [
     },
     {
       question: "Is Citea really completely free?",
-      answer: "Yes! Unlike other services, Citea is 100% free with no limits, no subscriptions, and no hidden fees. We believe academic integrity tools should be accessible to everyone."
+      answer: "Citea offers a free plan with daily credits for core features. No credit card is required to start. Advanced usage (higher limits, faster processing, and access to additional databases) will be available via paid plans. We do not charge hidden fees."
     }
   ],
   [
