@@ -23,7 +23,7 @@ import CitationCheckerInterface from '@/components/CitationCheckerInterface'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const [user, setUser] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
   const [query, setQuery] = useState('')
