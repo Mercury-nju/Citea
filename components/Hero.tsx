@@ -9,10 +9,10 @@ export default function Hero() {
   const { t } = useLanguage()
   
   return (
-    <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto text-center relative z-10">
+    <section className="relative pt-48 pb-40 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden min-h-screen flex items-center">
+      <div className="max-w-7xl mx-auto text-center relative z-10 w-full">
         {/* Main Heading */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+        <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-gray-900 mb-8 leading-tight">
           <span className="text-gray-900">{t.hero.title1}</span>
           <br />
           <span className="relative inline-block">
@@ -37,15 +37,15 @@ export default function Hero() {
         </h1>
         
         {/* Subtitle */}
-        <p className="text-base md:text-lg text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
           {t.hero.subtitle}
         </p>
 
         {/* CTA Button */}
-        <div className="flex flex-col items-center mb-6">
+        <div className="flex flex-col items-center mb-8">
           <Link
             href="/auth/signin"
-            className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-3 rounded-lg transition-all text-base font-semibold shadow-sm hover:shadow-md mb-4"
+            className="bg-blue-700 hover:bg-blue-800 text-white px-10 py-4 rounded-lg transition-all text-lg font-semibold shadow-lg hover:shadow-xl mb-6"
           >
             {t.hero.findSources || '开始'}
           </Link>
@@ -64,8 +64,8 @@ export default function Hero() {
         </div>
 
         {/* Database Integration */}
-        <div className="mt-16">
-          <p className="text-sm text-gray-600 mb-6 font-medium">
+        <div className="mt-20">
+          <p className="text-base text-gray-600 mb-8 font-medium">
             {t.hero.databases}
           </p>
           <DatabaseLogos />
