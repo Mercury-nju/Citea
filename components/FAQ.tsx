@@ -8,7 +8,7 @@ const faqs = [
   [
     {
       question: "How accurate is Citea's citation verification?",
-      answer: "Citea uses AI-powered verification against authoritative academic databases like CrossRef and PubMed, achieving over 95% accuracy in detecting authentic vs. fabricated citations."
+      answer: "Citea verifies citations against supported academic databases (e.g., CrossRef, PubMed). Results may vary by field and data quality. We continuously improve our models, but manual review is still recommended for critical submissions."
     },
     {
       question: "What citation formats does Citea support?",
