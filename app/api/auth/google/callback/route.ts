@@ -134,7 +134,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 6. 生成 JWT token
+    // 6. 确保用户对象存在
+    if (!user) {
+      console.error('User is null after creation/update')
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=user_creation_failed`
+      )
+    }
+
+    // 7. 生成 JWT token
     const token = await signJwt({
       id: user.id,
       email: user.email,
@@ -142,7 +150,7 @@ export async function GET(request: NextRequest) {
       plan: user.plan,
     })
 
-    // 7. 重定向到 dashboard，并在 URL 中携带 token
+    // 8. 重定向到 dashboard，并在 URL 中携带 token
     const dashboardUrl = new URL('/dashboard', process.env.NEXT_PUBLIC_APP_URL)
     dashboardUrl.searchParams.append('token', token)
     dashboardUrl.searchParams.append('user', JSON.stringify({
