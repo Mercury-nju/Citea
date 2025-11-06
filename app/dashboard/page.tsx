@@ -245,20 +245,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-72 bg-white border-r border-gray-200 flex flex-col">
-        {/* Logo & Menu Toggle */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <Logo />
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="3" y="5" width="14" height="2" rx="1" fill="currentColor"/>
-              <rect x="3" y="9" width="14" height="2" rx="1" fill="currentColor"/>
-              <rect x="3" y="13" width="14" height="2" rx="1" fill="currentColor"/>
-            </svg>
-          </button>
-        </div>
+    <div className="px-8 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          {t.dashboard.researchAssistant || 'Research Assistant'}
+        </h1>
+        <p className="text-gray-600">
+          {t.dashboard.researchSubtitle || 'Your AI-powered research companion'}
+        </p>
+      </div>
 
         {/* User Info & Credits */}
         {user && (

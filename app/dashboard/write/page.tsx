@@ -110,45 +110,35 @@ export default function WriteDocumentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <Logo />
-            <div className="flex items-center gap-2">
-              <Edit3 size={20} className="text-blue-600" />
-              <h1 className="text-xl font-bold text-gray-900">Write</h1>
-            </div>
+      {/* Main Content - Full Width */}
+      <main className="px-8 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Edit3 size={24} className="text-blue-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Write</h1>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search documents..."
-                className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-              />
-            </div>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <Filter size={18} />
-            </button>
-          </div>
+          <p className="text-gray-600">Create and manage your documents with AI assistance</p>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Search Bar */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search documents..."
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+            />
+          </div>
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+            <Filter size={18} />
+          </button>
+        </div>
         {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-8 max-w-4xl">
           {/* New Document Card */}
           <button
             onClick={() => setIsModalOpen(true)}
@@ -201,7 +191,7 @@ export default function WriteDocumentsPage() {
 
         {/* Documents Grid */}
         {filteredDocuments.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-16 max-w-2xl mx-auto">
             <FileText className="mx-auto mb-4 text-gray-300" size={64} />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No documents yet</h3>
             <p className="text-gray-600 mb-6">Create your first document to get started</p>
@@ -214,7 +204,7 @@ export default function WriteDocumentsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
               {filteredDocuments.map((doc) => (
                 <button
                   key={doc.id}
