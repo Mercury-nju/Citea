@@ -14,9 +14,12 @@ export const metadata: Metadata = {
   publisher: 'Citea',
   robots: 'index, follow',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/citea-logo-icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
     shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
+    apple: '/citea-logo-icon.svg',
   },
   openGraph: {
     type: 'website',
