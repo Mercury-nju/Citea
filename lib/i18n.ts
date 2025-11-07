@@ -253,7 +253,51 @@ export const translations = {
     // FAQ
     faq: {
       title: 'Frequently asked questions',
-      subtitle: 'Have questions about citation verification? Find answers to common questions about Citea\'s research tools.',
+      subtitle: 'Have questions about Citea? Find answers to common questions about our AI-powered research writing and citation verification tools.',
+      items: [
+        [
+          {
+            question: 'What is Citea and what can it do?',
+            answer: 'Citea is an AI-powered research writing assistant that helps you create academic content with verified sources. You can generate outlines from prompts, draft and enrich content with AI assistance, find relevant sources from major academic databases, and verify citations to ensure authenticity and eliminate AI hallucinations.',
+          },
+          {
+            question: 'What academic databases does Citea search?',
+            answer: 'Citea integrates with major academic databases including arXiv, CrossRef, OpenAlex, PubMed, and Semantic Scholar. Free users have access to basic databases, while paid subscribers can access advanced databases for more comprehensive source discovery.',
+          },
+          {
+            question: 'How does Citea\'s citation verification work?',
+            answer: 'Citea verifies citations by cross-referencing them against multiple authoritative academic databases. Our algorithms check citation details (authors, journals, years, DOIs) against real publications to detect fake or AI-generated citations. You can verify up to 1000 characters of citation text at once.',
+          },
+        ],
+        [
+          {
+            question: 'What is the AI writing feature?',
+            answer: 'Citea\'s AI writing feature helps you create academic documents from scratch. Start with a prompt to generate an outline, then use the AI assistant to expand sections, adjust content, and iterate. The assistant is available for paid subscribers, while free users can use AI document generation with daily credit limits.',
+          },
+          {
+            question: 'How does the credit system work?',
+            answer: 'Citea uses a credit-based system. Free users receive 3 credits per day that reset daily. Paid plans offer more credits: Weekly (35 credits/week), Monthly (150 credits/month), and Yearly (3000 credits/year). Each Find Sources or Citation Verification operation consumes 1 credit. Credits reset automatically based on your plan.',
+          },
+          {
+            question: 'What file formats can I export my documents to?',
+            answer: 'You can export your documents in multiple formats: PDF for sharing and printing, Markdown for version control and documentation, and Word (.docx) for further editing in Microsoft Word or Google Docs. All exports preserve your document structure, formatting, and content.',
+          },
+        ],
+        [
+          {
+            question: 'Is my research data secure with Citea?',
+            answer: 'Absolutely. Your research data is encrypted and stored securely. We never share your work with third parties, and you maintain full ownership of your content. All data transmission uses HTTPS encryption, and passwords are securely hashed.',
+          },
+          {
+            question: 'What\'s the difference between free and paid plans?',
+            answer: 'Free plan includes 3 daily credits, access to basic databases, and AI document generation. Paid plans offer more credits, access to advanced databases, and AI assistant chat functionality. All plans support up to 1000 characters for citation verification. No credit card required to start with the free plan.',
+          },
+          {
+            question: 'Can I use Citea without registering?',
+            answer: 'You need to create a free account to use Citea\'s features. Registration is quick and only requires an email address. You can start using the free plan immediately after registration, with no credit card required. Paid subscriptions can be purchased directly, and accounts are automatically created for unregistered users upon payment.',
+          },
+        ],
+      ],
     },
     
     // Footer
@@ -858,7 +902,51 @@ export const translations = {
     // FAQ
     faq: {
       title: '常见问题',
-      subtitle: '对引用验证有疑问？在这里找到关于 Citea 研究工具的常见问题答案。',
+      subtitle: '对 Citea 有疑问？在这里找到关于我们的 AI 驱动研究写作和引用验证工具的常见问题答案。',
+      items: [
+        [
+          {
+            question: 'Citea 是什么？它能做什么？',
+            answer: 'Citea 是一个 AI 驱动的研究写作助手，帮助您创建带有已验证来源的学术内容。您可以通过提示词生成大纲，使用 AI 助手起草和丰富内容，从主要学术数据库中查找相关来源，并验证引用以确保真实性和消除 AI 幻觉。',
+          },
+          {
+            question: 'Citea 搜索哪些学术数据库？',
+            answer: 'Citea 集成了主要学术数据库，包括 arXiv、CrossRef、OpenAlex、PubMed 和 Semantic Scholar。免费用户可以访问基础数据库，而付费订阅者可以访问高级数据库以获得更全面的来源发现。',
+          },
+          {
+            question: 'Citea 的引用验证是如何工作的？',
+            answer: 'Citea 通过将引用与多个权威学术数据库进行交叉引用来验证引用。我们的算法检查引用详细信息（作者、期刊、年份、DOI）与真实出版物，以检测虚假或 AI 生成的引用。您一次可以验证最多 1000 个字符的引用文本。',
+          },
+        ],
+        [
+          {
+            question: 'AI 写作功能是什么？',
+            answer: 'Citea 的 AI 写作功能帮助您从头创建学术文档。从提示词开始生成大纲，然后使用 AI 助手扩展章节、调整内容并进行迭代。助手适用于付费订阅者，而免费用户可以在每日积分限制内使用 AI 文档生成。',
+          },
+          {
+            question: '积分系统是如何工作的？',
+            answer: 'Citea 使用基于积分的系统。免费用户每天获得 3 个积分，每天重置。付费计划提供更多积分：周费（35 积分/周）、月费（150 积分/月）和年费（3000 积分/年）。每次查找来源或引用验证操作消耗 1 个积分。积分会根据您的计划自动重置。',
+          },
+          {
+            question: '我可以将文档导出为哪些文件格式？',
+            answer: '您可以将文档导出为多种格式：PDF 用于分享和打印，Markdown 用于版本控制和文档，Word (.docx) 用于在 Microsoft Word 或 Google Docs 中进一步编辑。所有导出都保留您的文档结构、格式和内容。',
+          },
+        ],
+        [
+          {
+            question: '我的研究数据在 Citea 中安全吗？',
+            answer: '绝对安全。您的研究数据经过加密并安全存储。我们从不与第三方分享您的工作，您完全拥有您的内容。所有数据传输都使用 HTTPS 加密，密码经过安全哈希处理。',
+          },
+          {
+            question: '免费计划和付费计划有什么区别？',
+            answer: '免费计划包括每天 3 个积分、访问基础数据库和 AI 文档生成。付费计划提供更多积分、访问高级数据库和 AI 助手聊天功能。所有计划都支持最多 1000 个字符的引用验证。免费计划无需信用卡即可开始使用。',
+          },
+          {
+            question: '我可以不注册就使用 Citea 吗？',
+            answer: '您需要创建一个免费账户才能使用 Citea 的功能。注册快速且只需要一个电子邮件地址。注册后您可以立即开始使用免费计划，无需信用卡。可以直接购买付费订阅，未注册用户在付款时会自动创建账户。',
+          },
+        ],
+      ],
     },
     
     // Footer
