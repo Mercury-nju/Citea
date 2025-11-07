@@ -325,16 +325,7 @@ export async function POST(req: NextRequest) {
     const limits = getPlanLimits(user.plan)
     // 注意：引文验证对免费用户也开放，但可能使用更少的数据库
 
-    // 消耗积分
-    const creditResult = await consumeCredit(user.email)
-    if (!creditResult.success) {
-      return NextResponse.json(
-        { error: creditResult.error || 'Insufficient credits' },
-        { status: 403 }
-      )
-    }
-
-    // Extract citations
+    // Extract citations first to validate input
     const citations = extractCitations(text)
     
     if (citations.length === 0) {
@@ -344,6 +335,15 @@ export async function POST(req: NextRequest) {
         totalFound: 0,
         verified: 0
       })
+    }
+
+    // 消耗积分（在验证输入后，避免无效请求消耗积分）
+    const creditResult = await consumeCredit(user.email)
+    if (!creditResult.success) {
+      return NextResponse.json(
+        { error: creditResult.error || 'Insufficient credits' },
+        { status: 403 }
+      )
     }
 
     // Limit to first 10 citations to prevent timeout

@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ArrowUp, Sparkles, CheckCircle, Loader, ExternalLink, Copy } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import SearchProgressOverlay from './SearchProgressOverlay'
 
 interface SearchStep {
   id: number
@@ -27,6 +29,7 @@ interface SourceFinderInterfaceProps {
 }
 
 export default function SourceFinderInterface({ onSearchComplete }: SourceFinderInterfaceProps = {}) {
+  const router = useRouter()
   const { t } = useLanguage()
   const [query, setQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
@@ -200,16 +203,18 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
       if (!step5Response.ok) throw new Error('Step 5 failed')
       
       const step5Data = await step5Response.json()
-      setSources(step5Data.sources || [])
+      const finalSources = step5Data.sources || []
       
       setSteps(prev => prev.map(step => ({ ...step, status: 'completed' })))
       
-      await new Promise(resolve => setTimeout(resolve, 300))
-      setShowResults(true)
+      // 跳转到结果页面
+      const resultsParam = encodeURIComponent(JSON.stringify({ sources: finalSources, count: finalSources.length }))
+      const queryParam = encodeURIComponent(query)
+      router.push(`/dashboard/results?type=finder&results=${resultsParam}&query=${queryParam}`)
       
       // 保存搜索历史
       if (onSearchComplete) {
-        onSearchComplete(query, { sources: step5Data.sources || [], count: (step5Data.sources || []).length })
+        onSearchComplete(query, { sources: finalSources, count: finalSources.length })
       }
     } catch (error) {
       console.error('Search error:', error)
@@ -226,9 +231,31 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
     navigator.clipboard.writeText(text)
   }
 
-  if (showResults) {
+  // 搜索中显示悬浮层
+  if (isSearching) {
     return (
-      <div className="space-y-6">
+      <>
+        <SearchProgressOverlay
+          steps={steps.map(s => ({
+            id: s.id,
+            title: s.title,
+            description: s.description,
+            status: s.status
+          }))}
+          currentStep={currentStep}
+          type="finder"
+        />
+        <div className="space-y-6 opacity-30 pointer-events-none">
+          {/* 原始内容，但被模糊化 */}
+        </div>
+      </>
+    )
+  }
+
+  // 不再显示结果，直接跳转到结果页
+  // if (showResults) {
+  //   return (
+  //     <div className="space-y-6">
         {/* Original Text */}
         <div className="bg-white rounded-xl p-6 border border-gray-200">
           <div className="flex items-start justify-between mb-4">
@@ -367,74 +394,7 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
       </div>
     )
   }
-
-  if (isSearching) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-full max-w-2xl">
-          {/* Top Spinner */}
-          <div className="flex flex-col items-center mb-10">
-            <div className="w-12 h-12 rounded-full border-3 border-blue-200 border-t-blue-600 animate-spin mb-3" />
-            <h3 className="text-base font-bold text-gray-900 mb-1">{t.sourceFinder.searching}</h3>
-            <p className="text-xs text-gray-600">{t.sourceFinder.searchingDesc}</p>
-          </div>
-
-          {/* Steps */}
-          <div className="space-y-3 mb-6">
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className={`p-4 rounded-lg transition-all ${
-                  step.status === 'completed'
-                    ? 'bg-green-50 border-2 border-green-200'
-                    : step.status === 'processing'
-                    ? 'bg-blue-50 border-2 border-blue-200'
-                    : 'bg-white border border-gray-200'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center ${
-                      step.status === 'completed'
-                        ? 'bg-green-500'
-                        : step.status === 'processing'
-                        ? 'bg-blue-500'
-                        : 'bg-gray-200'
-                    }`}
-                  >
-                    {step.status === 'completed' ? (
-                      <CheckCircle className="text-white" size={18} />
-                    ) : step.status === 'processing' ? (
-                      <Loader className="text-white animate-spin" size={18} />
-                    ) : (
-                      <div className="w-2 h-2 rounded-full bg-gray-400" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-sm text-gray-900">{step.title}</h4>
-                    <p className="text-xs text-gray-600">{step.description}</p>
-                  </div>
-                  {step.status === 'processing' && (
-                    <div className="w-2 h-2 rounded-full bg-blue-500" />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom Dots */}
-          <div className="flex items-center justify-center gap-3 text-xs text-gray-600">
-            <span>{t.sourceFinder.processingStep} {currentStep + 1} {t.sourceFinder.of} {steps.length}</span>
-            <div className="flex gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // 输入界面
 
   return (
     <div className="space-y-5">

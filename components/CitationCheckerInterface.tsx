@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ArrowUp, Sparkles, CheckCircle, AlertCircle, Loader2, ChevronRight, ChevronDown, ExternalLink } from 'lucide-react'
+import SearchProgressOverlay from './SearchProgressOverlay'
 
 interface Citation {
   id: string
@@ -39,6 +41,7 @@ interface CitationCheckerInterfaceProps {
 }
 
 export default function CitationCheckerInterface({ onCheckComplete }: CitationCheckerInterfaceProps = {}) {
+  const router = useRouter()
   const [text, setText] = useState('')
   const [isChecking, setIsChecking] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
@@ -144,7 +147,11 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
       if (data.error) {
         setError(data.error)
       } else {
-        setResult(data)
+        // 跳转到结果页面
+        const resultsParam = encodeURIComponent(JSON.stringify(data))
+        const queryParam = encodeURIComponent(text)
+        router.push(`/dashboard/results?type=checker&results=${resultsParam}&query=${queryParam}`)
+        
         // 保存搜索历史
         if (onCheckComplete) {
           onCheckComplete(text, data)
@@ -172,11 +179,22 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
     return 'text-red-600'
   }
 
-  // Loading state
+  // Loading state - 显示悬浮层
   if (isChecking) {
     return (
-      <div className="space-y-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+      <>
+        <SearchProgressOverlay
+          steps={steps.map(s => ({
+            id: s.id,
+            title: s.title,
+            description: s.subtitle,
+            status: s.status
+          }))}
+          currentStep={currentStep}
+          type="checker"
+        />
+        <div className="space-y-6 opacity-30 pointer-events-none">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <Loader2 className="text-blue-600 animate-spin" size={24} />
             <h3 className="text-lg font-bold text-gray-900">AI Content Detection</h3>
@@ -239,132 +257,12 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
           </div>
         </div>
       </div>
+      </>
     )
   }
 
-  // Results state
-  if (result) {
-    return (
-      <div className="space-y-6">
-        {/* Summary */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-          <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-red-50 to-red-100 border-4 border-red-200 mb-6">
-            <div className="text-center">
-              <p className="text-4xl font-bold text-red-600">{result.verificationRate}%</p>
-            </div>
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            {result.verified}/{result.totalFound} citations verified
-          </h3>
-        </div>
-
-        {/* Citations List */}
-        <div className="space-y-4">
-          {result.citations.map((citation) => (
-            <div
-              key={citation.id}
-              className="rounded-xl border-2 border-gray-200 bg-white overflow-hidden"
-            >
-              {/* Header */}
-              <button
-                onClick={() => setExpandedId(expandedId === citation.id ? null : citation.id)}
-                className="w-full p-5 flex items-start gap-4 hover:bg-gray-50 transition-colors"
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  citation.verified ? 'bg-red-500' : 'bg-gray-400'
-                }`}>
-                  <AlertCircle className="text-white" size={20} />
-                </div>
-
-                <div className="flex-1 text-left">
-                  <p className="text-sm text-gray-800 mb-2">{citation.text}</p>
-                </div>
-
-                {expandedId === citation.id ? (
-                  <ChevronDown className="text-gray-400 flex-shrink-0" size={20} />
-                ) : (
-                  <ChevronRight className="text-gray-400 flex-shrink-0" size={20} />
-                )}
-              </button>
-
-              {/* Expanded Details */}
-              {expandedId === citation.id && (
-                <div className="border-t border-gray-200 p-5 bg-gray-50 space-y-4">
-                  {/* Similarity Metrics */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Title similarity</span>
-                      <span className={`text-sm font-bold ${getSimilarityColor(citation.titleSimilarity)}`}>
-                        {citation.titleSimilarity.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {citation.titleSimilarity < 95 ? 'Title similarity <95% (below 95% threshold)' : 'Title matches'}
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Authors similarity</span>
-                      <span className={`text-sm font-bold ${getSimilarityColor(citation.authorsSimilarity)}`}>
-                        {citation.authorsSimilarity.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {citation.authorsSimilarity === 0 ? 'Authors completely different' : 'Authors partially match'}
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Date similarity</span>
-                      <span className={`text-sm font-bold ${getSimilarityColor(citation.dateSimilarity)}`}>
-                        {citation.dateSimilarity.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {citation.dateSimilarity >= 80 ? 'Years match exactly' : citation.dateSimilarity > 0 ? 'Years differ by 3+' : 'No date match'}
-                    </div>
-                  </div>
-
-                  {/* Best Match */}
-                  {citation.bestMatch && (
-                    <div className="pt-4 border-t border-gray-300">
-                      <p className="text-sm font-bold text-gray-900 mb-3">Best Match:</p>
-                      <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-2">
-                        <p className="text-sm font-semibold text-blue-600">{citation.bestMatch.title}</p>
-                        <p className="text-xs text-gray-700"><strong>Authors:</strong> {citation.bestMatch.authors}</p>
-                        <p className="text-xs text-gray-700"><strong>Date:</strong> {citation.bestMatch.date}年</p>
-                        {citation.bestMatch.link && (
-                          <a
-                            href={citation.bestMatch.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
-                          >
-                            <ExternalLink size={12} />
-                            <strong>Link:</strong> {citation.bestMatch.link}
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Back Button */}
-        <button
-          onClick={() => {
-            setResult(null)
-            setText('')
-            setExpandedId(null)
-          }}
-          className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition-all font-medium"
-        >
-          Check New Citations
-        </button>
-      </div>
-    )
-  }
+  // Results state - 不再显示结果，直接跳转到结果页
+  // 结果现在在单独的页面显示
 
   // Input state
   return (
@@ -376,10 +274,10 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
             onChange={(e) => setText(e.target.value)}
             placeholder="粘贴您的引用列表进行验证..."
             className="w-full h-64 p-3 border-0 focus:ring-0 resize-none text-sm text-gray-900 placeholder-gray-400"
-            maxLength={300}
+            maxLength={1000}
           />
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">{text.length}/300 字符</span>
+            <span className="text-xs text-gray-500">{text.length}/1000 字符</span>
             <button
               onClick={handleCheck}
               disabled={!text.trim() || isChecking}

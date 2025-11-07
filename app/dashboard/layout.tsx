@@ -229,18 +229,6 @@ export default function DashboardLayout({
                 <HomeIcon size={18} />
                 <span className="text-sm font-medium">Home</span>
               </button>
-              
-              <button
-                onClick={() => router.push('/dashboard/write')}
-                className={`w-full text-left px-3 py-2.5 rounded-lg transition group flex items-center gap-3 ${
-                  isActive('/dashboard/write')
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'hover:bg-gray-100 text-gray-700'
-                }`}
-              >
-                <Edit3 size={18} />
-                <span className="text-sm font-medium">Write</span>
-              </button>
 
               <button
                 onClick={() => {
