@@ -455,134 +455,133 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
 
             {/* Chat Messages */}
             <div className="flex-1 overflow-y-auto p-6">
-                {chatMessages.length === 0 ? (
-                  <div className="space-y-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="p-2 bg-blue-600 rounded-lg">
-                          <Sparkles size={18} className="text-white" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900 leading-relaxed mb-1">
-                            AI Writing Assistant
-                          </p>
-                          <p className="text-xs text-gray-600 leading-relaxed">
-                            I can help you improve your writing, suggest sources, check grammar, and answer questions about your document.
-                          </p>
-                        </div>
+              {chatMessages.length === 0 ? (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <Sparkles size={18} className="text-white" />
                       </div>
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-3">💡 Quick suggestions:</p>
-                      <div className="space-y-2">
-                        <button 
-                          onClick={() => {
-                            setChatInput('How can I improve the introduction section?')
-                            setTimeout(() => handleChatSubmit(), 100)
-                          }}
-                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
-                        >
-                          ✍️ Improve introduction
-                        </button>
-
-                        <button 
-                          onClick={() => {
-                            setChatInput('Make this section more academic and formal')
-                            setTimeout(() => handleChatSubmit(), 100)
-                          }}
-                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
-                        >
-                          🎓 Make it more academic
-                        </button>
-
-                        <button 
-                          onClick={() => {
-                            setChatInput('Suggest some credible sources for this topic')
-                            setTimeout(() => handleChatSubmit(), 100)
-                          }}
-                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
-                        >
-                          📚 Find credible sources
-                        </button>
-
-                        <button 
-                          onClick={() => {
-                            setChatInput('Check this text for grammar and clarity issues')
-                            setTimeout(() => handleChatSubmit(), 100)
-                          }}
-                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
-                        >
-                          ✅ Check grammar
-                        </button>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900 leading-relaxed mb-1">
+                          AI Writing Assistant
+                        </p>
+                        <p className="text-xs text-gray-600 leading-relaxed">
+                          I can help you improve your writing, suggest sources, check grammar, and answer questions about your document.
+                        </p>
                       </div>
-                    </div>
-
-                    <div className="text-xs text-gray-500 bg-white border border-dashed border-gray-300 rounded-lg p-3">
-                      <p className="leading-relaxed">
-                        提示：顶部工具栏提供了「Find Sources」及「Verify Citations」快捷入口，随时可在同一页面完成资料检索与引用验证。
-                      </p>
                     </div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {chatMessages.map((msg, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-3">💡 Quick suggestions:</p>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => {
+                          setChatInput('How can I improve the introduction section?')
+                          setTimeout(() => handleChatSubmit(), 100)
+                        }}
+                        className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
                       >
-                        <div
-                          className={`max-w-[85%] rounded-xl px-4 py-3 ${
-                            msg.role === 'user'
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
-                          }`}
-                        >
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {isChatLoading && (
-                      <div className="flex justify-start">
-                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                        ✍️ Improve introduction
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setChatInput('Make this section more academic and formal')
+                          setTimeout(() => handleChatSubmit(), 100)
+                        }}
+                        className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
+                      >
+                        🎓 Make it more academic
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setChatInput('Suggest some credible sources for this topic')
+                          setTimeout(() => handleChatSubmit(), 100)
+                        }}
+                        className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
+                      >
+                        📚 Find credible sources
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setChatInput('Check this text for grammar and clarity issues')
+                          setTimeout(() => handleChatSubmit(), 100)
+                        }}
+                        className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
+                      >
+                        ✅ Check grammar
+                      </button>
+                    </div>
                   </div>
-                )}
+
+                  <div className="text-xs text-gray-500 bg-white border border-dashed border-gray-300 rounded-lg p-3">
+                    <p className="leading-relaxed">
+                      提示：顶部工具栏提供了「Find Sources」及「Verify Citations」快捷入口，随时可在同一页面完成资料检索与引用验证。
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {chatMessages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[85%] rounded-xl px-4 py-3 ${
+                          msg.role === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
+                        }`}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {isChatLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Chat Input */}
             <div className="p-4 border-t border-gray-200">
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey && chatInput.trim() && !isChatLoading) {
-                        e.preventDefault()
-                        handleChatSubmit()
-                      }
-                    }}
-                    placeholder="Ask me anything about your writing..."
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm disabled:bg-gray-50"
-                    disabled={isChatLoading}
-                  />
-                  <button
-                    onClick={handleChatSubmit}
-                    disabled={!chatInput.trim() || isChatLoading}
-                    className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Sparkles size={18} />
-                  </button>
-                </div>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && chatInput.trim() && !isChatLoading) {
+                      e.preventDefault()
+                      handleChatSubmit()
+                    }
+                  }}
+                  placeholder="Ask me anything about your writing..."
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm disabled:bg-gray-50"
+                  disabled={isChatLoading}
+                />
+                <button
+                  onClick={handleChatSubmit}
+                  disabled={!chatInput.trim() || isChatLoading}
+                  className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Sparkles size={18} />
+                </button>
               </div>
             </div>
           </aside>
