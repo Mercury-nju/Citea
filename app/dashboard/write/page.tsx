@@ -403,8 +403,8 @@ Outline:
             onClick={() => setIsModalOpen(false)}
           />
           
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
+          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-xl">
+            <div className="p-6">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition"
@@ -412,142 +412,107 @@ Outline:
                 <X size={20} />
               </button>
               
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 mb-4 shadow-lg">
-                  <Edit3 className="text-white" size={36} />
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-1">
                   What are you writing today?
                 </h2>
-                <p className="text-gray-600 text-sm">Describe your topic and let AI create a structured outline for you</p>
+                <p className="text-gray-600 text-sm">Describe your topic and let AI create a structured outline</p>
               </div>
 
-              <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-xl border-2 border-gray-200 p-5 mb-4 focus-within:border-blue-400 transition-colors">
+              <div className="mb-6">
                 <textarea
                   value={writePrompt}
                   onChange={(e) => setWritePrompt(e.target.value)}
                   placeholder="e.g., The impact of artificial intelligence on modern healthcare systems and patient outcomes"
-                  className="w-full h-36 p-3 bg-transparent border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400 text-base leading-relaxed"
+                  className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder-gray-400 text-sm leading-relaxed transition-all"
                   maxLength={500}
                   autoFocus
                 />
-                <div className="pt-3 border-t border-gray-200 flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
-                    {writePrompt.length < 20 ? (
-                      <span className="text-orange-600">💡 Add more details for better results</span>
-                    ) : (
-                      <span className="text-green-600">✓ Good prompt length</span>
-                    )}
-                  </span>
-                  <span className={`text-sm font-medium ${
-                    writePrompt.length > 450 ? 'text-red-500' : 
-                    writePrompt.length > 300 ? 'text-orange-500' : 
-                    'text-gray-500'
-                  }`}>
-                    {writePrompt.length}/500
-                  </span>
-                </div>
-              </div>
-
-              {writePrompt.length > 0 && (
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex-1 bg-gray-200 h-2 rounded-full overflow-hidden">
+                
+                {writePrompt.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-xs ${
+                        writePrompt.length < 50 ? 'text-orange-600' :
+                        writePrompt.length < 100 ? 'text-yellow-600' :
+                        writePrompt.length < 300 ? 'text-green-600' :
+                        'text-blue-600'
+                      }`}>
+                        {writePrompt.length < 50 ? 'Too short - add more details' :
+                         writePrompt.length < 100 ? 'Good start' :
+                         writePrompt.length < 300 ? 'Great length' :
+                         'Excellent detail'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {writePrompt.length}/500
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
                       <div 
-                        className={`h-2 rounded-full transition-all ${
-                          writePrompt.length < 20 ? 'bg-red-500' :
-                          writePrompt.length < 50 ? 'bg-orange-500' :
-                          writePrompt.length < 100 ? 'bg-yellow-500' :
-                          'bg-green-500'
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          writePrompt.length < 50 ? 'bg-red-500' :
+                          writePrompt.length < 100 ? 'bg-orange-500' :
+                          writePrompt.length < 300 ? 'bg-green-500' :
+                          'bg-blue-500'
                         }`}
-                        style={{ width: `${Math.min(100, (writePrompt.length / 100) * 100)}%` }}
+                        style={{ width: `${Math.min(100, (writePrompt.length / 500) * 100)}%` }}
                       />
                     </div>
-                    <span className="text-xs font-medium text-gray-600">
-                      {writePrompt.length < 20 ? 'Weak' :
-                       writePrompt.length < 50 ? 'Fair' :
-                       writePrompt.length < 100 ? 'Good' :
-                       'Excellent'}
-                    </span>
                   </div>
-                  {writePrompt.length < 50 && (
-                    <p className="text-sm text-gray-600">
-                      💡 Tip: Add more details about your research topic, specific questions you want to explore, or key areas of focus for better AI-generated content.
-                    </p>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-3 mb-6">
                 <button
                   onClick={() => setWriteStartMode('heading')}
-                  className={`p-5 rounded-xl border-2 transition-all text-left group ${
+                  className={`p-4 rounded-lg border transition-all text-left ${
                     writeStartMode === 'heading'
-                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-md'
-                      : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-lg ${
-                      writeStartMode === 'heading'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500'
-                    } transition-colors`}>
-                      <Edit3 size={22} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-base text-gray-900 mb-1">Start with Heading</h3>
-                      <p className="text-xs text-gray-600 leading-relaxed">Use your input as the title and create a standard academic outline</p>
-                    </div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Edit3 size={18} className={writeStartMode === 'heading' ? 'text-blue-600' : 'text-gray-400'} />
+                    <h3 className="font-semibold text-sm text-gray-900">Start with Heading</h3>
                   </div>
+                  <p className="text-xs text-gray-600">Use input as title</p>
                 </button>
 
                 <button
                   onClick={() => setWriteStartMode('outline')}
-                  className={`p-5 rounded-xl border-2 transition-all text-left group ${
+                  className={`p-4 rounded-lg border transition-all text-left ${
                     writeStartMode === 'outline'
-                      ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-purple-100 shadow-md'
-                      : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-sm'
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-lg ${
-                      writeStartMode === 'outline'
-                        ? 'bg-purple-500 text-white'
-                        : 'bg-gray-100 text-gray-400 group-hover:bg-purple-50 group-hover:text-purple-500'
-                    } transition-colors`}>
-                      <FileText size={22} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-base text-gray-900 mb-1">Start with Outline</h3>
-                      <p className="text-xs text-gray-600 leading-relaxed">AI analyzes your topic and generates a professional academic outline</p>
-                    </div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <FileText size={18} className={writeStartMode === 'outline' ? 'text-purple-600' : 'text-gray-400'} />
+                    <h3 className="font-semibold text-sm text-gray-900">Start with Outline</h3>
                   </div>
+                  <p className="text-xs text-gray-600">AI generates outline</p>
                 </button>
               </div>
 
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                  className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleGenerate}
                   disabled={!writePrompt.trim() || isGenerating}
-                  className="px-8 py-3.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-2"
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
                 >
                   {isGenerating ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Generating outline...</span>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Generating...</span>
                     </>
                   ) : (
-                    <>
-                      <Sparkles size={18} />
-                      <span>Create Document</span>
-                    </>
+                    <span>Create Document</span>
                   )}
                 </button>
               </div>
