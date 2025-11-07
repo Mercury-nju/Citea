@@ -9,9 +9,9 @@ import {
   Save,
   Download,
   MessageSquare,
-  X,
   Sparkles,
-  Menu
+  Menu,
+  CheckCircle
 } from 'lucide-react'
 import Logo from '@/components/Logo'
 
@@ -28,7 +28,6 @@ export default function WriteEditorPage() {
   const router = useRouter()
   const params = useParams()
   const [document, setDocument] = useState<Document | null>(null)
-  const [isChatOpen, setIsChatOpen] = useState(false)
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([])
   const [chatInput, setChatInput] = useState('')
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
@@ -253,15 +252,12 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
             
             <div className="border-t border-gray-200 w-10 my-4" />
             
-            <button 
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              className={`p-3 rounded-lg transition mb-2 group relative ${
-                isChatOpen ? 'bg-blue-100' : 'hover:bg-blue-50'
-              }`}
+            <div 
+              className="p-3 rounded-lg transition mb-2 group relative bg-blue-100"
               title="AI Assistant"
             >
-              <MessageSquare size={20} className={isChatOpen ? 'text-blue-600' : 'text-gray-600'} />
-            </button>
+              <MessageSquare size={20} className="text-blue-600" />
+            </div>
           </>
         )}
         {!isSidebarOpen && (
@@ -351,13 +347,19 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
             </div>
 
             <button
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              className={`px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ${
-                isChatOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-blue-50 text-gray-700'
-              }`}
+              onClick={() => router.push('/dashboard?tab=finder')}
+              className="px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 bg-gray-100 hover:bg-blue-50 text-gray-700"
             >
-              <MessageSquare size={16} />
-              AI Assistant
+              <Sparkles size={16} />
+              Find Sources
+            </button>
+
+            <button
+              onClick={() => router.push('/dashboard?tab=checker')}
+              className="px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <CheckCircle size={16} />
+              Verify Citations
             </button>
           </div>
         </header>
@@ -444,24 +446,15 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
           </div>
 
           {/* Right Chat Sidebar */}
-          {isChatOpen && (
-            <aside className="w-96 border-l border-gray-200 bg-white flex flex-col">
-              {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-blue-50">
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">AI Writing Assistant</h3>
-                  <p className="text-xs text-gray-600 mt-0.5">Document: {document.title}</p>
-                </div>
-                <button
-                  onClick={() => setIsChatOpen(false)}
-                  className="p-1.5 hover:bg-blue-100 rounded-lg transition text-gray-600"
-                >
-                  <X size={18} />
-                </button>
-              </div>
+          <aside className="w-96 border-l border-gray-200 bg-white flex flex-col">
+            {/* Chat Header */}
+            <div className="p-4 border-b border-gray-200 bg-blue-50">
+              <h3 className="font-semibold text-gray-900 text-sm">AI Writing Assistant</h3>
+              <p className="text-xs text-gray-600 mt-0.5">Document: {document.title}</p>
+            </div>
 
-              {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-6">
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-6">
                 {chatMessages.length === 0 ? (
                   <div className="space-y-6">
                     <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
@@ -525,19 +518,10 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => router.push('/dashboard?tab=finder')}
-                        className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium"
-                      >
-                        🔍 Find Sources
-                      </button>
-                      <button 
-                        onClick={() => router.push('/dashboard?tab=checker')}
-                        className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium"
-                      >
-                        ✓ Verify Citations
-                      </button>
+                    <div className="text-xs text-gray-500 bg-white border border-dashed border-gray-300 rounded-lg p-3">
+                      <p className="leading-relaxed">
+                        提示：顶部工具栏提供了「Find Sources」及「Verify Citations」快捷入口，随时可在同一页面完成资料检索与引用验证。
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -572,10 +556,10 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
                     )}
                   </div>
                 )}
-              </div>
+            </div>
 
-              {/* Chat Input */}
-              <div className="p-4 border-t border-gray-200">
+            {/* Chat Input */}
+            <div className="p-4 border-t border-gray-200">
                 <div className="flex gap-2 items-center">
                   <input
                     type="text"
@@ -600,8 +584,8 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
                   </button>
                 </div>
               </div>
-            </aside>
-          )}
+            </div>
+          </aside>
         </div>
       </div>
     </div>
