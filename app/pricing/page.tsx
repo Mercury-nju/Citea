@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Check, X, Zap } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Header from '@/components/Header'
@@ -16,10 +16,10 @@ export default function PricingPage() {
       price: t.pricing.free,
       period: '',
       credits: t.pricing.freeCredits,
-      wordLimit: '300',
+      wordLimit: '1000',
       features: [
         t.pricing.creditsPerDay,
-        t.pricing.upTo300Chars,
+        t.pricing.upTo1000Chars,
         t.pricing.basicDatabases,
         t.pricing.aiDocGeneration,
       ],
@@ -91,14 +91,33 @@ export default function PricingPage() {
 
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {plans.map((plan) => (
+            {plans.map((plan, index) => {
+              const [isHovered, setIsHovered] = useState(false)
+              const cardRef = useRef<HTMLDivElement>(null)
+              
+              return (
               <div
                 key={plan.id}
-                className={`relative bg-white rounded-2xl border-2 p-8 transition-all ${
+                ref={cardRef}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className={`relative bg-white rounded-2xl border-2 p-8 transition-all duration-300 ease-out ${
                   plan.popular
                     ? 'border-blue-500 shadow-xl scale-105'
                     : 'border-gray-200 shadow-lg hover:shadow-xl'
+                } ${
+                  isHovered && !plan.popular
+                    ? 'scale-105 border-blue-300 -translate-y-2'
+                    : ''
                 }`}
+                style={{
+                  transform: isHovered && !plan.popular 
+                    ? 'scale(1.05) translateY(-8px)' 
+                    : plan.popular 
+                    ? 'scale(1.05)' 
+                    : 'scale(1)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
@@ -162,7 +181,8 @@ export default function PricingPage() {
                   {plan.buttonText}
                 </button>
               </div>
-            ))}
+              )
+            })}
           </div>
 
           {/* Credit Usage Info */}
@@ -217,7 +237,7 @@ export default function PricingPage() {
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="py-4 px-4">{t.pricing.characterLimit}</td>
-                    <td className="text-center py-4 px-4">300</td>
+                    <td className="text-center py-4 px-4">1000</td>
                     <td className="text-center py-4 px-4">1000</td>
                   </tr>
                   <tr className="border-b border-gray-100">

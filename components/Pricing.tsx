@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Check, X, Sparkles, Zap, Crown } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -94,14 +94,32 @@ export default function Pricing() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const IconComponent = plan.icon
+            const [isHovered, setIsHovered] = useState(false)
+            const cardRef = useRef<HTMLDivElement>(null)
+            
             return (
               <div
                 key={plan.id}
+                ref={cardRef}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 className={`relative bg-white rounded-xl border transition-all duration-300 ${
                   plan.popular
                     ? 'border-blue-600 shadow-xl scale-105'
                     : 'border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300'
+                } ${
+                  isHovered && !plan.popular
+                    ? 'scale-105 border-blue-300 -translate-y-2'
+                    : ''
                 }`}
+                style={{
+                  transform: isHovered && !plan.popular 
+                    ? 'scale(1.05) translateY(-8px)' 
+                    : plan.popular 
+                    ? 'scale(1.05)' 
+                    : 'scale(1)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
               >
                 {/* Popular Badge */}
                 {plan.popular && (
@@ -235,7 +253,7 @@ export default function Pricing() {
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="py-4 px-4">{t.pricing.characterLimit}</td>
-                    <td className="text-center py-4 px-4">300</td>
+                    <td className="text-center py-4 px-4">1000</td>
                     <td className="text-center py-4 px-4">1000</td>
                   </tr>
                   <tr className="border-b border-gray-100">
