@@ -1423,6 +1423,7 @@ export const translations = {
     faq: {
       title: 'Preguntas frecuentes',
       subtitle: '¿Tienes preguntas sobre la verificación de citas? Encuentra respuestas a preguntas comunes sobre las herramientas de investigación de Citea.',
+      items: [],
     },
     footer: {
       description: 'Tu guardián de la integridad de la investigación. Citea rastrea las citas hasta sus fuentes originales y detecta literatura falsa generada por IA, ayudando a los investigadores a mantener la credibilidad en la era de la inteligencia artificial.',
@@ -1558,6 +1559,7 @@ export const translations = {
     faq: {
       title: 'Questions fréquemment posées',
       subtitle: 'Des questions sur la vérification des citations ? Trouvez des réponses aux questions courantes sur les outils de recherche de Citea.',
+      items: [],
     },
     footer: {
       description: 'Votre gardien de l\'intégrité de la recherche. Citea retrace les citations jusqu\'à leurs sources originales et détecte la littérature fausse générée par IA, aidant les chercheurs à maintenir leur crédibilité à l\'ère de l\'intelligence artificielle.',
@@ -1693,6 +1695,7 @@ export const translations = {
     faq: {
       title: 'Häufig gestellte Fragen',
       subtitle: 'Haben Sie Fragen zur Zitationsüberprüfung? Finden Sie Antworten auf häufige Fragen zu den Forschungstools von Citea.',
+      items: [],
     },
     footer: {
       description: 'Ihr Wächter der Forschungsintegrität. Citea verfolgt Zitate bis zu ihren Originalquellen zurück und erkennt KI-generierte gefälschte Literatur, um Forschern zu helfen, im Zeitalter der künstlichen Intelligenz glaubwürdig zu bleiben.',
@@ -1828,6 +1831,7 @@ export const translations = {
     faq: {
       title: 'よくある質問',
       subtitle: '引用検証について質問がありますか？Citeaの研究ツールに関するよくある質問への回答を見つけてください。',
+      items: [],
     },
     footer: {
       description: 'あなたの研究誠実性の守護者。Citeaは引用を元のソースまで追跡し、AIによって生成された偽の文献を検出し、人工知能の時代において研究者が信頼性を維持するのを支援します。',
