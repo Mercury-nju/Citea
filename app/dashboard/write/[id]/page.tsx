@@ -334,21 +334,19 @@ export default function WriteEditorPage() {
       const language = isChinese ? 'Chinese' : 'English'
 
       // Add document context to the message with improved prompt
-      const outlineText = document ? document.outline.map((section: Section | string, idx: number) => {
-        const title = typeof section === 'string' ? section : section.title
-        return `${idx + 1}. ${title}`
-      }).join('\n') : ''
+      let outlineText = ''
+      if (document) {
+        outlineText = document.outline.map((section: Section | string, idx: number) => {
+          const title = typeof section === 'string' ? section : section.title
+          return `${idx + 1}. ${title}`
+        }).join('\n')
+      }
       
-      const documentContext = document ? `
-Document Title: "${document.title}"
-Document Outline:
-${outlineText}
-` : ''
+      const documentContext = document 
+        ? `Document Title: "${document.title}"\nDocument Outline:\n${outlineText}`
+        : ''
       
-      const contextMessage = `${documentContext}
-I'm working on this academic document. ${userMessage}
-
-Please provide helpful, specific, and actionable advice. If you're suggesting content, make it academic and well-structured.`
+      const contextMessage = `${documentContext}\nI'm working on this academic document. ${userMessage}\n\nPlease provide helpful, specific, and actionable advice. If you're suggesting content, make it academic and well-structured.`
 
       const response = await fetch('/api/chat', {
         method: 'POST',
