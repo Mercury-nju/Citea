@@ -208,9 +208,9 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
   }
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen h-screen bg-white flex">
       {/* Left Sidebar - Simplified */}
-      <aside className={`${isSidebarOpen ? 'w-16' : 'w-0'} bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all`}>
+      <aside className={`${isSidebarOpen ? 'w-16' : 'w-0'} bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all h-full`}>
         {isSidebarOpen && (
           <>
             <button 
@@ -272,7 +272,7 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         {/* Top Header - Simplified */}
         <header className="border-b border-gray-200 px-6 py-3 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
@@ -365,9 +365,9 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
         </header>
 
         {/* Editor Area */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex h-full">
           {/* Document Editor */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto h-full">
             <div className="max-w-3xl mx-auto px-8 py-8">
               {/* Title - Smaller font */}
               <h1 
@@ -446,7 +446,7 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
           </div>
 
           {/* Right Chat Sidebar */}
-          <aside className="w-96 border-l border-gray-200 bg-white flex flex-col">
+          <aside className="w-96 border-l border-gray-200 bg-white flex flex-col h-full sticky top-0 shrink-0">
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-200 bg-blue-50">
               <h3 className="font-semibold text-gray-900 text-sm">AI Writing Assistant</h3>
