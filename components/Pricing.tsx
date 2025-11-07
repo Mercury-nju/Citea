@@ -122,27 +122,6 @@ export default function Pricing() {
           })}
         </div>
 
-        {/* Credit Usage Info */}
-        <div className="bg-gray-50 rounded-xl p-8 mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-            {t.pricing.creditUsage}
-          </h2>
-          <div className="max-w-3xl mx-auto space-y-4">
-            <div className="flex items-start gap-3">
-              <Zap className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-gray-900">
-                  {t.pricing.creditUsageDesc}
-                </p>
-                <ul className="mt-2 space-y-1 text-gray-600">
-                  <li>• {t.pricing.sourceFinding}</li>
-                  <li>• {t.pricing.citationVerification}</li>
-                  <li>• {t.pricing.aiChat}</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Feature Comparison */}
         <div className="bg-white rounded-xl border border-gray-200 p-8">
