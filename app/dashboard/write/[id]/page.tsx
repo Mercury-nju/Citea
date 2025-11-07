@@ -14,6 +14,7 @@ import {
   CheckCircle
 } from 'lucide-react'
 import Logo from '@/components/Logo'
+import { useLanguage } from '@/contexts/LanguageContext'
 // @ts-ignore - jspdf types may not be available
 import jsPDF from 'jspdf'
 // @ts-ignore - docx types may not be available
@@ -33,6 +34,7 @@ interface Document {
 export default function WriteEditorPage() {
   const router = useRouter()
   const params = useParams()
+  const { t } = useLanguage()
   const [document, setDocument] = useState<Document | null>(null)
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([])
   const [chatInput, setChatInput] = useState('')
@@ -364,9 +366,7 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
       const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
       setChatMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: isChinese 
-          ? '抱歉，处理您的请求时出现错误。请重试。' 
-          : 'Sorry, I encountered an error. Please try again.' 
+        content: t.dashboard?.errorRetry || 'Sorry, I encountered an error. Please try again.' 
       }])
     } finally {
       setIsChatLoading(false)
@@ -694,7 +694,7 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
 
                   <div className="text-xs text-gray-500 bg-white border border-dashed border-gray-300 rounded-lg p-3">
                     <p className="leading-relaxed">
-                      提示：顶部工具栏提供了「Find Sources」及「Verify Citations」快捷入口，随时可在同一页面完成资料检索与引用验证。
+                      {t.dashboard?.writePageTip || 'Tip: The top toolbar provides quick access to "Find Sources" and "Verify Citations", allowing you to complete source retrieval and citation verification on the same page.'}
                     </p>
                   </div>
                 </div>

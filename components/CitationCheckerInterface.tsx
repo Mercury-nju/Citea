@@ -133,13 +133,13 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
         
         // 根据不同的错误类型显示不同的消息
         if (response.status === 401) {
-          setError('请先登录后再使用此功能')
+          setError(t.dashboard?.pleaseLogin || 'Please login first to use this feature')
         } else if (response.status === 403) {
-          setError(errorMessage || '积分不足，请升级账户')
+          setError(errorMessage || t.dashboard?.insufficientCredits || 'Insufficient credits, please upgrade your account')
         } else if (response.status === 400) {
-          setError(errorMessage || '输入内容无效')
+          setError(errorMessage || t.dashboard?.invalidInput || 'Invalid input content')
         } else {
-          setError(errorMessage || '验证过程中出现错误，请重试')
+          setError(errorMessage || t.dashboard?.verificationError || 'An error occurred during verification, please try again')
         }
         return
       }
@@ -161,7 +161,7 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
       }
     } catch (err: any) {
       console.error('Citation check error:', err)
-      const errorMessage = err?.message || '网络连接错误，请检查网络后重试'
+      const errorMessage = err?.message || t.dashboard?.networkError || 'Network connection error, please check your network and try again'
       setError(errorMessage)
     } finally {
       setIsChecking(false)
@@ -301,7 +301,7 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
       <div>
         <div className="flex items-center gap-1.5 mb-2.5">
           <Sparkles className="text-yellow-500" size={14} />
-          <span className="text-xs font-medium text-gray-700">示例引用：</span>
+          <span className="text-xs font-medium text-gray-700">{t.dashboard?.exampleCitation || 'Example Citation:'}</span>
         </div>
         <button
           onClick={() => setText(exampleText)}

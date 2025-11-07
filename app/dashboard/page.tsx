@@ -105,7 +105,7 @@ export default function DashboardPage() {
       console.error('Chat error:', error)
       setChatMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: isChinese ? '抱歉，处理您的请求时出现错误，请重试。' : 'Sorry, I encountered an error processing your request. Please try again.' 
+        content: t.dashboard?.errorOccurred || 'Sorry, I encountered an error processing your request. Please try again.' 
       }])
     } finally {
       setLoading(false)
@@ -114,9 +114,9 @@ export default function DashboardPage() {
 
   const examplePrompts = {
     assistant: [
-      '如何引用网站？',
-      'What is the difference between primary and secondary sources?',
-      '如何判断期刊是否正规？',
+      t.dashboard?.examplePrompt1 || 'How do I cite a website?',
+      t.dashboard?.examplePrompt2 || 'What is the difference between primary and secondary sources?',
+      t.dashboard?.examplePrompt3 || 'How do I determine if a journal is legitimate?',
     ]
   }
 

@@ -509,6 +509,21 @@ export const translations = {
       pleaseWait: 'Please wait, we are processing for you',
       searchingFromDatabases: 'Searching relevant literature from multiple academic databases...',
       verifyingCitationAccuracy: 'Verifying the authenticity and accuracy of citations...',
+      // Error messages
+      errorOccurred: 'Sorry, I encountered an error processing your request. Please try again.',
+      errorRetry: 'Sorry, I encountered an error. Please try again.',
+      pleaseLogin: 'Please login first to use this feature',
+      insufficientCredits: 'Insufficient credits, please upgrade your account',
+      invalidInput: 'Invalid input content',
+      verificationError: 'An error occurred during verification, please try again',
+      networkError: 'Network connection error, please check your network and try again',
+      // Tips and hints
+      exampleCitation: 'Example Citation:',
+      writePageTip: 'Tip: The top toolbar provides quick access to "Find Sources" and "Verify Citations", allowing you to complete source retrieval and citation verification on the same page.',
+      // Example prompts
+      examplePrompt1: 'How do I cite a website?',
+      examplePrompt2: 'What is the difference between primary and secondary sources?',
+      examplePrompt3: 'How do I determine if a journal is legitimate?',
     },
     
     // Source Finder Interface
@@ -1099,6 +1114,21 @@ export const translations = {
       pleaseWait: '请稍候，我们正在为您处理',
       searchingFromDatabases: '正在从多个学术数据库中搜索相关文献...',
       verifyingCitationAccuracy: '正在验证引文的真实性和准确性...',
+      // Error messages
+      errorOccurred: '抱歉，处理您的请求时出现错误，请重试。',
+      errorRetry: '抱歉，处理您的请求时出现错误。请重试。',
+      pleaseLogin: '请先登录后再使用此功能',
+      insufficientCredits: '积分不足，请升级账户',
+      invalidInput: '输入内容无效',
+      verificationError: '验证过程中出现错误，请重试',
+      networkError: '网络连接错误，请检查网络后重试',
+      // Tips and hints
+      exampleCitation: '示例引用：',
+      writePageTip: '提示：顶部工具栏提供了「Find Sources」及「Verify Citations」快捷入口，随时可在同一页面完成资料检索与引用验证。',
+      // Example prompts
+      examplePrompt1: '如何引用网站？',
+      examplePrompt2: '主要来源和次要来源有什么区别？',
+      examplePrompt3: '如何判断期刊是否正规？',
     },
     
     // Source Finder Interface
