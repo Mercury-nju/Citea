@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowUp, Sparkles, CheckCircle, Loader, ExternalLink, Copy } from 'lucide-react'
+import { ArrowUp, Sparkles, CheckCircle, ExternalLink, Copy } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import SearchProgressOverlay from './SearchProgressOverlay'
 
@@ -36,7 +36,6 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
   const [currentStep, setCurrentStep] = useState(0)
   const [steps, setSteps] = useState<SearchStep[]>([])
   const [sources, setSources] = useState<Source[]>([])
-  const [showResults, setShowResults] = useState(false)
   const [originalText, setOriginalText] = useState('')
   const [needUpgrade, setNeedUpgrade] = useState(false)
 
@@ -58,7 +57,6 @@ export default function SourceFinderInterface({ onSearchComplete }: SourceFinder
     if (!query.trim()) return
 
     setIsSearching(true)
-    setShowResults(false)
     setOriginalText(query)
     setSources([])
     setCurrentStep(0)
