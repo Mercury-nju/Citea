@@ -4,6 +4,13 @@ import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
+interface FAQItemData {
+  question: string
+  answer: string
+}
+
+type FAQColumn = FAQItemData[]
+
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -29,7 +36,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 export default function FAQ() {
   const { t } = useLanguage()
-  const faqs = t.faq?.items || []
+  const faqs: FAQColumn[] = (t.faq?.items as FAQColumn[]) || []
 
   return (
     <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
@@ -44,9 +51,9 @@ export default function FAQ() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {faqs.map((column, colIndex) => (
+          {faqs.map((column: FAQColumn, colIndex: number) => (
             <div key={colIndex} className="space-y-4">
-              {column.map((faq, index) => (
+              {column.map((faq: FAQItemData, index: number) => (
                 <FAQItem key={index} question={faq.question} answer={faq.answer} />
               ))}
             </div>
