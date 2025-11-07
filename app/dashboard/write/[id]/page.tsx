@@ -59,6 +59,21 @@ export default function WriteEditorPage() {
         setDocument(doc)
         setSaveStatus('saved')
         setLastSaved(new Date(doc.updatedAt))
+        
+        // Save to history
+        const historyItem = {
+          id: `write_${docId}`,
+          title: doc.title || 'Untitled Document',
+          date: new Date().toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }),
+          type: 'write',
+          docId: docId,
+          timestamp: Date.now()
+        }
+        
+        const savedHistory = localStorage.getItem(`citea_search_history_${user.email}`)
+        const history = savedHistory ? JSON.parse(savedHistory) : []
+        const updated = [historyItem, ...history.filter((d: any) => d.id !== historyItem.id)].slice(0, 50)
+        localStorage.setItem(`citea_search_history_${user.email}`, JSON.stringify(updated))
       } else {
         router.push('/dashboard/write')
       }

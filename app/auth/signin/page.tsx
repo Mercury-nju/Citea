@@ -78,7 +78,7 @@ export default function SignInPage() {
                   {t.auth.signIn.feature1Title || 'Instant Citation Verification'}
                 </h3>
                 <p className="text-blue-100">
-                  {t.auth.signIn.feature1Desc || 'Check up to 300 characters of citations at once'}
+                  {t.auth.signIn.feature1Desc || 'Check up to 1000 characters of citations at once'}
                 </p>
               </div>
             </div>

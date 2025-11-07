@@ -94,7 +94,13 @@ export default function DashboardLayout({
       if (savedHistory) {
         try {
           const history = JSON.parse(savedHistory)
-          setDocuments(history)
+          // Filter to show only past 7 days
+          const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+          const recentHistory = history.filter((doc: any) => {
+            const docTimestamp = doc.timestamp || new Date(doc.date).getTime()
+            return docTimestamp >= sevenDaysAgo
+          })
+          setDocuments(recentHistory)
         } catch (e) {
           console.error('Failed to load search history:', e)
         }
@@ -148,9 +154,65 @@ export default function DashboardLayout({
         {user && (
           <div className="p-4 border-b border-gray-200 bg-gray-50">
             <div className="mb-3">
-              <p className="text-sm font-semibold text-gray-900">{user.name || user.email}</p>
+              <p className="text-sm font-semibold text-gray-900">
+                {user.name && user.name !== 'test user' ? user.name : user.email || 'User'}
+              </p>
               <p className="text-xs text-gray-600 capitalize">{user.plan || 'free'} plan</p>
             </div>
+            
+            {/* Subscription Time Progress Bar - Only for paid users */}
+            {(user.plan === 'monthly' || user.plan === 'yearly' || user.plan === 'Monthly' || user.plan === 'Yearly') && user.subscriptionExpiresAt && (
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs text-gray-600">
+                    {t.dashboard?.subscriptionTime || 'Subscription'}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-green-600">
+                      {(() => {
+                        const expiresAt = new Date(user.subscriptionExpiresAt).getTime()
+                        const now = Date.now()
+                        const diff = expiresAt - now
+                        if (diff <= 0) return 'Expired'
+                        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+                        return days > 0 ? `${days}d ${hours}h` : `${hours}h`
+                      })()}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {(() => {
+                        const expiresAt = new Date(user.subscriptionExpiresAt).getTime()
+                        const now = Date.now()
+                        const diff = expiresAt - now
+                        if (diff <= 0) return 'Expired'
+                        const totalDays = user.plan === 'monthly' || user.plan === 'Monthly' ? 30 : 365
+                        const remainingDays = Math.floor(diff / (1000 * 60 * 60 * 24))
+                        return `${remainingDays} / ${totalDays} days`
+                      })()}
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${(() => {
+                          const expiresAt = new Date(user.subscriptionExpiresAt).getTime()
+                          const now = Date.now()
+                          const diff = expiresAt - now
+                          if (diff <= 0) return 0
+                          const totalDays = user.plan === 'monthly' || user.plan === 'Monthly' ? 30 : 365
+                          const remainingDays = Math.floor(diff / (1000 * 60 * 60 * 24))
+                          return Math.min(100, (remainingDays / totalDays) * 100)
+                        })()}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="mb-2">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs text-gray-600">
@@ -187,17 +249,6 @@ export default function DashboardLayout({
             </div>
           </div>
         )}
-
-        {/* New Document Button */}
-        <div className="p-4">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="w-full bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-all font-medium flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
-          >
-            <Plus size={20} />
-            {t.dashboard?.newDocument || 'New Search'}
-          </button>
-        </div>
 
         {/* Search */}
         <div className="px-4 mb-4">
@@ -283,6 +334,23 @@ export default function DashboardLayout({
                 {documents.slice(0, 5).map((doc) => (
                   <button
                     key={doc.id}
+                    onClick={() => {
+                      if (doc.type === 'write' && doc.docId) {
+                        router.push(`/dashboard/write/${doc.docId}`)
+                      } else if (doc.type === 'finder') {
+                        router.push('/dashboard?tab=finder')
+                        setTimeout(() => {
+                          const event = new CustomEvent('setActiveTab', { detail: 'finder' })
+                          window.dispatchEvent(event)
+                        }, 100)
+                      } else if (doc.type === 'checker') {
+                        router.push('/dashboard?tab=checker')
+                        setTimeout(() => {
+                          const event = new CustomEvent('setActiveTab', { detail: 'checker' })
+                          window.dispatchEvent(event)
+                        }, 100)
+                      }
+                    }}
                     className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 transition group"
                   >
                     <div className="flex items-start gap-2">
@@ -303,6 +371,11 @@ export default function DashboardLayout({
                               验证
                             </span>
                           )}
+                          {doc.type === 'write' && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 rounded">
+                              写作
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -313,25 +386,28 @@ export default function DashboardLayout({
           )}
         </nav>
 
-        {/* Upgrade to Pro */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 mb-3">
-            <div className="flex items-start gap-2 mb-2">
-              <Sparkles className="text-blue-600 flex-shrink-0" size={20} />
-              <div>
-                <h4 className="font-semibold text-gray-900 text-sm">{t.dashboard?.upgradeToPro || 'Upgrade'}</h4>
-                <p className="text-xs text-gray-600 mt-1">
-                  {t.dashboard?.upgradeDesc || 'Get unlimited access'}
-                </p>
+        {/* Upgrade to Pro - Only show for free users */}
+        {user && (user.plan === 'free' || !user.plan || user.plan === 'Free') && (
+          <div className="p-4 border-t border-gray-200">
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 mb-3">
+              <div className="flex items-start gap-2 mb-2">
+                <Sparkles className="text-blue-600 flex-shrink-0" size={20} />
+                <div>
+                  <h4 className="font-semibold text-gray-900 text-sm">{t.dashboard?.upgradeToPro || 'Upgrade'}</h4>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {t.dashboard?.upgradeDesc || 'Get unlimited access'}
+                  </p>
+                </div>
               </div>
+              <button 
+                onClick={() => router.push('/pricing')}
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium mt-2"
+              >
+                {t.dashboard?.tryPro || 'Try Pro'}
+              </button>
             </div>
-            <button 
-              onClick={() => router.push('/pricing')}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium mt-2"
-            >
-              {t.dashboard?.tryPro || 'Try Pro'}
-            </button>
           </div>
+        )}
 
           {/* User Menu */}
           <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition cursor-pointer">
@@ -339,7 +415,9 @@ export default function DashboardLayout({
               {user.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user.name || user.email}</p>
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {user.name && user.name !== 'test user' ? user.name : user.email || 'User'}
+              </p>
               <p className="text-xs text-gray-500">{user.plan || 'Free'} Plan</p>
             </div>
             <button
