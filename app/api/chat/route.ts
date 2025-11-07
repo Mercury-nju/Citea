@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const lang = typeof language === 'string' ? language.toLowerCase() : 'en'
     const isZh = lang === 'zh' || lang === 'zh-cn' || lang === 'chinese'
     const systemPrompt = isZh 
-      ? `你是 Citea 的 AI 研究助手，Citea 是一个免费的引用验证和文献查找工具。
+      ? `你是 Citea 的 AI 研究助手，Citea 是一个引用验证和文献查找工具。
 
 你的专业领域包括：
 - 帮助研究者验证引用和检查虚假参考文献
@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
 - 提供学术诚信和研究最佳实践指导
 - 检测可能伪造或 AI 生成的引用
 
-请始终用中文回答，保持专业、准确和友好。强调 Citea 完全免费使用。`
-      : `You are a helpful AI research assistant for Citea, a free citation verification and source finding tool. 
+请始终用中文回答，保持专业、准确和友好。直接回答用户的问题，不要主动强调价格或免费信息。`
+      : `You are a helpful AI research assistant for Citea, a citation verification and source finding tool. 
               
 Your expertise includes:
 - Helping researchers verify citations and check for fake references
@@ -80,7 +80,7 @@ Your expertise includes:
 - Providing guidance on academic integrity and research best practices
 - Detecting potentially fabricated or AI-generated citations
 
-Always respond in English, be helpful, accurate, and professional. Emphasize that Citea is completely free to use.`
+Always respond in English, be helpful, accurate, and professional. Answer users' questions directly without proactively emphasizing pricing or free information.`
 
     // Call Tongyi Qianwen API
     const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
