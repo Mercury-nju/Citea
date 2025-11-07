@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, ExternalLink, CheckCircle, X, Copy } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ResultsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t } = useLanguage()
   const [type, setType] = useState<'finder' | 'checker'>('finder')
   const [results, setResults] = useState<any>(null)
   const [query, setQuery] = useState('')
@@ -36,7 +38,7 @@ export default function ResultsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500">加载中...</p>
+          <p className="text-gray-500">{t.dashboard?.loading}</p>
         </div>
       </div>
     )
@@ -56,7 +58,7 @@ export default function ResultsPage() {
             </button>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-gray-900">
-                {type === 'finder' ? '搜索结果' : '验证结果'}
+                {type === 'finder' ? t.dashboard?.searchResults : t.dashboard?.verificationResults}
               </h1>
               {query && (
                 <p className="text-sm text-gray-600 mt-1 truncate max-w-2xl">
@@ -74,7 +76,7 @@ export default function ResultsPage() {
           <div className="space-y-4">
             <div className="mb-6">
               <p className="text-sm text-gray-600">
-                找到 <span className="font-semibold text-gray-900">{results.sources.length}</span> 个相关文献
+                {t.dashboard?.foundSources} <span className="font-semibold text-gray-900">{results.sources.length}</span> {t.dashboard?.relatedSources}
               </p>
             </div>
 
@@ -89,9 +91,9 @@ export default function ResultsPage() {
                       {source.title}
                     </h3>
                     <div className="space-y-1 text-sm text-gray-600">
-                      <p><span className="font-medium">作者:</span> {source.authors || '未知'}</p>
-                      <p><span className="font-medium">期刊:</span> {source.journal || '未知'}</p>
-                      <p><span className="font-medium">年份:</span> {source.year || '未知'}</p>
+                      <p><span className="font-medium">{t.dashboard?.author}:</span> {source.authors || t.dashboard?.unknown}</p>
+                      <p><span className="font-medium">{t.dashboard?.journal}:</span> {source.journal || t.dashboard?.unknown}</p>
+                      <p><span className="font-medium">{t.dashboard?.year}:</span> {source.year || t.dashboard?.unknown}</p>
                       {source.doi && (
                         <p><span className="font-medium">DOI:</span> {source.doi}</p>
                       )}
@@ -100,7 +102,7 @@ export default function ResultsPage() {
                   <div className="flex items-center gap-2">
                     {source.verified && (
                       <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                        已验证
+                        {t.dashboard?.verified}
                       </span>
                     )}
                     {source.link && (
@@ -126,15 +128,15 @@ export default function ResultsPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{results.totalFound || 0}</p>
-                  <p className="text-sm text-gray-600 mt-1">总引文数</p>
+                  <p className="text-sm text-gray-600 mt-1">{t.dashboard?.totalCitations}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-green-600">{results.verified || 0}</p>
-                  <p className="text-sm text-gray-600 mt-1">已验证</p>
+                  <p className="text-sm text-gray-600 mt-1">{t.dashboard?.verified}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-blue-600">{results.verificationRate || 0}%</p>
-                  <p className="text-sm text-gray-600 mt-1">验证率</p>
+                  <p className="text-sm text-gray-600 mt-1">{t.dashboard?.verificationRate}</p>
                 </div>
               </div>
             </div>
@@ -159,7 +161,7 @@ export default function ResultsPage() {
                       <span className={`font-semibold ${
                         citation.verified ? 'text-green-900' : 'text-red-900'
                       }`}>
-                        {citation.verified ? '已验证' : '未验证'}
+                        {citation.verified ? t.dashboard?.verified : t.dashboard?.unverified}
                       </span>
                     </div>
                     <p className="text-gray-700 mb-4">{citation.text}</p>
@@ -174,11 +176,11 @@ export default function ResultsPage() {
 
                 {citation.bestMatch && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
-                    <p className="text-sm font-medium text-gray-700 mb-2">最佳匹配:</p>
+                    <p className="text-sm font-medium text-gray-700 mb-2">{t.dashboard?.bestMatch}:</p>
                     <div className="bg-white rounded-lg p-4 space-y-2">
-                      <p className="text-sm"><span className="font-medium">标题:</span> {citation.bestMatch.title}</p>
-                      <p className="text-sm"><span className="font-medium">作者:</span> {citation.bestMatch.authors}</p>
-                      <p className="text-sm"><span className="font-medium">日期:</span> {citation.bestMatch.date}</p>
+                      <p className="text-sm"><span className="font-medium">{t.dashboard?.title}:</span> {citation.bestMatch.title}</p>
+                      <p className="text-sm"><span className="font-medium">{t.dashboard?.author}:</span> {citation.bestMatch.authors}</p>
+                      <p className="text-sm"><span className="font-medium">{t.dashboard?.date}:</span> {citation.bestMatch.date}</p>
                       {citation.bestMatch.link && (
                         <a
                           href={citation.bestMatch.link}
@@ -186,7 +188,7 @@ export default function ResultsPage() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
                         >
-                          查看原文 <ExternalLink size={14} />
+                          {t.dashboard?.viewOriginal} <ExternalLink size={14} />
                         </a>
                       )}
                     </div>
@@ -197,15 +199,15 @@ export default function ResultsPage() {
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-600">标题相似度</p>
+                        <p className="text-gray-600">{t.dashboard?.titleSimilarity}</p>
                         <p className="font-semibold text-gray-900">{citation.titleSimilarity || 0}%</p>
                       </div>
                       <div>
-                        <p className="text-gray-600">作者相似度</p>
+                        <p className="text-gray-600">{t.dashboard?.authorSimilarity}</p>
                         <p className="font-semibold text-gray-900">{citation.authorsSimilarity || 0}%</p>
                       </div>
                       <div>
-                        <p className="text-gray-600">日期相似度</p>
+                        <p className="text-gray-600">{t.dashboard?.dateSimilarity}</p>
                         <p className="font-semibold text-gray-900">{citation.dateSimilarity || 0}%</p>
                       </div>
                     </div>

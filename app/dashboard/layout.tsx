@@ -361,17 +361,17 @@ export default function DashboardLayout({
                           <p className="text-xs text-gray-500">{doc.date}</p>
                           {doc.type === 'finder' && (
                             <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
-                              搜索
+                              {t.dashboard?.historyFinder}
                             </span>
                           )}
                           {doc.type === 'checker' && (
                             <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded">
-                              验证
+                              {t.dashboard?.historyChecker}
                             </span>
                           )}
                           {doc.type === 'write' && (
                             <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 rounded">
-                              写作
+                              {t.dashboard?.historyWrite}
                             </span>
                           )}
                         </div>

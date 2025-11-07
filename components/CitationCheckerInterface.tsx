@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowUp, Sparkles, CheckCircle, AlertCircle, Loader2, ChevronRight, ChevronDown, ExternalLink } from 'lucide-react'
 import SearchProgressOverlay from './SearchProgressOverlay'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface Citation {
   id: string
@@ -42,6 +43,7 @@ interface CitationCheckerInterfaceProps {
 
 export default function CitationCheckerInterface({ onCheckComplete }: CitationCheckerInterfaceProps = {}) {
   const router = useRouter()
+  const { t } = useLanguage()
   const [text, setText] = useState('')
   const [isChecking, setIsChecking] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
@@ -86,7 +88,7 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
 
   const handleCheck = async () => {
     if (!text.trim()) {
-      setError('请输入需要验证的引用文本')
+      setError(t.tools?.checker?.noInput || 'Please paste text containing citations')
       return
     }
 
@@ -272,12 +274,12 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="粘贴您的引用列表进行验证..."
+            placeholder={t.dashboard?.pasteText || t.tools?.checker?.placeholder || "Paste text with citations for verification..."}
             className="w-full h-64 p-3 border-0 focus:ring-0 resize-none text-sm text-gray-900 placeholder-gray-400"
             maxLength={1000}
           />
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <span className="text-xs text-gray-500">{text.length}/1000 字符</span>
+            <span className="text-xs text-gray-500">{text.length}/1000 {t.dashboard?.characterCount || 'characters'}</span>
             <button
               onClick={handleCheck}
               disabled={!text.trim() || isChecking}

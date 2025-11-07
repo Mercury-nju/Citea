@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Loader2, CheckCircle, X } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface Step {
   id: number
@@ -23,6 +24,7 @@ export default function SearchProgressOverlay({
   onClose,
   type 
 }: SearchProgressOverlayProps) {
+  const { t } = useLanguage()
   const [displaySteps, setDisplaySteps] = useState<Step[]>(steps)
 
   useEffect(() => {
@@ -63,10 +65,10 @@ export default function SearchProgressOverlay({
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-gray-900">
-              {type === 'finder' ? '正在搜索文献...' : '正在验证引文...'}
+              {type === 'finder' ? t.dashboard?.searchingLiterature : t.dashboard?.verifyingCitations}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              请稍候，我们正在为您处理
+              {t.dashboard?.pleaseWait}
             </p>
           </div>
           {onClose && (
@@ -133,8 +135,8 @@ export default function SearchProgressOverlay({
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
           <p className="text-xs text-gray-500 text-center">
             {type === 'finder' 
-              ? '正在从多个学术数据库中搜索相关文献...' 
-              : '正在验证引文的真实性和准确性...'}
+              ? t.dashboard?.searchingFromDatabases
+              : t.dashboard?.verifyingCitationAccuracy}
           </p>
         </div>
       </div>
