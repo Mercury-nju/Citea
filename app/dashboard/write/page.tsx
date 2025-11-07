@@ -430,32 +430,17 @@ Outline:
                 />
                 
                 {writePrompt.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs ${
-                        writePrompt.length < 50 ? 'text-orange-600' :
-                        writePrompt.length < 100 ? 'text-yellow-600' :
-                        writePrompt.length < 300 ? 'text-green-600' :
-                        'text-blue-600'
-                      }`}>
-                        {writePrompt.length < 50 ? 'Too short - add more details' :
-                         writePrompt.length < 100 ? 'Good start' :
-                         writePrompt.length < 300 ? 'Great length' :
-                         'Excellent detail'}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {writePrompt.length}/500
-                      </span>
-                    </div>
+                  <div className="mt-3">
                     <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all duration-300 ${
-                          writePrompt.length < 50 ? 'bg-red-500' :
+                          writePrompt.length < 30 ? 'bg-gray-400' :
+                          writePrompt.length < 60 ? 'bg-yellow-500' :
                           writePrompt.length < 100 ? 'bg-orange-500' :
-                          writePrompt.length < 300 ? 'bg-green-500' :
+                          writePrompt.length < 150 ? 'bg-green-500' :
                           'bg-blue-500'
                         }`}
-                        style={{ width: `${Math.min(100, (writePrompt.length / 500) * 100)}%` }}
+                        style={{ width: `${Math.min(100, (writePrompt.length / 150) * 100)}%` }}
                       />
                     </div>
                   </div>
