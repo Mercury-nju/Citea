@@ -1859,6 +1859,12 @@ export function getTranslation(lang: Language) {
     for (const key in fallback) {
       if (!(key in result)) {
         result[key] = fallback[key]
+      } else if (Array.isArray(result[key])) {
+        // If target has an array, use it directly (don't merge arrays)
+        // Only use fallback if target array is empty
+        if (result[key].length === 0 && Array.isArray(fallback[key]) && fallback[key].length > 0) {
+          result[key] = fallback[key]
+        }
       } else if (typeof result[key] === 'object' && typeof fallback[key] === 'object') {
         result[key] = mergeWithFallback(result[key], fallback[key])
       }

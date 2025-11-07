@@ -41,6 +41,11 @@ export default function FAQ() {
   let faqs: FAQColumn[] = []
   try {
     const items = t.faq?.items
+    // Debug: log the items to see what we're getting
+    if (process.env.NODE_ENV === 'development') {
+      console.log('FAQ items:', items, 'Type:', typeof items, 'Is Array:', Array.isArray(items))
+    }
+    
     if (items && Array.isArray(items) && items.length > 0) {
       // Validate that items is a 2D array structure
       const isValidStructure = items.every(col => Array.isArray(col) && col.length > 0)
@@ -50,6 +55,9 @@ export default function FAQ() {
         // If structure is invalid, try to fix it or log for debugging
         console.warn('FAQ items structure is invalid:', items)
       }
+    } else if (items && !Array.isArray(items)) {
+      // Handle case where items might be an object instead of array
+      console.warn('FAQ items is not an array:', items)
     }
   } catch (error) {
     console.error('Error loading FAQ items:', error)
