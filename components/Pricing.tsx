@@ -20,35 +20,10 @@ interface Plan {
   popular: boolean
 }
 
-function PricingCardItem({ plan, IconComponent, t }: { plan: Plan; IconComponent: LucideIcon; t: any }) {
-  const [isHovered, setIsHovered] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
+export default function Pricing() {
+  const { t } = useLanguage()
 
-  return (
-    <div
-      ref={cardRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`relative bg-white rounded-xl border transition-all duration-300 ${
-        plan.popular
-          ? 'border-blue-600 shadow-xl scale-105'
-          : 'border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300'
-      } ${
-        isHovered && !plan.popular
-          ? 'scale-105 border-blue-300 -translate-y-2'
-          : ''
-      }`}
-      style={{
-        transform: isHovered && !plan.popular 
-          ? 'scale(1.05) translateY(-8px)' 
-          : plan.popular 
-          ? 'scale(1.05)' 
-          : 'scale(1)',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-      }}
-    >
-
-  const plans = [
+  const plans: Plan[] = [
     {
       id: 'free',
       name: t.pricing.freePlan,
@@ -135,33 +110,17 @@ function PricingCardItem({ plan, IconComponent, t }: { plan: Plan; IconComponent
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 max-w-6xl mx-auto">
           {plans.map((plan) => {
             const IconComponent = plan.icon
-            const [isHovered, setIsHovered] = useState(false)
-            const cardRef = useRef<HTMLDivElement>(null)
             
             return (
-              <div
+              <PricingCardItem
                 key={plan.id}
-                ref={cardRef}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                className={`relative bg-white rounded-xl border transition-all duration-300 ${
-                  plan.popular
-                    ? 'border-blue-600 shadow-xl scale-105'
-                    : 'border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300'
-                } ${
-                  isHovered && !plan.popular
-                    ? 'scale-105 border-blue-300 -translate-y-2'
-                    : ''
-                }`}
-                style={{
-                  transform: isHovered && !plan.popular 
-                    ? 'scale(1.05) translateY(-8px)' 
-                    : plan.popular 
-                    ? 'scale(1.05)' 
-                    : 'scale(1)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              >
+                plan={plan}
+                IconComponent={IconComponent}
+                t={t}
+              />
+            )
+          })}
+        </div>
                 {/* Popular Badge */}
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
@@ -326,5 +285,111 @@ function PricingCardItem({ plan, IconComponent, t }: { plan: Plan; IconComponent
         </div>
       </div>
     </section>
+  )
+}
+
+function PricingCardItem({ plan, IconComponent, t }: { plan: Plan; IconComponent: LucideIcon; t: any }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`relative bg-white rounded-xl border transition-all duration-300 ${
+        plan.popular
+          ? 'border-blue-600 shadow-xl scale-105'
+          : 'border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300'
+      } ${
+        isHovered && !plan.popular
+          ? 'scale-105 border-blue-300 -translate-y-2'
+          : ''
+      }`}
+      style={{
+        transform: isHovered && !plan.popular 
+          ? 'scale(1.05) translateY(-8px)' 
+          : plan.popular 
+          ? 'scale(1.05)' 
+          : 'scale(1)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+    >
+      {/* Popular Badge */}
+      {plan.popular && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+          <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+            {t.pricing.mostPopular}
+          </span>
+        </div>
+      )}
+
+      {/* Card Content */}
+      <div className="p-8">
+        {/* Header */}
+        <div className="text-center mb-6 pb-6 border-b border-gray-100">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-50 rounded-lg mb-3">
+            <IconComponent className={`w-6 h-6 ${
+              plan.id === 'free' ? 'text-gray-600' :
+              plan.id === 'monthly' ? 'text-blue-600' :
+              'text-purple-600'
+            }`} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-3">{plan.name}</h3>
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+            {plan.period && (
+              <span className="text-gray-500 text-base">{plan.period}</span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 mt-2">{plan.credits}</p>
+        </div>
+
+        {/* Features List */}
+        <ul className="space-y-3 mb-8">
+          {plan.features.map((feature, idx) => (
+            <li key={idx} className="flex items-start gap-2">
+              <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <span className="text-gray-700 text-sm">{feature}</span>
+            </li>
+          ))}
+          {plan.limitations.map((limitation, idx) => (
+            <li key={idx} className="flex items-start gap-2">
+              <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <span className="text-gray-400 text-sm line-through">{limitation}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* CTA Button */}
+        <button
+          className={`w-full ${plan.buttonStyle} text-white py-3 px-6 rounded-lg font-medium transition-all`}
+          onClick={async () => {
+            if (plan.id === 'free') {
+              window.location.href = '/auth/signup'
+            } else {
+              const targetPlan = plan.id === 'yearly' ? 'yearly' : 'monthly'
+              // Try to get user email from localStorage
+              try {
+                const savedUser = localStorage.getItem('citea_user')
+                if (savedUser) {
+                  const user = JSON.parse(savedUser)
+                  if (user.email) {
+                    window.location.href = `/api/creem/checkout?plan=${targetPlan}&email=${encodeURIComponent(user.email)}`
+                    return
+                  }
+                }
+              } catch (e) {
+                console.error('Error getting user email:', e)
+              }
+              // Fallback without email
+              window.location.href = `/api/creem/checkout?plan=${targetPlan}`
+            }
+          }}
+        >
+          {plan.buttonText}
+        </button>
+      </div>
+    </div>
   )
 }
