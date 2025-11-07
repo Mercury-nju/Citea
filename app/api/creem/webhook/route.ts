@@ -187,10 +187,19 @@ export async function POST(request: NextRequest) {
       console.warn('[Webhook] ⚠️ No email found in webhook event:', JSON.stringify(event))
     }
 
-    return NextResponse.json({ received: true })
+    return NextResponse.json({ 
+      received: true,
+      message: 'Webhook processed successfully',
+      timestamp: new Date().toISOString()
+    })
   } catch (err) {
-    console.error('Creem webhook error:', err)
-    return NextResponse.json({ error: 'Bad Request' }, { status: 400 })
+    console.error('[Webhook] ❌ Error:', err)
+    console.error('[Webhook] Error stack:', err instanceof Error ? err.stack : 'No stack trace')
+    return NextResponse.json({ 
+      error: 'Bad Request',
+      message: err instanceof Error ? err.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, { status: 400 })
   }
 }
 
