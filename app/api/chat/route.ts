@@ -46,9 +46,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 对话功能向所有登录用户开放，后续仅按积分计费
+    // 检查权限
+    const limits = getPlanLimits(user.plan)
+    if (!limits.hasChatAccess) {
+      return NextResponse.json(
+        { error: 'Chat feature is not available for your plan. Please upgrade to access this feature.' },
+        { status: 403 }
+      )
+    }
 
-    // 消耗积分
+    // 消耗积分（在验证权限后）
     const creditResult = await consumeCredit(user.email)
     if (!creditResult.success) {
       return NextResponse.json(
@@ -82,46 +89,79 @@ Your expertise includes:
 
 Always respond in English, be helpful, accurate, and professional. Answer users' questions directly without proactively emphasizing pricing or free information.`
 
-    // Call Tongyi Qianwen API
-    const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TONGYI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'qwen-turbo',
-        input: {
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt
-            },
-            ...messages
-          ]
-        },
-        parameters: {
-          max_tokens: 1000,
-          temperature: 0.7,
-          result_format: 'message'
-        }
+    let aiResponse: string
+    try {
+      // 手动超时处理
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000)
       })
-    })
+      
+      // Call Tongyi Qianwen API with timeout
+      const response = await Promise.race([
+        fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TONGYI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'qwen-turbo',
+            input: {
+              messages: [
+                {
+                  role: 'system',
+                  content: systemPrompt
+                },
+                ...messages
+              ]
+            },
+            parameters: {
+              max_tokens: 1000,
+              temperature: 0.7,
+              result_format: 'message'
+            }
+          })
+        }),
+        timeoutPromise
+      ]) as Response
 
-    if (!response.ok) {
-      throw new Error(`Tongyi API error: ${response.status}`)
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error')
+        throw new Error(`Tongyi API error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      
+      // Extract response from Tongyi API
+      aiResponse = data.output?.choices?.[0]?.message?.content || 
+                   data.output?.text || 
+                   'I apologize, but I encountered an error. Please try again.'
+      
+      if (!aiResponse || aiResponse.trim().length === 0) {
+        throw new Error('Empty response from AI API')
+      }
+    } catch (apiError) {
+      // API 调用失败，尝试退回积分
+      console.error('[Chat] API call failed, attempting to refund credit:', apiError)
+      try {
+        const { updateUser } = await import('@/lib/userStore')
+        const currentUser = await getUserByEmail(user.email)
+        if (currentUser) {
+          await updateUser(user.email, {
+            credits: (currentUser.credits || 0) + 1
+          })
+        }
+      } catch (refundError) {
+        console.error('[Chat] Failed to refund credit:', refundError)
+      }
+      
+      throw apiError
     }
-
-    const data = await response.json()
-    
-    // Extract response from Tongyi API
-    const aiResponse = data.output?.choices?.[0]?.message?.content || 
-                       data.output?.text || 
-                       'I apologize, but I encountered an error. Please try again.'
 
     return NextResponse.json({ 
       response: aiResponse,
-      model: 'qwen-turbo'
+      model: 'qwen-turbo',
+      creditsRemaining: creditResult.creditsRemaining
     })
   } catch (error) {
     console.error('Error in chat:', error)

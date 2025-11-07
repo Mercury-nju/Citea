@@ -78,8 +78,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 如果是第一步，消耗积分
+    let creditResult: { success: boolean; creditsRemaining: number; error?: string } | null = null
     if (step === 1) {
-      const creditResult = await consumeCredit(user.email)
+      creditResult = await consumeCredit(user.email)
       if (!creditResult.success) {
         return NextResponse.json(
           { error: creditResult.error || 'Insufficient credits' },
@@ -90,7 +91,35 @@ export async function POST(request: NextRequest) {
 
     // 如果指定了步骤，执行对应的步骤
     if (step !== undefined) {
-      return await executeStep(step, text, user)
+      try {
+        const result = await executeStep(step, text, user)
+        // 如果成功，返回结果（包含积分信息）
+        if (creditResult && result.status === 200) {
+          const json = await result.json()
+          return NextResponse.json({
+            ...json,
+            creditsRemaining: creditResult.creditsRemaining
+          }, { status: 200 })
+        }
+        return result
+      } catch (stepError) {
+        // 步骤执行失败，尝试退回积分
+        if (step === 1 && creditResult) {
+          console.error('[Find Sources] Step execution failed, attempting to refund credit:', stepError)
+          try {
+            const { updateUser } = await import('@/lib/userStore')
+            const currentUser = await getUserByEmail(user.email)
+            if (currentUser) {
+              await updateUser(user.email, {
+                credits: (currentUser.credits || 0) + 1
+              })
+            }
+          } catch (refundError) {
+            console.error('[Find Sources] Failed to refund credit:', refundError)
+          }
+        }
+        throw stepError
+      }
     }
 
       // 如果没有指定步骤，返回完整流程（兼容旧代码）

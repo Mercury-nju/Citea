@@ -351,34 +351,55 @@ export async function POST(req: NextRequest) {
 
     // Verify each citation with delay
     const results: Citation[] = []
-    for (const citation of limitedCitations) {
-      try {
-        const result = await verifyCitation(citation)
-        results.push(result)
-        // Delay between requests to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000))
-      } catch (error) {
-        console.error('Error verifying citation:', error)
-        // Add failed citation
-        results.push({
-          id: Math.random().toString(36).substr(2, 9),
-          text: citation,
-          verified: false,
-          titleSimilarity: 0,
-          authorsSimilarity: 0,
-          dateSimilarity: 0,
-        })
+    let successCount = 0
+    try {
+      for (const citation of limitedCitations) {
+        try {
+          const result = await verifyCitation(citation)
+          results.push(result)
+          if (result.verified) successCount++
+          // Delay between requests to avoid rate limits
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        } catch (error) {
+          console.error('Error verifying citation:', error)
+          // Add failed citation
+          results.push({
+            id: Math.random().toString(36).substr(2, 9),
+            text: citation,
+            verified: false,
+            titleSimilarity: 0,
+            authorsSimilarity: 0,
+            dateSimilarity: 0,
+          })
+        }
       }
+    } catch (error) {
+      // 如果整个验证过程失败，尝试退回积分
+      console.error('[Check Citations] Verification process failed, attempting to refund credit:', error)
+      try {
+        const { updateUser } = await import('@/lib/userStore')
+        const currentUser = await getUserByEmail(user.email)
+        if (currentUser && results.length === 0) {
+          // 只有在完全没有结果时才退回积分
+          await updateUser(user.email, {
+            credits: (currentUser.credits || 0) + 1
+          })
+        }
+      } catch (refundError) {
+        console.error('[Check Citations] Failed to refund credit:', refundError)
+      }
+      throw error
     }
 
     const verifiedCount = results.filter(r => r.verified).length
-    const verificationRate = Math.round((verifiedCount / results.length) * 100)
+    const verificationRate = results.length > 0 ? Math.round((verifiedCount / results.length) * 100) : 0
 
     return NextResponse.json({
       citations: results,
       totalFound: results.length,
       verified: verifiedCount,
       verificationRate,
+      creditsRemaining: creditResult.creditsRemaining
     })
   } catch (error: any) {
     console.error('Error in check-citations API:', error)
