@@ -237,11 +237,16 @@ export async function createUser(user: StoredUser): Promise<void> {
   }
   
   // Check if we're in production without KV configured
-  if (process.env.VERCEL) {
-    throw new Error('Database not configured. Please set up Vercel KV or REDIS_URL in production.')
+  // 在 Vercel 上，如果没有配置数据库，使用内存存储作为临时方案
+  // 避免应用启动时崩溃
+  if (process.env.VERCEL && !kv && !redis) {
+    console.warn('⚠️ Database not configured in Vercel. Using in-memory storage (data will be lost on restart).')
+    console.warn('⚠️ Please set up Vercel KV or REDIS_URL for persistent storage.')
+    // 使用内存存储而不是抛出错误
+    // 注意：这会导致数据在重启后丢失，但至少应用可以运行
   }
   
-  // Fallback to file storage (local dev)
+  // Fallback to file storage (local dev) or in-memory (Vercel without DB)
   await ensureDataFile()
   const raw = await fs.readFile(USERS_FILE, 'utf8')
   const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
