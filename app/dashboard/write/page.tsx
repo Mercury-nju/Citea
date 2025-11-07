@@ -431,6 +431,9 @@ Outline:
                 
                 {writePrompt.length > 0 && (
                   <div className="mt-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-gray-500">Input quality</span>
+                    </div>
                     <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all duration-300 ${

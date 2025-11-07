@@ -11,10 +11,13 @@ import {
   MessageSquare,
   Sparkles,
   Menu,
-  CheckCircle
+  CheckCircle,
+  X
 } from 'lucide-react'
 import Logo from '@/components/Logo'
 import { useLanguage } from '@/contexts/LanguageContext'
+import SourceFinderInterface from '@/components/SourceFinderInterface'
+import CitationCheckerInterface from '@/components/CitationCheckerInterface'
 // @ts-ignore - jspdf types may not be available
 import jsPDF from 'jspdf'
 // @ts-ignore - docx types may not be available
@@ -43,6 +46,7 @@ export default function WriteEditorPage() {
   const [isChatLoading, setIsChatLoading] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved')
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [activeTool, setActiveTool] = useState<'none' | 'finder' | 'checker'>('none')
 
   useEffect(() => {
     // Load document from localStorage
@@ -521,16 +525,24 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
             </div>
 
             <button
-              onClick={() => router.push('/dashboard?tab=finder')}
-              className="px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 bg-gray-100 hover:bg-blue-50 text-gray-700"
+              onClick={() => setActiveTool(activeTool === 'finder' ? 'none' : 'finder')}
+              className={`px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ${
+                activeTool === 'finder' 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-gray-100 hover:bg-blue-50 text-gray-700'
+              }`}
             >
               <Sparkles size={16} />
               Find Sources
             </button>
 
             <button
-              onClick={() => router.push('/dashboard?tab=checker')}
-              className="px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
+              onClick={() => setActiveTool(activeTool === 'checker' ? 'none' : 'checker')}
+              className={`px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ${
+                activeTool === 'checker' 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-gray-100 hover:bg-blue-50 text-gray-700'
+              }`}
             >
               <CheckCircle size={16} />
               Verify Citations
