@@ -27,17 +27,38 @@ export async function GET(request: NextRequest) {
     const origin = request.nextUrl.origin
 
     // Try to attach user email as metadata for webhook mapping
+    // Try both cookie and Authorization header
     let userEmail: string | undefined
     try {
-      const token = cookies().get('citea_auth')?.value
-      if (token) {
+      // Try cookie first
+      let token = cookies().get('citea_auth')?.value
+      
+      // If no cookie, try Authorization header
+      if (!token) {
+        const authHeader = request.headers.get('authorization')
+        if (authHeader?.startsWith('Bearer ')) {
+          token = authHeader.substring(7)
+        }
+      }
+      
+      // If still no token, try to get from localStorage via client-side redirect
+      // This is a fallback - the client should pass email as query param if needed
+      if (!token) {
+        const emailParam = searchParams.get('email')
+        if (emailParam) {
+          userEmail = emailParam
+        }
+      } else {
         const jwt = await verifyJwt(token)
         if (jwt?.email) {
           const user = await getUserByEmail(jwt.email)
           userEmail = user?.email
         }
       }
-    } catch {}
+    } catch (err) {
+      console.error('Error getting user email for checkout:', err)
+      // Continue without email - webhook can still work with customer email from Creem
+    }
 
     // Optional debug: /api/creem/checkout?plan=monthly&debug=1  → 返回解析结果而不调用 Creem
     if (searchParams.get('debug') === '1') {

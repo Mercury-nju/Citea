@@ -152,11 +152,25 @@ export default function Pricing() {
                   {/* CTA Button */}
                   <button
                     className={`w-full ${plan.buttonStyle} text-white py-3 px-6 rounded-lg font-medium transition-all`}
-                    onClick={() => {
+                    onClick={async () => {
                       if (plan.id === 'free') {
                         window.location.href = '/auth/signup'
                       } else {
                         const targetPlan = plan.id === 'yearly' ? 'yearly' : 'monthly'
+                        // Try to get user email from localStorage
+                        try {
+                          const savedUser = localStorage.getItem('citea_user')
+                          if (savedUser) {
+                            const user = JSON.parse(savedUser)
+                            if (user.email) {
+                              window.location.href = `/api/creem/checkout?plan=${targetPlan}&email=${encodeURIComponent(user.email)}`
+                              return
+                            }
+                          }
+                        } catch (e) {
+                          console.error('Error getting user email:', e)
+                        }
+                        // Fallback without email
                         window.location.href = `/api/creem/checkout?plan=${targetPlan}`
                       }
                     }}

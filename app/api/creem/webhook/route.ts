@@ -20,19 +20,37 @@ export async function POST(request: NextRequest) {
     if (metaEmail) {
       if (type === 'subscription.activated' || type === 'checkout.completed') {
         const limits = getPlanLimits(planFromProduct as any)
+        const now = new Date()
+        const subscriptionStartDate = now.toISOString()
+        
+        // 计算订阅过期时间
+        const subscriptionExpiresAt = new Date(now)
+        if (planFromProduct === 'yearly') {
+          subscriptionExpiresAt.setFullYear(subscriptionExpiresAt.getFullYear() + 1)
+        } else {
+          subscriptionExpiresAt.setMonth(subscriptionExpiresAt.getMonth() + 1)
+        }
+        
         await updateUser(metaEmail, {
           plan: planFromProduct as any,
-          subscriptionStartDate: new Date().toISOString(),
+          subscriptionStartDate: subscriptionStartDate,
+          subscriptionExpiresAt: subscriptionExpiresAt.toISOString(),
           credits: limits.maxCredits,
         })
       }
       if (type === 'subscription.canceled') {
         const limits = getPlanLimits('free')
-        await updateUser(metaEmail, {
-          plan: 'free',
-          subscriptionEndDate: new Date().toISOString(),
-          credits: Math.min(limits.maxCredits, limits.maxCredits),
-        })
+        // 获取用户信息以保留其他字段
+        const { getUserByEmail } = await import('@/lib/userStore')
+        const user = await getUserByEmail(metaEmail)
+        if (user) {
+          await updateUser(metaEmail, {
+            plan: 'free',
+            subscriptionEndDate: new Date().toISOString(),
+            subscriptionExpiresAt: '', // 清除过期时间（使用空字符串而不是undefined）
+            credits: limits.maxCredits,
+          })
+        }
       }
     }
 

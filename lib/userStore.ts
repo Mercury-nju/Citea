@@ -64,6 +64,7 @@ export type StoredUser = AuthUser & {
   creditsResetDate?: string // 积分重置日期（ISO string）
   subscriptionStartDate?: string // 订阅开始日期
   subscriptionEndDate?: string // 订阅结束日期
+  subscriptionExpiresAt?: string // 订阅过期时间（用于显示进度条）
   authProvider?: 'email' | 'google' // 认证提供者
   googleId?: string // Google 用户 ID
   avatar?: string // 用户头像 URL
@@ -116,6 +117,7 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         creditsResetDate: data.creditsResetDate as string | undefined,
         subscriptionStartDate: data.subscriptionStartDate as string | undefined,
         subscriptionEndDate: data.subscriptionEndDate as string | undefined,
+        subscriptionExpiresAt: data.subscriptionExpiresAt as string | undefined,
         authProvider: (data.authProvider as 'email' | 'google') || 'email',
         googleId: data.googleId as string | undefined,
         avatar: data.avatar as string | undefined,
@@ -166,6 +168,7 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
         creditsResetDate: data.creditsResetDate,
         subscriptionStartDate: data.subscriptionStartDate,
         subscriptionEndDate: data.subscriptionEndDate,
+        subscriptionExpiresAt: data.subscriptionExpiresAt,
         authProvider: (data.authProvider as 'email' | 'google') || 'email',
         googleId: data.googleId,
         avatar: data.avatar,
@@ -225,6 +228,7 @@ export async function createUser(user: StoredUser): Promise<void> {
         creditsResetDate: user.creditsResetDate || '',
         subscriptionStartDate: user.subscriptionStartDate || '',
         subscriptionEndDate: user.subscriptionEndDate || '',
+        subscriptionExpiresAt: user.subscriptionExpiresAt || '',
         authProvider: user.authProvider || 'email',
         googleId: user.googleId || '',
         avatar: user.avatar || '',
@@ -436,6 +440,9 @@ export async function updateUser(email: string, updates: Partial<StoredUser>): P
       }
       if (updatedUser.subscriptionEndDate) {
         dataToStore.subscriptionEndDate = updatedUser.subscriptionEndDate
+      }
+      if (updatedUser.subscriptionExpiresAt) {
+        dataToStore.subscriptionExpiresAt = updatedUser.subscriptionExpiresAt
       }
 
       await redis.hset(key, dataToStore)
