@@ -6,22 +6,25 @@ import {
   ArrowLeft, 
   Edit3, 
   FileText, 
-  Plus,
   MoreVertical,
   Trash2,
   Star,
   Filter,
   Search,
   X,
-  ArrowRight,
-  Sparkles
+  ArrowRight
 } from 'lucide-react'
 import Logo from '@/components/Logo'
+
+interface Section {
+  title: string
+  content: string
+}
 
 interface Document {
   id: string
   title: string
-  outline: string[]
+  outline: Section[]
   content: string
   preview: string
   createdAt: number
@@ -33,7 +36,7 @@ export default function WriteDocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [writePrompt, setWritePrompt] = useState('')
-  const [writeStartMode, setWriteStartMode] = useState<'heading' | 'outline'>('heading')
+  // Removed writeStartMode - always use outline generation
   const [isGenerating, setIsGenerating] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -64,32 +67,21 @@ export default function WriteDocumentsPage() {
     
     try {
       let title = ''
-      let outline: string[] = []
+      let outline: Section[] = []
       
-      if (writeStartMode === 'heading') {
-        // Start with heading: Use user input as title directly
-        title = writePrompt.trim()
-        outline = [
-          'Introduction',
-          'Background and Context',
-          'Main Analysis',
-          'Key Findings',
-          'Conclusion'
-        ]
-      } else {
-        // Start with outline: Generate both title and outline using AI
-        const token = localStorage.getItem('citea_auth_token')
-        const headers: HeadersInit = { 'Content-Type': 'application/json' }
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`
-        }
+      // Generate title and outline with content using AI
+      const token = localStorage.getItem('citea_auth_token')
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
 
-        // Detect language
-        const isChinese = /[\u4e00-\u9fa5]/.test(writePrompt)
-        const language = isChinese ? 'Chinese' : 'English'
+      // Detect language
+      const isChinese = /[\u4e00-\u9fa5]/.test(writePrompt)
+      const language = isChinese ? 'Chinese' : 'English'
 
-        const promptMessage = isChinese
-          ? `你是一位专业的学术写作助手。请根据以下主题生成一个高质量的学术文档标题和详细大纲。
+      const promptMessage = isChinese
+        ? `你是一位专业的学术写作助手。请根据以下主题生成一个高质量的学术文档标题、详细大纲，并为每个章节生成一段简单的内容概述。
 
 主题：${writePrompt}
 
@@ -98,19 +90,33 @@ export default function WriteDocumentsPage() {
 2. 大纲应该包含5-7个主要章节，每个章节都应该有明确的学术价值
 3. 大纲应该遵循学术写作的逻辑结构：引言、文献综述、方法论、分析、结论等
 4. 每个章节标题应该具体、专业，避免过于宽泛
+5. 为每个章节生成一段2-3句话的简单内容概述，说明该章节将讨论的主要内容
 
 请严格按照以下格式返回（不要添加任何其他内容）：
 标题：[标题内容]
 
 大纲：
 1. [章节1标题]
+   内容：[章节1的简单内容概述，2-3句话]
+
 2. [章节2标题]
+   内容：[章节2的简单内容概述，2-3句话]
+
 3. [章节3标题]
+   内容：[章节3的简单内容概述，2-3句话]
+
 4. [章节4标题]
+   内容：[章节4的简单内容概述，2-3句话]
+
 5. [章节5标题]
+   内容：[章节5的简单内容概述，2-3句话]
+
 6. [章节6标题]（可选）
-7. [章节7标题]（可选）`
-          : `You are a professional academic writing assistant. Please generate a high-quality academic document title and detailed outline based on the following topic.
+   内容：[章节6的简单内容概述，2-3句话]
+
+7. [章节7标题]（可选）
+   内容：[章节7的简单内容概述，2-3句话]`
+        : `You are a professional academic writing assistant. Please generate a high-quality academic document title, detailed outline, and brief content overview for each section based on the following topic.
 
 Topic: ${writePrompt}
 
@@ -119,92 +125,145 @@ Requirements:
 2. The outline should include 5-7 main sections, each with clear academic value
 3. The outline should follow the logical structure of academic writing: Introduction, Literature Review, Methodology, Analysis, Conclusion, etc.
 4. Each section title should be specific and professional, avoiding overly broad terms
+5. Generate a brief 2-3 sentence content overview for each section, explaining what will be discussed in that section
 
 Please return strictly in the following format (do not add any other content):
 Title: [title content]
 
 Outline:
 1. [Section 1 title]
+   Content: [Brief 2-3 sentence overview of section 1 content]
+
 2. [Section 2 title]
+   Content: [Brief 2-3 sentence overview of section 2 content]
+
 3. [Section 3 title]
+   Content: [Brief 2-3 sentence overview of section 3 content]
+
 4. [Section 4 title]
+   Content: [Brief 2-3 sentence overview of section 4 content]
+
 5. [Section 5 title]
+   Content: [Brief 2-3 sentence overview of section 5 content]
+
 6. [Section 6 title] (optional)
-7. [Section 7 title] (optional)`
+   Content: [Brief 2-3 sentence overview of section 6 content]
 
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            messages: [
-              {
-                role: 'user',
-                content: promptMessage
-              }
-            ],
-            language: language
-          }),
-        })
+7. [Section 7 title] (optional)
+   Content: [Brief 2-3 sentence overview of section 7 content]`
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          console.error('API Error:', errorData)
-          throw new Error(errorData.error || 'Failed to generate outline')
-        }
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: promptMessage
+            }
+          ],
+          language: language
+        }),
+      })
 
-        const data = await response.json()
-        console.log('AI Response:', data)
-        const aiResponse = data.response || ''
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('API Error:', errorData)
+        throw new Error(errorData.error || 'Failed to generate outline')
+      }
+
+      const data = await response.json()
+      console.log('AI Response:', data)
+      const aiResponse = data.response || ''
+      
+      if (!aiResponse) {
+        throw new Error('Empty response from AI')
+      }
+
+      // Parse AI response
+      const titleMatch = aiResponse.match(/(?:Title|标题)[：:]\s*(.+?)(?:\n|$)/i) || 
+                        aiResponse.match(/^标题[：:]\s*(.+?)$/im) ||
+                        aiResponse.match(/^Title[：:]\s*(.+?)$/im)
+      title = titleMatch ? titleMatch[1].trim().replace(/^["']|["']$/g, '') : `Document about ${writePrompt}`
+
+      // Extract outline sections with content
+      const outlineMatches = aiResponse.match(/(?:Outline|大纲)[：:]?\s*\n([\s\S]+)/i) ||
+                            aiResponse.match(/大纲[：:]\s*([\s\S]+?)(?:\n\n|$)/i) ||
+                            aiResponse.match(/Outline[：:]\s*([\s\S]+?)(?:\n\n|$)/i)
+      
+      if (outlineMatches) {
+        const outlineText = outlineMatches[1]
+        // Split by section number pattern
+        const sectionPattern = /(\d+)\.\s*([^\n]+?)\n\s*(?:内容|Content)[：:]\s*([^\n]+(?:\n(?!\d+\.)[^\n]+)*)/g
+        const sections: Section[] = []
+        let match
         
-        if (!aiResponse) {
-          throw new Error('Empty response from AI')
+        while ((match = sectionPattern.exec(outlineText)) !== null) {
+          const sectionTitle = match[2].trim()
+            .replace(/^[-*•]\s*/, '')
+            .replace(/^[（(]\d+[）)]\s*/, '')
+          const sectionContent = match[3].trim()
+          
+          if (sectionTitle && !sectionTitle.match(/^(可选|optional)/i)) {
+            sections.push({
+              title: sectionTitle,
+              content: sectionContent
+            })
+          }
         }
-
-        // Parse AI response with improved regex
-        const titleMatch = aiResponse.match(/(?:Title|标题)[：:]\s*(.+?)(?:\n|$)/i) || 
-                          aiResponse.match(/^标题[：:]\s*(.+?)$/im) ||
-                          aiResponse.match(/^Title[：:]\s*(.+?)$/im)
-        title = titleMatch ? titleMatch[1].trim().replace(/^["']|["']$/g, '') : `Document about ${writePrompt}`
-
-        // Extract outline sections with improved parsing
-        const outlineMatches = aiResponse.match(/(?:Outline|大纲)[：:]?\s*\n([\s\S]+)/i) ||
-                              aiResponse.match(/大纲[：:]\s*([\s\S]+?)(?:\n\n|$)/i) ||
-                              aiResponse.match(/Outline[：:]\s*([\s\S]+?)(?:\n\n|$)/i)
         
-        if (outlineMatches) {
-          const outlineText = outlineMatches[1]
+        // Fallback parsing if regex doesn't match
+        if (sections.length === 0) {
           const lines = outlineText.split('\n').filter((line: string) => line.trim())
-          outline = lines
-            .map((line: string) => {
-              // Remove numbering (1., 2., etc.) and bullets (-, *, etc.)
-              return line
-                .replace(/^\d+[\.\)]\s*/, '')
+          let currentSection: Section | null = null
+          
+          for (const line of lines) {
+            const sectionMatch = line.match(/^(\d+)[\.\)]\s*(.+)$/)
+            const contentMatch = line.match(/^(?:内容|Content)[：:]\s*(.+)$/i)
+            
+            if (sectionMatch) {
+              if (currentSection) {
+                sections.push(currentSection)
+              }
+              const title = sectionMatch[2].trim()
                 .replace(/^[-*•]\s*/, '')
                 .replace(/^[（(]\d+[）)]\s*/, '')
-                .trim()
-            })
-            .filter((line: string) => line.length > 0 && !line.match(/^(可选|optional)/i))
-            .slice(0, 7) // Limit to 7 sections
+              if (title && !title.match(/^(可选|optional)/i)) {
+                currentSection = { title, content: '' }
+              }
+            } else if (contentMatch && currentSection) {
+              currentSection.content = contentMatch[1].trim()
+            } else if (currentSection && line.trim() && !line.match(/^(内容|Content)/i)) {
+              // Append to content if it's not a new section marker
+              currentSection.content += (currentSection.content ? '\n' : '') + line.trim()
+            }
+          }
+          
+          if (currentSection) {
+            sections.push(currentSection)
+          }
         }
+        
+        outline = sections.slice(0, 7) // Limit to 7 sections
+      }
 
-        // Fallback if outline extraction failed
-        if (outline.length === 0) {
-          outline = isChinese ? [
-            '引言',
-            '文献综述',
-            '研究方法',
-            '结果分析',
-            '讨论',
-            '结论'
-          ] : [
-            'Introduction',
-            'Literature Review',
-            'Methodology',
-            'Results and Analysis',
-            'Discussion',
-            'Conclusion'
-          ]
-        }
+      // Fallback if outline extraction failed
+      if (outline.length === 0) {
+        outline = isChinese ? [
+          { title: '引言', content: '本章节将介绍研究背景、研究问题和研究目标，为后续章节奠定基础。' },
+          { title: '文献综述', content: '本章节将回顾相关领域的研究文献，分析现有研究的不足和研究空白。' },
+          { title: '研究方法', content: '本章节将详细说明研究设计、数据收集方法和分析方法。' },
+          { title: '结果分析', content: '本章节将呈现研究结果并进行深入分析，探讨研究发现的意义。' },
+          { title: '讨论', content: '本章节将讨论研究结果的含义，与现有研究进行比较，并提出研究局限性。' },
+          { title: '结论', content: '本章节将总结研究的主要发现，提出未来研究方向和实践建议。' }
+        ] : [
+          { title: 'Introduction', content: 'This section will introduce the research background, research questions, and research objectives, laying the foundation for subsequent sections.' },
+          { title: 'Literature Review', content: 'This section will review relevant research literature in the field, analyzing gaps and limitations in existing research.' },
+          { title: 'Methodology', content: 'This section will detail the research design, data collection methods, and analytical approaches.' },
+          { title: 'Results and Analysis', content: 'This section will present research findings and provide in-depth analysis, exploring the significance of the discoveries.' },
+          { title: 'Discussion', content: 'This section will discuss the implications of the findings, compare with existing research, and address research limitations.' },
+          { title: 'Conclusion', content: 'This section will summarize the main findings, propose future research directions, and provide practical recommendations.' }
+        ]
       }
       
       const newDoc: Document = {
@@ -212,7 +271,7 @@ Outline:
         title: title,
         outline: outline,
         content: '',
-        preview: outline.slice(0, 3).join(', ') + '...',
+        preview: outline.slice(0, 3).map(s => s.title).join(', ') + '...',
         createdAt: Date.now(),
         updatedAt: Date.now()
       }
@@ -232,7 +291,7 @@ Outline:
     } catch (error) {
       console.error('Generation error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      alert(`Failed to generate document: ${errorMessage}\n\nPlease try again or use "Start with Heading" mode.`)
+      alert(`Failed to generate document: ${errorMessage}\n\nPlease try again.`)
     } finally {
       setIsGenerating(false)
     }
@@ -450,37 +509,6 @@ Outline:
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <button
-                  onClick={() => setWriteStartMode('heading')}
-                  className={`p-4 rounded-lg border transition-all text-left ${
-                    writeStartMode === 'heading'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <Edit3 size={18} className={writeStartMode === 'heading' ? 'text-blue-600' : 'text-gray-400'} />
-                    <h3 className="font-semibold text-sm text-gray-900">Start with Heading</h3>
-                  </div>
-                  <p className="text-xs text-gray-600">Use input as title</p>
-                </button>
-
-                <button
-                  onClick={() => setWriteStartMode('outline')}
-                  className={`p-4 rounded-lg border transition-all text-left ${
-                    writeStartMode === 'outline'
-                      ? 'border-purple-500 bg-purple-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <FileText size={18} className={writeStartMode === 'outline' ? 'text-purple-600' : 'text-gray-400'} />
-                    <h3 className="font-semibold text-sm text-gray-900">Start with Outline</h3>
-                  </div>
-                  <p className="text-xs text-gray-600">AI generates outline</p>
-                </button>
-              </div>
 
               <div className="flex justify-end gap-3">
                 <button

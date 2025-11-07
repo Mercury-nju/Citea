@@ -25,10 +25,15 @@ import { Document as DocxDocument, Packer, Paragraph, TextRun, HeadingLevel } fr
 // @ts-ignore - file-saver types may not be available
 import { saveAs } from 'file-saver'
 
+interface Section {
+  title: string
+  content: string
+}
+
 interface Document {
   id: string
   title: string
-  outline: string[]
+  outline: Section[]
   content: string
   createdAt: number
   updatedAt: number
@@ -173,10 +178,10 @@ export default function WriteEditorPage() {
 
       // Fallback to document state if DOM extraction fails
       if (sections.length === 0 && document.outline.length > 0) {
-        document.outline.forEach((sectionTitle) => {
+        document.outline.forEach((section) => {
           sections.push({
-            heading: sectionTitle,
-            content: document.content || ''
+            heading: typeof section === 'string' ? section : section.title,
+            content: typeof section === 'string' ? (document.content || '') : (section.content || '')
           })
         })
       }
@@ -332,7 +337,10 @@ export default function WriteEditorPage() {
       const documentContext = document ? `
 Document Title: "${document.title}"
 Document Outline:
-${document.outline.map((section: string, idx: number) => `${idx + 1}. ${section}`).join('\n')}
+${document.outline.map((section: Section | string, idx: number) => {
+  const title = typeof section === 'string' ? section : section.title
+  return `${idx + 1}. ${title}`
+}).join('\n')}
 ` : ''
       
       const contextMessage = `${documentContext}
@@ -609,58 +617,80 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
 
               {/* Content Sections - Smaller fonts */}
               <div className="space-y-8">
-                {document.outline.map((section, index) => (
-                  <div key={index} className="group">
-                    <h2 
-                      className="text-xl font-semibold text-gray-900 mb-4 focus:outline-none border-b border-transparent focus:border-blue-300 pb-2 transition-colors"
-                      contentEditable
-                      suppressContentEditableWarning
-                      onBlur={(e) => {
-                        const newOutline = [...document.outline]
-                        newOutline[index] = e.currentTarget.textContent || section
-                        if (newOutline[index] !== section) {
-                          setDocument(prev => prev ? {...prev, outline: newOutline} : null)
+                {document.outline.map((section, index) => {
+                  // Support both old format (string) and new format (Section object)
+                  const sectionTitle = typeof section === 'string' ? section : section.title
+                  const sectionContent = typeof section === 'string' ? '' : (section.content || '')
+                  
+                  return (
+                    <div key={index} className="group">
+                      <h2 
+                        className="text-xl font-semibold text-gray-900 mb-4 focus:outline-none border-b border-transparent focus:border-blue-300 pb-2 transition-colors"
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => {
+                          const newTitle = e.currentTarget.textContent || sectionTitle
+                          const newOutline = [...document.outline]
+                          if (typeof section === 'string') {
+                            newOutline[index] = newTitle
+                          } else {
+                            newOutline[index] = { ...section, title: newTitle }
+                          }
+                          if (newTitle !== sectionTitle) {
+                            setDocument(prev => prev ? {...prev, outline: newOutline} : null)
+                            setSaveStatus('unsaved')
+                            autoSave({ ...document, outline: newOutline })
+                          }
+                        }}
+                        style={{ minHeight: '32px' }}
+                      >
+                        {sectionTitle}
+                      </h2>
+                      <div 
+                        className="text-gray-700 text-base leading-relaxed focus:outline-none min-h-[150px] p-4 rounded-lg border border-transparent focus-within:border-blue-200 focus-within:bg-blue-50/30 transition-all relative"
+                        contentEditable
+                        suppressContentEditableWarning
+                        spellCheck={true}
+                        data-placeholder="Start writing here... Use the AI assistant for help."
+                        onInput={(e) => {
                           setSaveStatus('unsaved')
+                        }}
+                        onBlur={(e) => {
+                          // Auto-save content changes
+                          const content = e.currentTarget.textContent || ''
+                          const newOutline = [...document.outline]
+                          if (typeof section === 'string') {
+                            // Convert old format to new format
+                            newOutline[index] = { title: sectionTitle, content }
+                          } else {
+                            newOutline[index] = { ...section, content }
+                          }
+                          setDocument(prev => prev ? {...prev, outline: newOutline} : null)
                           autoSave({ ...document, outline: newOutline })
-                        }
-                      }}
-                      style={{ minHeight: '32px' }}
-                    >
-                      {section}
-                    </h2>
-                    <div 
-                      className="text-gray-700 text-base leading-relaxed focus:outline-none min-h-[150px] p-4 rounded-lg border border-transparent focus-within:border-blue-200 focus-within:bg-blue-50/30 transition-all relative"
-                      contentEditable
-                      suppressContentEditableWarning
-                      spellCheck={true}
-                      data-placeholder="Start writing here... Use the AI assistant for help."
-                      onInput={(e) => {
-                        setSaveStatus('unsaved')
-                      }}
-                      onBlur={(e) => {
-                        // Auto-save content changes
-                        const content = e.currentTarget.textContent || ''
-                        autoSave({ ...document, content })
-                      }}
-                      style={{ 
-                        fontFamily: 'system-ui, -apple-system, sans-serif',
-                        lineHeight: '1.6',
-                        wordBreak: 'break-word'
-                      }}
-                    />
-                    <style jsx global>{`
-                      div[contenteditable][data-placeholder]:empty:before {
-                        content: attr(data-placeholder);
-                        color: #9ca3af;
-                        font-style: italic;
-                        pointer-events: none;
-                        position: absolute;
-                        top: 1rem;
-                        left: 1rem;
-                      }
-                    `}</style>
-                  </div>
-                ))}
+                        }}
+                        style={{ 
+                          fontFamily: 'system-ui, -apple-system, sans-serif',
+                          lineHeight: '1.6',
+                          wordBreak: 'break-word'
+                        }}
+                      >
+                        {sectionContent}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <style jsx global>{`
+                div[contenteditable][data-placeholder]:empty:before {
+                  content: attr(data-placeholder);
+                  color: #9ca3af;
+                  font-style: italic;
+                  pointer-events: none;
+                  position: absolute;
+                  top: 1rem;
+                  left: 1rem;
+                }
+              `}</style>
               </div>
             </div>
           </div>
