@@ -334,13 +334,15 @@ export default function WriteEditorPage() {
       const language = isChinese ? 'Chinese' : 'English'
 
       // Add document context to the message with improved prompt
+      const outlineText = document ? document.outline.map((section: Section | string, idx: number) => {
+        const title = typeof section === 'string' ? section : section.title
+        return `${idx + 1}. ${title}`
+      }).join('\n') : ''
+      
       const documentContext = document ? `
 Document Title: "${document.title}"
 Document Outline:
-${document.outline.map((section: Section | string, idx: number) => {
-  const title = typeof section === 'string' ? section : section.title
-  return `${idx + 1}. ${title}`
-}).join('\n')}
+${outlineText}
 ` : ''
       
       const contextMessage = `${documentContext}
