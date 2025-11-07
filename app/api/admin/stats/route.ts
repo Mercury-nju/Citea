@@ -50,7 +50,10 @@ export async function GET(request: NextRequest) {
           const user = await getUserByEmail(email)
           if (user) {
             stats.total++
-            stats.byPlan[user.plan] = (stats.byPlan[user.plan] || 0) + 1
+            const plan = user.plan as 'free' | 'weekly' | 'monthly' | 'yearly'
+            if (plan && (plan === 'free' || plan === 'weekly' || plan === 'monthly' || plan === 'yearly')) {
+              stats.byPlan[plan] = (stats.byPlan[plan] || 0) + 1
+            }
             if (user.emailVerified) stats.verified++
             else stats.unverified++
             if (user.subscriptionExpiresAt) {
@@ -82,7 +85,10 @@ export async function GET(request: NextRequest) {
         
         for (const user of json.users || []) {
           stats.total++
-          stats.byPlan[user.plan] = (stats.byPlan[user.plan] || 0) + 1
+          const plan = user.plan as 'free' | 'weekly' | 'monthly' | 'yearly'
+          if (plan && (plan === 'free' || plan === 'weekly' || plan === 'monthly' || plan === 'yearly')) {
+            stats.byPlan[plan] = (stats.byPlan[plan] || 0) + 1
+          }
           if (user.emailVerified) stats.verified++
           else stats.unverified++
           if (user.subscriptionExpiresAt) {
