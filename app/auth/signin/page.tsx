@@ -164,14 +164,9 @@ export default function SignInPage() {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t.auth.signIn.passwordLabel}
-                  </label>
-                  <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
-                    {t.auth.signIn.forgotPassword || 'Forgot password?'}
-                  </Link>
-                </div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.auth.signIn.passwordLabel}
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <input
