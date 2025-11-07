@@ -134,8 +134,17 @@ export default function WriteEditorPage() {
       const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
       const language = isChinese ? 'Chinese' : 'English'
 
-      // Add document context to the message
-      const contextMessage = `I'm writing a document titled "${document?.title}". ${userMessage}`
+      // Add document context to the message with improved prompt
+      const documentContext = document ? `
+Document Title: "${document.title}"
+Document Outline:
+${document.outline.map((section: string, idx: number) => `${idx + 1}. ${section}`).join('\n')}
+` : ''
+      
+      const contextMessage = `${documentContext}
+I'm working on this academic document. ${userMessage}
+
+Please provide helpful, specific, and actionable advice. If you're suggesting content, make it academic and well-structured.`
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -354,68 +363,81 @@ export default function WriteEditorPage() {
             <div className="max-w-4xl mx-auto px-12 py-16">
               {/* Title */}
               <h1 
-                className="text-5xl font-bold text-gray-900 mb-12 focus:outline-none leading-tight"
+                className="text-5xl font-bold text-gray-900 mb-12 focus:outline-none leading-tight border-b-2 border-transparent focus:border-blue-200 pb-4 transition-colors"
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => {
-                  setDocument(prev => prev ? {...prev, title: e.currentTarget.textContent || prev.title} : null)
+                  const newTitle = e.currentTarget.textContent || document.title
+                  setDocument(prev => prev ? {...prev, title: newTitle} : null)
+                  // Auto-save on blur
+                  setTimeout(() => {
+                    const updatedDoc = { ...document, title: newTitle, updatedAt: Date.now() }
+                    const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
+                    if (user.email) {
+                      const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+                      const index = savedDocs.findIndex((d: Document) => d.id === document.id)
+                      if (index >= 0) {
+                        savedDocs[index] = updatedDoc
+                        localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
+                      }
+                    }
+                  }, 100)
                 }}
+                style={{ minHeight: '60px' }}
               >
                 {document.title}
               </h1>
 
               {/* Content Sections */}
-              <div className="space-y-10">
+              <div className="space-y-12">
                 {document.outline.map((section, index) => (
-                  <div key={index}>
+                  <div key={index} className="group">
                     <h2 
-                      className="text-3xl font-bold text-gray-900 mb-4 focus:outline-none"
+                      className="text-3xl font-bold text-gray-900 mb-6 focus:outline-none border-b-2 border-transparent focus:border-blue-200 pb-2 transition-colors"
                       contentEditable
                       suppressContentEditableWarning
                       onBlur={(e) => {
                         const newOutline = [...document.outline]
                         newOutline[index] = e.currentTarget.textContent || section
                         setDocument(prev => prev ? {...prev, outline: newOutline} : null)
+                        // Auto-save on blur
+                        setTimeout(() => {
+                          const updatedDoc = { ...document, outline: newOutline, updatedAt: Date.now() }
+                          const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
+                          if (user.email) {
+                            const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+                            const index = savedDocs.findIndex((d: Document) => d.id === document.id)
+                            if (index >= 0) {
+                              savedDocs[index] = updatedDoc
+                              localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
+                            }
+                          }
+                        }, 100)
                       }}
+                      style={{ minHeight: '40px' }}
                     >
                       {section}
                     </h2>
                     <div 
-                      className="text-gray-700 space-y-2 ml-4 leading-relaxed focus:outline-none"
+                      className="text-gray-700 space-y-4 ml-4 leading-relaxed focus:outline-none min-h-[200px] p-4 rounded-lg border-2 border-transparent focus-within:border-blue-200 transition-colors prose prose-lg max-w-none relative empty:before:content-['Start_writing_here..._Use_the_AI_assistant_on_the_right_for_help.'] empty:before:text-gray-400 empty:before:italic"
                       contentEditable
                       suppressContentEditableWarning
-                    >
-                      {section === 'Introduction' && (
-                        <ul className="list-disc list-inside">
-                          <li>Background information</li>
-                          <li>Research objectives</li>
-                        </ul>
-                      )}
-                      {section === 'Background and Context' && (
-                        <ul className="list-disc list-inside">
-                          <li>Historical perspective</li>
-                          <li>Current state of research</li>
-                        </ul>
-                      )}
-                      {section === 'Main Analysis' && (
-                        <ul className="list-disc list-inside">
-                          <li>Methodology</li>
-                          <li>Data analysis</li>
-                        </ul>
-                      )}
-                      {section === 'Key Findings' && (
-                        <ul className="list-disc list-inside">
-                          <li>Primary results</li>
-                          <li>Secondary observations</li>
-                        </ul>
-                      )}
-                      {section === 'Conclusion' && (
-                        <ul className="list-disc list-inside">
-                          <li>Summary of findings</li>
-                          <li>Future directions</li>
-                        </ul>
-                      )}
-                    </div>
+                      onBlur={(e) => {
+                        // Auto-save content changes
+                        setTimeout(() => {
+                          const updatedDoc = { ...document, updatedAt: Date.now() }
+                          const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
+                          if (user.email) {
+                            const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+                            const docIndex = savedDocs.findIndex((d: Document) => d.id === document.id)
+                            if (docIndex >= 0) {
+                              savedDocs[docIndex] = updatedDoc
+                              localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
+                            }
+                          }
+                        }, 500)
+                      }}
+                    />
                   </div>
                 ))}
               </div>

@@ -12,7 +12,9 @@ import {
   Star,
   Filter,
   Search,
-  X
+  X,
+  ArrowRight,
+  Sparkles
 } from 'lucide-react'
 import Logo from '@/components/Logo'
 
@@ -87,8 +89,48 @@ export default function WriteDocumentsPage() {
         const language = isChinese ? 'Chinese' : 'English'
 
         const promptMessage = isChinese
-          ? `请根据以下主题生成一个学术文档的标题和大纲。主题：${writePrompt}\n\n请按以下格式返回：\n标题：[标题内容]\n大纲：\n1. [章节1]\n2. [章节2]\n3. [章节3]\n4. [章节4]\n5. [章节5]`
-          : `Generate a title and outline for an academic document based on this topic: ${writePrompt}\n\nPlease return in this format:\nTitle: [title content]\nOutline:\n1. [Section 1]\n2. [Section 2]\n3. [Section 3]\n4. [Section 4]\n5. [Section 5]`
+          ? `你是一位专业的学术写作助手。请根据以下主题生成一个高质量的学术文档标题和详细大纲。
+
+主题：${writePrompt}
+
+要求：
+1. 标题应该准确、简洁，能够概括文档的核心内容
+2. 大纲应该包含5-7个主要章节，每个章节都应该有明确的学术价值
+3. 大纲应该遵循学术写作的逻辑结构：引言、文献综述、方法论、分析、结论等
+4. 每个章节标题应该具体、专业，避免过于宽泛
+
+请严格按照以下格式返回（不要添加任何其他内容）：
+标题：[标题内容]
+
+大纲：
+1. [章节1标题]
+2. [章节2标题]
+3. [章节3标题]
+4. [章节4标题]
+5. [章节5标题]
+6. [章节6标题]（可选）
+7. [章节7标题]（可选）`
+          : `You are a professional academic writing assistant. Please generate a high-quality academic document title and detailed outline based on the following topic.
+
+Topic: ${writePrompt}
+
+Requirements:
+1. The title should be accurate, concise, and summarize the core content of the document
+2. The outline should include 5-7 main sections, each with clear academic value
+3. The outline should follow the logical structure of academic writing: Introduction, Literature Review, Methodology, Analysis, Conclusion, etc.
+4. Each section title should be specific and professional, avoiding overly broad terms
+
+Please return strictly in the following format (do not add any other content):
+Title: [title content]
+
+Outline:
+1. [Section 1 title]
+2. [Section 2 title]
+3. [Section 3 title]
+4. [Section 4 title]
+5. [Section 5 title]
+6. [Section 6 title] (optional)
+7. [Section 7 title] (optional)`
 
         const response = await fetch('/api/chat', {
           method: 'POST',
@@ -118,28 +160,48 @@ export default function WriteDocumentsPage() {
           throw new Error('Empty response from AI')
         }
 
-        // Parse AI response
-        const titleMatch = aiResponse.match(/(?:Title|标题)[：:]\s*(.+?)(?:\n|$)/i)
-        title = titleMatch ? titleMatch[1].trim() : `Document about ${writePrompt}`
+        // Parse AI response with improved regex
+        const titleMatch = aiResponse.match(/(?:Title|标题)[：:]\s*(.+?)(?:\n|$)/i) || 
+                          aiResponse.match(/^标题[：:]\s*(.+?)$/im) ||
+                          aiResponse.match(/^Title[：:]\s*(.+?)$/im)
+        title = titleMatch ? titleMatch[1].trim().replace(/^["']|["']$/g, '') : `Document about ${writePrompt}`
 
-        // Extract outline sections
-        const outlineMatches = aiResponse.match(/(?:Outline|大纲)[：:]?\s*\n([\s\S]+)/i)
+        // Extract outline sections with improved parsing
+        const outlineMatches = aiResponse.match(/(?:Outline|大纲)[：:]?\s*\n([\s\S]+)/i) ||
+                              aiResponse.match(/大纲[：:]\s*([\s\S]+?)(?:\n\n|$)/i) ||
+                              aiResponse.match(/Outline[：:]\s*([\s\S]+?)(?:\n\n|$)/i)
+        
         if (outlineMatches) {
           const outlineText = outlineMatches[1]
           const lines = outlineText.split('\n').filter((line: string) => line.trim())
           outline = lines
-            .map((line: string) => line.replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').trim())
-            .filter((line: string) => line.length > 0)
-            .slice(0, 6) // Limit to 6 sections
+            .map((line: string) => {
+              // Remove numbering (1., 2., etc.) and bullets (-, *, etc.)
+              return line
+                .replace(/^\d+[\.\)]\s*/, '')
+                .replace(/^[-*•]\s*/, '')
+                .replace(/^[（(]\d+[）)]\s*/, '')
+                .trim()
+            })
+            .filter((line: string) => line.length > 0 && !line.match(/^(可选|optional)/i))
+            .slice(0, 7) // Limit to 7 sections
         }
 
         // Fallback if outline extraction failed
         if (outline.length === 0) {
-          outline = [
+          outline = isChinese ? [
+            '引言',
+            '文献综述',
+            '研究方法',
+            '结果分析',
+            '讨论',
+            '结论'
+          ] : [
             'Introduction',
-            'Background and Context',
-            'Main Analysis',
-            'Key Findings',
+            'Literature Review',
+            'Methodology',
+            'Results and Analysis',
+            'Discussion',
             'Conclusion'
           ]
         }
@@ -237,15 +299,19 @@ export default function WriteDocumentsPage() {
         <div className="mb-8 max-w-2xl">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="group w-full bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-lg transition-all text-left"
+            className="group w-full bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-blue-500 hover:shadow-xl transition-all text-left relative overflow-hidden"
           >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition">
-                <Edit3 size={24} className="text-blue-600" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative flex items-center gap-4">
+              <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl group-hover:scale-110 transition-transform shadow-lg">
+                <Edit3 size={24} className="text-white" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">New document</h3>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">New document</h3>
                 <p className="text-sm text-gray-600">Get AI help as you write</p>
+              </div>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <ArrowRight size={20} className="text-blue-600" />
               </div>
             </div>
           </button>
@@ -347,74 +413,114 @@ export default function WriteDocumentsPage() {
               </button>
               
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-cyan-400 mb-4">
-                  <Edit3 className="text-white" size={32} />
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 mb-4 shadow-lg">
+                  <Edit3 className="text-white" size={36} />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  What are you writing today? <span className="text-red-500">*</span>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  What are you writing today?
                 </h2>
+                <p className="text-gray-600 text-sm">Describe your topic and let AI create a structured outline for you</p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl border-2 border-gray-200 p-4 mb-4">
+              <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-xl border-2 border-gray-200 p-5 mb-4 focus-within:border-blue-400 transition-colors">
                 <textarea
                   value={writePrompt}
                   onChange={(e) => setWritePrompt(e.target.value)}
-                  placeholder="e.g., write an essay about history of the United States"
-                  className="w-full h-32 p-3 bg-transparent border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400"
+                  placeholder="e.g., The impact of artificial intelligence on modern healthcare systems and patient outcomes"
+                  className="w-full h-36 p-3 bg-transparent border-0 focus:ring-0 resize-none text-gray-900 placeholder-gray-400 text-base leading-relaxed"
                   maxLength={500}
                   autoFocus
                 />
-                <div className="pt-3 border-t border-gray-200">
-                  <span className="text-sm text-gray-500">
+                <div className="pt-3 border-t border-gray-200 flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    {writePrompt.length < 20 ? (
+                      <span className="text-orange-600">💡 Add more details for better results</span>
+                    ) : (
+                      <span className="text-green-600">✓ Good prompt length</span>
+                    )}
+                  </span>
+                  <span className={`text-sm font-medium ${
+                    writePrompt.length > 450 ? 'text-red-500' : 
+                    writePrompt.length > 300 ? 'text-orange-500' : 
+                    'text-gray-500'
+                  }`}>
                     {writePrompt.length}/500
                   </span>
                 </div>
               </div>
 
-              {writePrompt.length > 0 && writePrompt.length < 20 && (
-                <div className="mb-4">
+              {writePrompt.length > 0 && (
+                <div className="mb-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="flex-1 bg-gray-200 h-1 rounded-full">
-                      <div className="bg-orange-500 h-1 rounded-full" style={{ width: '20%' }} />
+                    <div className="flex-1 bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-2 rounded-full transition-all ${
+                          writePrompt.length < 20 ? 'bg-red-500' :
+                          writePrompt.length < 50 ? 'bg-orange-500' :
+                          writePrompt.length < 100 ? 'bg-yellow-500' :
+                          'bg-green-500'
+                        }`}
+                        style={{ width: `${Math.min(100, (writePrompt.length / 100) * 100)}%` }}
+                      />
                     </div>
+                    <span className="text-xs font-medium text-gray-600">
+                      {writePrompt.length < 20 ? 'Weak' :
+                       writePrompt.length < 50 ? 'Fair' :
+                       writePrompt.length < 100 ? 'Good' :
+                       'Excellent'}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    Weak Prompt: add more context for higher quality generations
-                  </p>
+                  {writePrompt.length < 50 && (
+                    <p className="text-sm text-gray-600">
+                      💡 Tip: Add more details about your research topic, specific questions you want to explore, or key areas of focus for better AI-generated content.
+                    </p>
+                  )}
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 <button
                   onClick={() => setWriteStartMode('heading')}
-                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                  className={`p-5 rounded-xl border-2 transition-all text-left group ${
                     writeStartMode === 'heading'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-md'
+                      : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <Edit3 className={writeStartMode === 'heading' ? 'text-blue-600' : 'text-gray-400'} size={20} />
-                    <div>
-                      <h3 className="font-semibold text-sm text-gray-900 mb-1">Start with Heading</h3>
-                      <p className="text-xs text-gray-600">Generate title, and write upon it</p>
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-lg ${
+                      writeStartMode === 'heading'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500'
+                    } transition-colors`}>
+                      <Edit3 size={22} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-base text-gray-900 mb-1">Start with Heading</h3>
+                      <p className="text-xs text-gray-600 leading-relaxed">Use your input as the title and create a standard academic outline</p>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setWriteStartMode('outline')}
-                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                  className={`p-5 rounded-xl border-2 transition-all text-left group ${
                     writeStartMode === 'outline'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                      ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-purple-100 shadow-md'
+                      : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-sm'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <FileText className={writeStartMode === 'outline' ? 'text-blue-600' : 'text-gray-400'} size={20} />
-                    <div>
-                      <h3 className="font-semibold text-sm text-gray-900 mb-1">Start with Outline</h3>
-                      <p className="text-xs text-gray-600">AI will generate outline for you</p>
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-lg ${
+                      writeStartMode === 'outline'
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-gray-100 text-gray-400 group-hover:bg-purple-50 group-hover:text-purple-500'
+                    } transition-colors`}>
+                      <FileText size={22} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-base text-gray-900 mb-1">Start with Outline</h3>
+                      <p className="text-xs text-gray-600 leading-relaxed">AI analyzes your topic and generates a professional academic outline</p>
                     </div>
                   </div>
                 </button>
@@ -430,9 +536,19 @@ export default function WriteDocumentsPage() {
                 <button
                   onClick={handleGenerate}
                   disabled={!writePrompt.trim() || isGenerating}
-                  className="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-2"
                 >
-                  {isGenerating ? 'Generating...' : 'Create Document'}
+                  {isGenerating ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Generating outline...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={18} />
+                      <span>Create Document</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
