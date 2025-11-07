@@ -68,8 +68,17 @@ export default function DashboardLayout({
         const data = await res.json()
         
         if (data.user) {
-          setUser(data.user)
-          localStorage.setItem('citea_user', JSON.stringify(data.user))
+          // 确保包含所有必要的字段
+          const fullUserData = {
+            ...data.user,
+            subscriptionExpiresAt: data.user.subscriptionExpiresAt || null,
+            subscriptionStartDate: data.user.subscriptionStartDate || null,
+            subscriptionEndDate: data.user.subscriptionEndDate || null,
+            credits: data.user.credits || 0,
+            plan: data.user.plan || 'free'
+          }
+          setUser(fullUserData)
+          localStorage.setItem('citea_user', JSON.stringify(fullUserData))
         } else {
           localStorage.removeItem('citea_auth_token')
           localStorage.removeItem('citea_user')
@@ -104,6 +113,59 @@ export default function DashboardLayout({
         }
       }
     }
+  }, [user])
+
+  // 定期刷新用户数据（每30秒），确保支付后权益能及时显示
+  useEffect(() => {
+    if (!user) return
+
+    const refreshUserData = async () => {
+      try {
+        const token = localStorage.getItem('citea_auth_token')
+        if (!token) return
+
+        const res = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        const data = await res.json()
+        if (data.user) {
+          const fullUserData = {
+            ...data.user,
+            subscriptionExpiresAt: data.user.subscriptionExpiresAt || null,
+            subscriptionStartDate: data.user.subscriptionStartDate || null,
+            subscriptionEndDate: data.user.subscriptionEndDate || null,
+            credits: data.user.credits || 0,
+            plan: data.user.plan || 'free'
+          }
+          
+          // 只有当 plan 或 credits 发生变化时才更新
+          if (fullUserData.plan !== user.plan || fullUserData.credits !== user.credits) {
+            console.log('[Dashboard] User data updated:', { 
+              oldPlan: user.plan, 
+              newPlan: fullUserData.plan,
+              oldCredits: user.credits,
+              newCredits: fullUserData.credits
+            })
+            setUser(fullUserData)
+            localStorage.setItem('citea_user', JSON.stringify(fullUserData))
+          }
+        }
+      } catch (error) {
+        console.error('Error refreshing user data:', error)
+      }
+    }
+
+    // 立即刷新一次（支付成功后）
+    refreshUserData()
+
+    // 每30秒刷新一次
+    const interval = setInterval(refreshUserData, 30000)
+
+    return () => clearInterval(interval)
   }, [user])
 
   const handleLogout = async () => {

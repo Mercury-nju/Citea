@@ -37,12 +37,18 @@ export async function GET(req: Request) {
         // 检查并重置积分（如果需要）
         const currentCredits = await checkAndResetCredits(jwtUser.email)
         
-        console.log('[Auth/Me] ✅ Token 验证成功，用户:', jwtUser.email)
+        console.log('[Auth/Me] ✅ Token 验证成功，用户:', jwtUser.email, 'Plan:', fullUser.plan, 'Credits:', currentCredits)
+        
+        // 返回完整的用户信息，包括所有订阅相关字段
         return NextResponse.json({ 
           user: {
             ...jwtUser,
             credits: currentCredits,
-            plan: fullUser.plan
+            plan: fullUser.plan,
+            subscriptionExpiresAt: fullUser.subscriptionExpiresAt || null,
+            subscriptionStartDate: fullUser.subscriptionStartDate || null,
+            subscriptionEndDate: fullUser.subscriptionEndDate || null,
+            creditsResetDate: fullUser.creditsResetDate || null,
           } 
         }, { status: 200 })
       }
