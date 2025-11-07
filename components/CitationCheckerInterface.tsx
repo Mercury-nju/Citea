@@ -122,8 +122,21 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || '验证失败')
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || errorData.details || `HTTP ${response.status}: ${response.statusText}`
+        console.error('API error:', errorMessage, errorData)
+        
+        // 根据不同的错误类型显示不同的消息
+        if (response.status === 401) {
+          setError('请先登录后再使用此功能')
+        } else if (response.status === 403) {
+          setError(errorMessage || '积分不足，请升级账户')
+        } else if (response.status === 400) {
+          setError(errorMessage || '输入内容无效')
+        } else {
+          setError(errorMessage || '验证过程中出现错误，请重试')
+        }
+        return
       }
 
       const data = await response.json()
@@ -137,9 +150,10 @@ export default function CitationCheckerInterface({ onCheckComplete }: CitationCh
           onCheckComplete(text, data)
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Citation check error:', err)
-      setError('验证过程中出现错误，请重试')
+      const errorMessage = err?.message || '网络连接错误，请检查网络后重试'
+      setError(errorMessage)
     } finally {
       setIsChecking(false)
     }

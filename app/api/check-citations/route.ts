@@ -8,6 +8,11 @@ import { consumeCredit, checkWordLimit, getPlanLimits } from '@/lib/credits'
 const TONGYI_API_KEY = process.env.TONGYI_API_KEY || 'sk-9bf19547ddbd4be1a87a7a43cf251097'
 const TONGYI_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
 
+// 检查 API key 是否配置
+if (!TONGYI_API_KEY || TONGYI_API_KEY === '') {
+  console.warn('⚠️ TONGYI_API_KEY is not configured. Citation parsing may fail.')
+}
+
 interface Citation {
   id: string
   text: string
@@ -293,10 +298,16 @@ export async function POST(req: NextRequest) {
     }
 
     // 验证用户并检查权限
+    // 注意：允许未登录用户使用基础功能（但会限制功能）
     const user = await getCurrentUser(req)
     if (!user) {
+      // 对于未登录用户，允许使用但限制功能
+      // 或者要求登录
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { 
+          error: 'Authentication required. Please sign in to use citation verification.',
+          code: 'AUTH_REQUIRED'
+        },
         { status: 401 }
       )
     }
@@ -370,10 +381,16 @@ export async function POST(req: NextRequest) {
       verificationRate,
     })
   } catch (error: any) {
-    console.error('Error in check-citations API:', error.message)
+    console.error('Error in check-citations API:', error)
+    const errorMessage = error?.message || 'Unknown error'
+    const errorStack = error?.stack || ''
+    
+    // 提供更详细的错误信息用于调试
     return NextResponse.json({ 
       error: 'Failed to check citations. Please try again.',
-      details: error.message 
+      details: errorMessage,
+      // 只在开发环境返回堆栈信息
+      ...(process.env.NODE_ENV === 'development' && { stack: errorStack })
     }, { status: 500 })
   }
 }
