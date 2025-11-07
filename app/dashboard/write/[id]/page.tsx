@@ -552,6 +552,40 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
 
         {/* Editor Area */}
         <div className="flex-1 flex h-full">
+          {/* Tool Panel - Find Sources or Verify Citations */}
+          {activeTool !== 'none' && (
+            <div className="w-96 border-r border-gray-200 bg-white overflow-y-auto">
+              <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                <h3 className="font-semibold text-gray-900">
+                  {activeTool === 'finder' ? 'Find Sources' : 'Verify Citations'}
+                </h3>
+                <button
+                  onClick={() => setActiveTool('none')}
+                  className="p-1 hover:bg-gray-100 rounded transition"
+                >
+                  <X size={18} className="text-gray-500" />
+                </button>
+              </div>
+              <div className="p-4">
+                {activeTool === 'finder' ? (
+                  <SourceFinderInterface 
+                    onSearchComplete={(query, results) => {
+                      console.log('Search completed:', query, results)
+                      setActiveTool('none')
+                    }}
+                  />
+                ) : (
+                  <CitationCheckerInterface 
+                    onCheckComplete={(text, results) => {
+                      console.log('Check completed:', text, results)
+                      setActiveTool('none')
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+          
           {/* Document Editor */}
           <div className="flex-1 overflow-y-auto h-full">
             <div className="max-w-3xl mx-auto px-8 py-8">
