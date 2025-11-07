@@ -14,6 +14,12 @@ import {
   CheckCircle
 } from 'lucide-react'
 import Logo from '@/components/Logo'
+// @ts-ignore - jspdf types may not be available
+import jsPDF from 'jspdf'
+// @ts-ignore - docx types may not be available
+import { Document as DocxDocument, Packer, Paragraph, TextRun, HeadingLevel } from 'docx'
+// @ts-ignore - file-saver types may not be available
+import { saveAs } from 'file-saver'
 
 interface Document {
   id: string
@@ -121,10 +127,163 @@ export default function WriteEditorPage() {
     }
   }
 
-  const handleExport = (format: string) => {
+  const handleExport = async (format: string) => {
     if (!document) return
-    alert(`Exporting as ${format.toUpperCase()}...`)
     setIsExportMenuOpen(false)
+
+    try {
+      // Get current content from DOM (includes unsaved edits)
+      const titleEl = window.document.querySelector('h1[contenteditable]') as HTMLElement
+      const title = titleEl?.textContent?.trim() || document.title || 'Untitled Document'
+      
+      // Extract sections from DOM
+      const sections: Array<{ heading: string; content: string }> = []
+      const sectionGroups = window.document.querySelectorAll('.group')
+      
+      sectionGroups.forEach((group: Element) => {
+        const headingEl = group.querySelector('h2[contenteditable]') as HTMLElement
+        const contentEl = group.querySelector('div[contenteditable]') as HTMLElement
+        const heading = headingEl?.textContent?.trim() || ''
+        const content = contentEl?.textContent?.trim() || ''
+        if (heading || content) {
+          sections.push({ heading, content })
+        }
+      })
+
+      // Fallback to document state if DOM extraction fails
+      if (sections.length === 0 && document.outline.length > 0) {
+        document.outline.forEach((sectionTitle) => {
+          sections.push({
+            heading: sectionTitle,
+            content: document.content || ''
+          })
+        })
+      }
+
+      const fileName = title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'document'
+
+      if (format === 'pdf') {
+        const pdf = new jsPDF()
+        let yPos = 20
+
+        // Add title
+        pdf.setFontSize(18)
+        pdf.setFont('helvetica', 'bold')
+        const titleLines = pdf.splitTextToSize(title, 170)
+        titleLines.forEach((line: string) => {
+          if (yPos > 270) {
+            pdf.addPage()
+            yPos = 20
+          }
+          pdf.text(line, 20, yPos)
+          yPos += 7
+        })
+        yPos += 10
+
+        // Add sections
+        sections.forEach((section) => {
+          if (yPos > 270) {
+            pdf.addPage()
+            yPos = 20
+          }
+
+          // Section heading
+          if (section.heading) {
+            pdf.setFontSize(14)
+            pdf.setFont('helvetica', 'bold')
+            const headingLines = pdf.splitTextToSize(section.heading, 170)
+            headingLines.forEach((line: string) => {
+              if (yPos > 270) {
+                pdf.addPage()
+                yPos = 20
+              }
+              pdf.text(line, 20, yPos)
+              yPos += 7
+            })
+            yPos += 5
+          }
+
+          // Section content
+          if (section.content) {
+            pdf.setFontSize(11)
+            pdf.setFont('helvetica', 'normal')
+            const lines = pdf.splitTextToSize(section.content, 170)
+            lines.forEach((line: string) => {
+              if (yPos > 270) {
+                pdf.addPage()
+                yPos = 20
+              }
+              pdf.text(line, 20, yPos)
+              yPos += 7
+            })
+            yPos += 5
+          }
+        })
+
+        pdf.save(`${fileName}.pdf`)
+      } else if (format === 'md') {
+        let markdown = `# ${title}\n\n`
+        sections.forEach((section) => {
+          if (section.heading) {
+            markdown += `## ${section.heading}\n\n`
+          }
+          if (section.content) {
+            markdown += `${section.content}\n\n`
+          }
+        })
+
+        const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
+        saveAs(blob, `${fileName}.md`)
+      } else if (format === 'docx') {
+        const docxSections = [
+          new Paragraph({
+            text: title,
+            heading: HeadingLevel.TITLE,
+          }),
+          new Paragraph({ text: '' }),
+        ]
+
+        sections.forEach((section) => {
+          if (section.heading) {
+            docxSections.push(
+              new Paragraph({
+                text: section.heading,
+                heading: HeadingLevel.HEADING_1,
+              })
+            )
+          }
+          if (section.content) {
+            const contentLines = section.content.split('\n')
+            contentLines.forEach((line) => {
+              if (line.trim()) {
+                docxSections.push(
+                  new Paragraph({
+                    children: [new TextRun(line)],
+                  })
+                )
+              } else {
+                docxSections.push(new Paragraph({ text: '' }))
+              }
+            })
+          }
+          docxSections.push(new Paragraph({ text: '' }))
+        })
+
+        const doc = new DocxDocument({
+          sections: [
+            {
+              children: docxSections,
+            },
+          ],
+        })
+
+        const blob = await Packer.toBlob(doc)
+        saveAs(blob, `${fileName}.docx`)
+      }
+    } catch (error) {
+      console.error('Export error:', error)
+      alert(`Failed to export as ${format.toUpperCase()}. Please try again.`)
+    }
   }
 
   const handleChatSubmit = async () => {
