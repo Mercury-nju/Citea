@@ -6,10 +6,8 @@ import Logo from '@/components/Logo'
 import { 
   FileText, 
   Search, 
-  Plus, 
   LogOut,
   Sparkles,
-  Edit3,
   CheckCircle,
   MessageSquare,
   Home as HomeIcon
@@ -409,7 +407,8 @@ export default function DashboardLayout({
           </div>
         )}
 
-          {/* User Menu */}
+        {/* User Menu */}
+        <div className="p-4 border-t border-gray-200">
           <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition cursor-pointer">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
               {user.name?.charAt(0).toUpperCase() || 'U'}
