@@ -1,12 +1,30 @@
 'use client'
 
-import { ArrowRight, Play } from 'lucide-react'
+import { Play, ListChecks, MessageSquare, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
 import DatabaseLogos from './DatabaseLogos'
 
 export default function Hero() {
   const { t } = useLanguage()
+  const workflow = t.hero.workflow || {}
+  const workflowItems = [
+    {
+      icon: ListChecks,
+      title: workflow.outline?.title || 'Outline with prompts',
+      description: workflow.outline?.description || 'Turn a rough topic into a detailed structure in seconds.'
+    },
+    {
+      icon: MessageSquare,
+      title: workflow.assistant?.title || 'Draft with AI assistant',
+      description: workflow.assistant?.description || 'Expand each section, adjust tone, and iterate without leaving the editor.'
+    },
+    {
+      icon: ShieldCheck,
+      title: workflow.verify?.title || 'Verify citations automatically',
+      description: workflow.verify?.description || 'Trace every reference with Find Source and run citation checks to remove hallucinations.'
+    }
+  ]
   
   return (
     <section className="relative pt-48 pb-40 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden min-h-screen flex items-center">
@@ -61,6 +79,31 @@ export default function Hero() {
             <Play size={16} className="fill-current" />
             <span className="text-sm font-medium">{t.hero.watchDemo}</span>
           </button>
+        </div>
+
+        {/* Workflow Highlights */}
+        <div className="mt-14">
+          <p className="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-4">
+            {t.hero.workflowTitle}
+          </p>
+          <div className="grid gap-4 md:grid-cols-3 text-left">
+            {workflowItems.map((item, index) => {
+              const Icon = item.icon
+              return (
+                <div key={index} className="h-full rounded-2xl border border-blue-100 bg-blue-50/40 p-6 backdrop-blur-sm">
+                  <div className="inline-flex items-center justify-center rounded-xl bg-blue-600/10 text-blue-700 p-3 mb-4">
+                    <Icon size={20} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         {/* Database Integration */}

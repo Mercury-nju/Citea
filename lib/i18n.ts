@@ -63,6 +63,21 @@ export const translations = {
       checkCitations: 'Check Citations',
       watchDemo: 'Watch Demo',
       databases: 'Integrated with academic databases',
+      workflowTitle: 'Everything you need from first idea to verified references:',
+      workflow: {
+        outline: {
+          title: 'Outline with prompts',
+          description: 'Turn a rough topic into a detailed structure in seconds.'
+        },
+        assistant: {
+          title: 'Draft with AI Assistant',
+          description: 'Expand each section, adjust tone, and iterate without leaving the editor.'
+        },
+        verify: {
+          title: 'Verify with Find Source + Checker',
+          description: 'Run automatic source tracing and citation checks to remove hallucinations.'
+        }
+      }
     },
     
     // Features
@@ -606,6 +621,21 @@ export const translations = {
       checkCitations: '验证引用',
       watchDemo: '观看演示',
       databases: '集成学术数据库',
+      workflowTitle: '从灵感到可信引用的一体化流程：',
+      workflow: {
+        outline: {
+          title: '提示词生成提纲',
+          description: '几秒钟内把研究主题拆解成清晰的章节结构。'
+        },
+        assistant: {
+          title: 'AI 助手扩写润色',
+          description: '在同一编辑器里扩写每段内容，随时调整语气与论证。'
+        },
+        verify: {
+          title: 'Find Source + 引文验证',
+          description: '自动回溯来源并检查引用真伪，彻底杜绝 AI 幻觉。'
+        }
+      }
     },
     
     // Features
