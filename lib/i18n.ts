@@ -57,7 +57,7 @@ export const translations = {
     hero: {
       title1: 'Stop Guessing.',
       title2: 'Start Citing Real.',
-      subtitle: 'Verify citations, find credible sources, and maintain academic integrity.',
+      subtitle: 'Generate academic outlines with prompts, expand chapters with the AI assistant, and use Find Source plus Citation Checker to keep every reference real—zero hallucinations.',
       free: 'Free plan available',
       findSources: 'Start Writing with AI',
       checkCitations: 'Check Citations',
@@ -67,19 +67,19 @@ export const translations = {
     
     // Features
     features: {
-      title: 'Powerful citation tools for serious researchers.',
-      subtitle: 'Advanced features to streamline your research workflow and maintain academic integrity.',
+      title: 'Plan, write, and verify with one AI research workspace.',
+      subtitle: 'Generate outlines from prompts, draft with the AI assistant, and finish with trustworthy source verification—no hallucinated citations.',
       sourceFinder: {
         title: 'AI Source Finder',
-        description: 'Find original source of citation instantly. Direct integration with major academic databases including CrossRef, PubMed, arXiv, and Google Scholar for comprehensive source validation.',
+        description: 'Trace every reference back to a real paper after drafting. Direct integration with CrossRef, PubMed, arXiv, and Google Scholar guarantees your citations point to verifiable sources.',
       },
       citationChecker: {
         title: 'Citation Checker Online',
-        description: 'Check fake citations and verify reference authenticity. Advanced AI algorithms analyze your text and automatically identify citations that need verification.',
+        description: 'Run automatic checks to catch fabricated references. Advanced AI reviews your manuscript and validates each citation before submission.',
       },
       aiAssistant: {
         title: 'AI Research Assistant',
-        description: 'Chat with our AI assistant about your research questions, citation verification, and source validation. Get instant guidance on reference authenticity and maintain academic integrity in real-time.',
+        description: 'Turn prompts into structured outlines, expand each section, and iterate on tone or arguments with an assistant built for academic writing and linked to verification tools.',
       },
     },
     
@@ -600,7 +600,7 @@ export const translations = {
     hero: {
       title1: '别再猜测。',
       title2: '开始只引真实文献。',
-      subtitle: '验证引用、发现可信来源、维护学术诚信。',
+      subtitle: '用提示词生成学术提纲，借助 AI 助手不断丰富段落，再通过 Find Source 与 引文验证确保每条文献真实可靠，彻底告别幻觉。',
       free: '提供免费计划',
       findSources: 'Start Writing with AI',
       checkCitations: '验证引用',
@@ -610,19 +610,19 @@ export const translations = {
     
     // Features
     features: {
-      title: '为认真的研究者提供强大的引用工具',
-      subtitle: '先进的功能简化您的研究工作流程，维护学术诚信。',
+      title: '一体化 AI 写作与验证工作台',
+      subtitle: '用提示词生成提纲、AI 助手扩展内容，并结合 Find Source 与 引文验证完成真实可信的研究。',
       sourceFinder: {
         title: 'AI 文献查找器',
-        description: '即时查找引用的原始来源。直接集成 CrossRef、PubMed、arXiv 和 Google Scholar 等主要学术数据库，提供全面的来源验证。',
+        description: '在写作完成后即时回溯每条引用的真实论文。直接集成 CrossRef、PubMed、arXiv 和 Google Scholar 等主流数据库，保证引用可查可证。',
       },
       citationChecker: {
         title: '在线引用检查器',
-        description: '检查虚假引用并验证参考文献的真实性。先进的 AI 算法分析您的文本，自动识别需要验证的引用。',
+        description: '自动识别并揪出虚假引用。高级 AI 算法逐条扫描稿件，在提交前完成全面的引用真实性核验。',
       },
       aiAssistant: {
         title: 'AI 研究助手',
-        description: '与我们的 AI 助手讨论您的研究问题、引用验证和来源确认。实时获得关于参考文献真实性的即时指导，维护学术诚信。',
+        description: '通过提示词生成结构化提纲，逐段扩写并调整语气与论证，AI 助手全程陪伴写作并与验证工具衔接。',
       },
     },
     
