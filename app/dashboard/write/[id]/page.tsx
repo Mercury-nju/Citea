@@ -5,19 +5,13 @@ import { useRouter, useParams } from 'next/navigation'
 import { 
   ArrowLeft, 
   Home, 
-  Edit3, 
   FileText,
   Save,
   Download,
   MessageSquare,
   X,
   Sparkles,
-  Moon,
-  Maximize,
-  RotateCcw,
-  Printer,
-  Menu,
-  Search
+  Menu
 } from 'lucide-react'
 import Logo from '@/components/Logo'
 
@@ -40,6 +34,8 @@ export default function WriteEditorPage() {
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isChatLoading, setIsChatLoading] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved')
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
 
   useEffect(() => {
     // Load document from localStorage
@@ -56,6 +52,8 @@ export default function WriteEditorPage() {
       
       if (doc) {
         setDocument(doc)
+        setSaveStatus('saved')
+        setLastSaved(new Date(doc.updatedAt))
       } else {
         router.push('/dashboard/write')
       }
@@ -65,12 +63,15 @@ export default function WriteEditorPage() {
     }
   }, [params.id, router])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!document) return
+    
+    setSaveStatus('saving')
     
     try {
       const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
       if (!user.email) {
+        setSaveStatus('unsaved')
         alert('User not found. Please sign in again.')
         return
       }
@@ -88,22 +89,36 @@ export default function WriteEditorPage() {
       
       localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
       
-      // Show success toast
-      if (typeof window !== 'undefined') {
-        const toast = window.document.createElement('div')
-        toast.className = 'fixed top-20 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2'
-        toast.innerHTML = '<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Document saved'
-        window.document.body.appendChild(toast)
-        
-        setTimeout(() => {
-          toast.style.transition = 'opacity 0.3s'
-          toast.style.opacity = '0'
-          setTimeout(() => toast.remove(), 300)
-        }, 2000)
-      }
+      setSaveStatus('saved')
+      setLastSaved(new Date())
+      
+      // Update document state
+      setDocument(updatedDoc)
     } catch (error) {
       console.error('Failed to save document:', error)
+      setSaveStatus('unsaved')
       alert('Failed to save document. Please try again.')
+    }
+  }
+
+  // Auto-save function
+  const autoSave = async (updatedDoc: Document) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
+      if (!user.email) return
+      
+      const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+      const index = savedDocs.findIndex((d: Document) => d.id === updatedDoc.id)
+      
+      if (index >= 0) {
+        savedDocs[index] = { ...updatedDoc, updatedAt: Date.now() }
+        localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
+        setSaveStatus('saved')
+        setLastSaved(new Date())
+      }
+    } catch (error) {
+      console.error('Auto-save failed:', error)
+      setSaveStatus('unsaved')
     }
   }
 
@@ -195,134 +210,141 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
 
   return (
     <div className="min-h-screen bg-white flex">
-      {/* Left Sidebar */}
-      <aside className={`${isSidebarOpen ? 'w-16' : 'w-0'} bg-gray-50 border-r border-gray-200 flex flex-col items-center py-4 transition-all`}>
+      {/* Left Sidebar - Simplified */}
+      <aside className={`${isSidebarOpen ? 'w-16' : 'w-0'} bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all`}>
         {isSidebarOpen && (
           <>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="p-3 hover:bg-gray-200 rounded-lg transition mb-4"
+              className="p-3 hover:bg-blue-50 rounded-lg transition mb-4"
               title="Hide sidebar"
             >
-              <Menu size={20} className="text-gray-700" />
+              <Menu size={20} className="text-gray-600" />
             </button>
             
-            <div className="border-t border-gray-300 w-10 mb-4" />
+            <div className="border-t border-gray-200 w-10 mb-4" />
             
             <button 
               onClick={() => router.push('/dashboard')}
-              className="p-3 hover:bg-blue-100 rounded-lg transition mb-2 group relative"
+              className="p-3 hover:bg-blue-50 rounded-lg transition mb-2 group relative"
               title="Back to Dashboard"
             >
-              <Home size={20} className="text-gray-700" />
-              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                Dashboard
-              </span>
+              <Home size={20} className="text-gray-600" />
             </button>
             
             <button 
               onClick={() => router.push('/dashboard/write')}
-              className="p-3 hover:bg-gray-200 rounded-lg transition mb-2 group relative"
+              className="p-3 hover:bg-blue-50 rounded-lg transition mb-2 group relative"
               title="My Documents"
             >
-              <FileText size={20} className="text-gray-700" />
-              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                Documents
-              </span>
+              <FileText size={20} className="text-gray-600" />
             </button>
             
             <button 
               onClick={handleSave}
-              className="p-3 hover:bg-green-100 rounded-lg transition mb-2 group relative"
+              className={`p-3 rounded-lg transition mb-2 group relative ${
+                saveStatus === 'saving' ? 'bg-blue-100' : 'hover:bg-blue-50'
+              }`}
               title="Save Document"
+              disabled={saveStatus === 'saving'}
             >
-              <Save size={20} className="text-gray-700" />
-              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                Save
-              </span>
+              <Save size={20} className={saveStatus === 'saving' ? 'text-blue-600' : 'text-gray-600'} />
             </button>
             
-            <div className="border-t border-gray-300 w-10 my-4" />
+            <div className="border-t border-gray-200 w-10 my-4" />
             
             <button 
               onClick={() => setIsChatOpen(!isChatOpen)}
               className={`p-3 rounded-lg transition mb-2 group relative ${
-                isChatOpen ? 'bg-blue-100' : 'hover:bg-gray-200'
+                isChatOpen ? 'bg-blue-100' : 'hover:bg-blue-50'
               }`}
               title="AI Assistant"
             >
-              <MessageSquare size={20} className={isChatOpen ? 'text-blue-600' : 'text-gray-700'} />
-              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                AI Chat
-              </span>
+              <MessageSquare size={20} className={isChatOpen ? 'text-blue-600' : 'text-gray-600'} />
             </button>
           </>
         )}
         {!isSidebarOpen && (
           <button 
             onClick={() => setIsSidebarOpen(true)}
-            className="p-2 hover:bg-gray-200 rounded-lg transition"
+            className="p-2 hover:bg-blue-50 rounded-lg transition"
             title="Show sidebar"
           >
-            <Menu size={16} className="text-gray-700" />
+            <Menu size={16} className="text-gray-600" />
           </button>
         )}
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Top Header */}
+        {/* Top Header - Simplified */}
         <header className="border-b border-gray-200 px-6 py-3 flex items-center justify-between bg-white">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => router.push('/dashboard')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
+              className="p-2 hover:bg-blue-50 rounded-lg transition text-gray-600"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={18} />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <Moon size={18} />
-            </button>
+            <h2 className="text-sm font-medium text-gray-700">Document Editor</h2>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Saved</span>
+          <div className="flex items-center gap-3">
+            {/* Save Status */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50">
+              {saveStatus === 'saving' && (
+                <>
+                  <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-xs text-gray-600">Saving...</span>
+                </>
+              )}
+              {saveStatus === 'saved' && (
+                <>
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  <span className="text-xs text-gray-600">
+                    {lastSaved ? `Saved ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Saved'}
+                  </span>
+                </>
+              )}
+              {saveStatus === 'unsaved' && (
+                <>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  <span className="text-xs text-gray-600">Unsaved</span>
+                </>
+              )}
+            </div>
             
             <button
               onClick={handleSave}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
+              className={`px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ${
+                saveStatus === 'saving' 
+                  ? 'bg-blue-100 text-blue-600 cursor-not-allowed' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+              disabled={saveStatus === 'saving'}
             >
-              <Save size={18} />
-            </button>
-
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <Printer size={18} />
+              <Save size={16} />
+              Save
             </button>
             
             <div className="relative">
               <button
                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                className="p-2 hover:bg-blue-50 rounded-lg transition text-gray-600"
               >
                 <Download size={18} />
               </button>
               
               {isExportMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                  <button onClick={() => handleExport('pdf')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
+                  <button onClick={() => handleExport('pdf')} className="w-full px-4 py-2 text-left hover:bg-blue-50 flex items-center gap-3 text-sm text-gray-700">
                     <FileText size={16} />PDF (.PDF)
                   </button>
-                  <button onClick={() => handleExport('md')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
+                  <button onClick={() => handleExport('md')} className="w-full px-4 py-2 text-left hover:bg-blue-50 flex items-center gap-3 text-sm text-gray-700">
                     <FileText size={16} />Markdown (.MD)
                   </button>
-                  <button onClick={() => handleExport('latex')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
-                    <FileText size={16} />Latex (.TEX)
-                  </button>
-                  <button onClick={() => handleExport('docx')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
+                  <button onClick={() => handleExport('docx')} className="w-full px-4 py-2 text-left hover:bg-blue-50 flex items-center gap-3 text-sm text-gray-700">
                     <FileText size={16} />WORD (.DOCX)
-                  </button>
-                  <button onClick={() => handleExport('html')} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm">
-                    <FileText size={16} />HTML (.HTML)
                   </button>
                 </div>
               )}
@@ -331,27 +353,11 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
             <button
               onClick={() => setIsChatOpen(!isChatOpen)}
               className={`px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ${
-                isChatOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                isChatOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-blue-50 text-gray-700'
               }`}
             >
               <MessageSquare size={16} />
-              {isChatOpen ? 'Chat' : 'Chat'}
-            </button>
-
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <Menu size={18} />
-            </button>
-
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <Maximize size={18} />
-            </button>
-
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <RotateCcw size={18} />
-            </button>
-
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <Printer size={18} />
+              AI Assistant
             </button>
           </div>
         </header>
@@ -360,84 +366,77 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
         <div className="flex-1 flex overflow-hidden">
           {/* Document Editor */}
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto px-12 py-16">
-              {/* Title */}
+            <div className="max-w-3xl mx-auto px-8 py-8">
+              {/* Title - Smaller font */}
               <h1 
-                className="text-5xl font-bold text-gray-900 mb-12 focus:outline-none leading-tight border-b-2 border-transparent focus:border-blue-200 pb-4 transition-colors"
+                className="text-2xl font-bold text-gray-900 mb-8 focus:outline-none leading-tight border-b border-transparent focus:border-blue-300 pb-3 transition-colors"
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => {
                   const newTitle = e.currentTarget.textContent || document.title
-                  setDocument(prev => prev ? {...prev, title: newTitle} : null)
-                  // Auto-save on blur
-                  setTimeout(() => {
-                    const updatedDoc = { ...document, title: newTitle, updatedAt: Date.now() }
-                    const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
-                    if (user.email) {
-                      const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
-                      const index = savedDocs.findIndex((d: Document) => d.id === document.id)
-                      if (index >= 0) {
-                        savedDocs[index] = updatedDoc
-                        localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
-                      }
-                    }
-                  }, 100)
+                  if (newTitle !== document.title) {
+                    setDocument(prev => prev ? {...prev, title: newTitle} : null)
+                    setSaveStatus('unsaved')
+                    autoSave({ ...document, title: newTitle })
+                  }
                 }}
-                style={{ minHeight: '60px' }}
+                style={{ minHeight: '40px' }}
               >
                 {document.title}
               </h1>
 
-              {/* Content Sections */}
-              <div className="space-y-12">
+              {/* Content Sections - Smaller fonts */}
+              <div className="space-y-8">
                 {document.outline.map((section, index) => (
                   <div key={index} className="group">
                     <h2 
-                      className="text-3xl font-bold text-gray-900 mb-6 focus:outline-none border-b-2 border-transparent focus:border-blue-200 pb-2 transition-colors"
+                      className="text-xl font-semibold text-gray-900 mb-4 focus:outline-none border-b border-transparent focus:border-blue-300 pb-2 transition-colors"
                       contentEditable
                       suppressContentEditableWarning
                       onBlur={(e) => {
                         const newOutline = [...document.outline]
                         newOutline[index] = e.currentTarget.textContent || section
-                        setDocument(prev => prev ? {...prev, outline: newOutline} : null)
-                        // Auto-save on blur
-                        setTimeout(() => {
-                          const updatedDoc = { ...document, outline: newOutline, updatedAt: Date.now() }
-                          const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
-                          if (user.email) {
-                            const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
-                            const index = savedDocs.findIndex((d: Document) => d.id === document.id)
-                            if (index >= 0) {
-                              savedDocs[index] = updatedDoc
-                              localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
-                            }
-                          }
-                        }, 100)
+                        if (newOutline[index] !== section) {
+                          setDocument(prev => prev ? {...prev, outline: newOutline} : null)
+                          setSaveStatus('unsaved')
+                          autoSave({ ...document, outline: newOutline })
+                        }
                       }}
-                      style={{ minHeight: '40px' }}
+                      style={{ minHeight: '32px' }}
                     >
                       {section}
                     </h2>
                     <div 
-                      className="text-gray-700 space-y-4 ml-4 leading-relaxed focus:outline-none min-h-[200px] p-4 rounded-lg border-2 border-transparent focus-within:border-blue-200 transition-colors prose prose-lg max-w-none relative empty:before:content-['Start_writing_here..._Use_the_AI_assistant_on_the_right_for_help.'] empty:before:text-gray-400 empty:before:italic"
+                      className="text-gray-700 text-base leading-relaxed focus:outline-none min-h-[150px] p-4 rounded-lg border border-transparent focus-within:border-blue-200 focus-within:bg-blue-50/30 transition-all relative"
                       contentEditable
                       suppressContentEditableWarning
+                      spellCheck={true}
+                      data-placeholder="Start writing here... Use the AI assistant for help."
+                      onInput={(e) => {
+                        setSaveStatus('unsaved')
+                      }}
                       onBlur={(e) => {
                         // Auto-save content changes
-                        setTimeout(() => {
-                          const updatedDoc = { ...document, updatedAt: Date.now() }
-                          const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
-                          if (user.email) {
-                            const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
-                            const docIndex = savedDocs.findIndex((d: Document) => d.id === document.id)
-                            if (docIndex >= 0) {
-                              savedDocs[docIndex] = updatedDoc
-                              localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
-                            }
-                          }
-                        }, 500)
+                        const content = e.currentTarget.textContent || ''
+                        autoSave({ ...document, content })
+                      }}
+                      style={{ 
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        lineHeight: '1.6',
+                        wordBreak: 'break-word'
                       }}
                     />
+                    <style jsx global>{`
+                      div[contenteditable][data-placeholder]:empty:before {
+                        content: attr(data-placeholder);
+                        color: #9ca3af;
+                        font-style: italic;
+                        pointer-events: none;
+                        position: absolute;
+                        top: 1rem;
+                        left: 1rem;
+                      }
+                    `}</style>
                   </div>
                 ))}
               </div>
@@ -448,15 +447,16 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
           {isChatOpen && (
             <aside className="w-96 border-l border-gray-200 bg-white flex flex-col">
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-blue-50">
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">Chat is using: <span className="font-normal">1 item</span></h3>
+                  <h3 className="font-semibold text-gray-900 text-sm">AI Writing Assistant</h3>
+                  <p className="text-xs text-gray-600 mt-0.5">Document: {document.title}</p>
                 </div>
                 <button
                   onClick={() => setIsChatOpen(false)}
-                  className="p-1 hover:bg-gray-100 rounded transition"
+                  className="p-1.5 hover:bg-blue-100 rounded-lg transition text-gray-600"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
 
@@ -464,42 +464,61 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
               <div className="flex-1 overflow-y-auto p-6">
                 {chatMessages.length === 0 ? (
                   <div className="space-y-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
-                      <p className="text-sm text-gray-800 leading-relaxed mb-2">
-                        👋 <strong>Hello! I'm your AI writing assistant.</strong>
-                      </p>
-                      <p className="text-xs text-gray-600 leading-relaxed">
-                        I can help you improve your writing, suggest sources, check grammar, and answer questions about your document titled "<strong>{document.title}</strong>".
-                      </p>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="p-2 bg-blue-600 rounded-lg">
+                          <Sparkles size={18} className="text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 leading-relaxed mb-1">
+                            AI Writing Assistant
+                          </p>
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            I can help you improve your writing, suggest sources, check grammar, and answer questions about your document.
+                          </p>
+                        </div>
+                      </div>
                     </div>
 
                     <div>
                       <p className="text-xs font-semibold text-gray-700 mb-3">💡 Quick suggestions:</p>
                       <div className="space-y-2">
                         <button 
-                          onClick={() => setChatInput('How can I improve the introduction?')}
-                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm"
+                          onClick={() => {
+                            setChatInput('How can I improve the introduction section?')
+                            setTimeout(() => handleChatSubmit(), 100)
+                          }}
+                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
                         >
                           ✍️ Improve introduction
                         </button>
 
                         <button 
-                          onClick={() => setChatInput('Make this more academic and formal')}
-                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm"
+                          onClick={() => {
+                            setChatInput('Make this section more academic and formal')
+                            setTimeout(() => handleChatSubmit(), 100)
+                          }}
+                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
                         >
                           🎓 Make it more academic
                         </button>
 
                         <button 
-                          onClick={() => setChatInput('Suggest some credible sources for this topic')}
-                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm"
+                          onClick={() => {
+                            setChatInput('Suggest some credible sources for this topic')
+                            setTimeout(() => handleChatSubmit(), 100)
+                          }}
+                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
                         >
                           📚 Find credible sources
                         </button>
 
                         <button 
-                          onClick={() => setChatInput('Check this text for grammar and clarity issues')}
-                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition text-sm"
+                          onClick={() => {
+                            setChatInput('Check this text for grammar and clarity issues')
+                            setTimeout(() => handleChatSubmit(), 100)
+                          }}
+                          className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-sm text-gray-700"
                         >
                           ✅ Check grammar
                         </button>
@@ -509,13 +528,13 @@ Please provide helpful, specific, and actionable advice. If you're suggesting co
                     <div className="flex gap-2">
                       <button 
                         onClick={() => router.push('/dashboard?tab=finder')}
-                        className="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-xs font-medium"
+                        className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium"
                       >
                         🔍 Find Sources
                       </button>
                       <button 
                         onClick={() => router.push('/dashboard?tab=checker')}
-                        className="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-xs font-medium"
+                        className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium"
                       >
                         ✓ Verify Citations
                       </button>
