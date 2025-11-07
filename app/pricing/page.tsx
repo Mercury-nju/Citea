@@ -1,15 +1,121 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { Check, X, Zap } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
+interface Plan {
+  id: string
+  name: string
+  price: string
+  period: string
+  credits: string
+  wordLimit: string
+  features: string[]
+  limitations: string[]
+  buttonText: string
+  buttonStyle: string
+  popular: boolean
+}
+
+function PricingCard({ plan, t }: { plan: Plan; t: any }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`relative bg-white rounded-2xl border-2 p-8 transition-all duration-300 ease-out ${
+        plan.popular
+          ? 'border-blue-500 shadow-xl scale-105'
+          : 'border-gray-200 shadow-lg hover:shadow-xl'
+      } ${
+        isHovered && !plan.popular
+          ? 'scale-105 border-blue-300 -translate-y-2'
+          : ''
+      }`}
+      style={{
+        transform: isHovered && !plan.popular 
+          ? 'scale(1.05) translateY(-8px)' 
+          : plan.popular 
+          ? 'scale(1.05)' 
+          : 'scale(1)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+    >
+      {plan.popular && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+          <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold">
+            {t.pricing.mostPopular}
+          </span>
+        </div>
+      )}
+
+      <div className="text-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+        <div className="flex items-baseline justify-center gap-1">
+          <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+          {plan.period && (
+            <span className="text-gray-600">{plan.period}</span>
+          )}
+        </div>
+        <p className="text-sm text-gray-500 mt-2">{plan.credits}</p>
+      </div>
+
+      <ul className="space-y-3 mb-8">
+        {plan.features.map((feature, idx) => (
+          <li key={idx} className="flex items-start gap-2">
+            <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <span className="text-gray-700 text-sm">{feature}</span>
+          </li>
+        ))}
+        {plan.limitations.map((limitation, idx) => (
+          <li key={idx} className="flex items-start gap-2">
+            <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <span className="text-gray-500 text-sm line-through">{limitation}</span>
+          </li>
+        ))}
+      </ul>
+
+      <button
+        className={`w-full ${plan.buttonStyle} text-white py-3 px-6 rounded-xl font-semibold transition-all`}
+        onClick={async () => {
+          if (plan.id === 'free') {
+            window.location.href = '/auth/signup'
+          } else {
+            const targetPlan = plan.id === 'yearly' ? 'yearly' : 'monthly'
+            // Try to get user email from localStorage
+            try {
+              const savedUser = localStorage.getItem('citea_user')
+              if (savedUser) {
+                const user = JSON.parse(savedUser)
+                if (user.email) {
+                  window.location.href = `/api/creem/checkout?plan=${targetPlan}&email=${encodeURIComponent(user.email)}`
+                  return
+                }
+              }
+            } catch (e) {
+              console.error('Error getting user email:', e)
+            }
+            // Fallback without email
+            window.location.href = `/api/creem/checkout?plan=${targetPlan}`
+          }
+        }}
+      >
+        {plan.buttonText}
+      </button>
+    </div>
+  )
+}
+
 export default function PricingPage() {
   const { t } = useLanguage()
 
-  const plans = [
+  const plans: Plan[] = [
     {
       id: 'free',
       name: t.pricing.freePlan,
@@ -91,98 +197,9 @@ export default function PricingPage() {
 
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {plans.map((plan, index) => {
-              const [isHovered, setIsHovered] = useState(false)
-              const cardRef = useRef<HTMLDivElement>(null)
-              
-              return (
-              <div
-                key={plan.id}
-                ref={cardRef}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                className={`relative bg-white rounded-2xl border-2 p-8 transition-all duration-300 ease-out ${
-                  plan.popular
-                    ? 'border-blue-500 shadow-xl scale-105'
-                    : 'border-gray-200 shadow-lg hover:shadow-xl'
-                } ${
-                  isHovered && !plan.popular
-                    ? 'scale-105 border-blue-300 -translate-y-2'
-                    : ''
-                }`}
-                style={{
-                  transform: isHovered && !plan.popular 
-                    ? 'scale(1.05) translateY(-8px)' 
-                    : plan.popular 
-                    ? 'scale(1.05)' 
-                    : 'scale(1)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-                      {t.pricing.mostPopular}
-                    </span>
-                  </div>
-                )}
-
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                    {plan.period && (
-                      <span className="text-gray-600">{plan.period}</span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-500 mt-2">{plan.credits}</p>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 text-sm">{feature}</span>
-                    </li>
-                  ))}
-                  {plan.limitations.map((limitation, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-500 text-sm line-through">{limitation}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  className={`w-full ${plan.buttonStyle} text-white py-3 px-6 rounded-xl font-semibold transition-all`}
-                  onClick={async () => {
-                    if (plan.id === 'free') {
-                      window.location.href = '/auth/signup'
-                    } else {
-                      const targetPlan = plan.id === 'yearly' ? 'yearly' : 'monthly'
-                      // Try to get user email from localStorage
-                      try {
-                        const savedUser = localStorage.getItem('citea_user')
-                        if (savedUser) {
-                          const user = JSON.parse(savedUser)
-                          if (user.email) {
-                            window.location.href = `/api/creem/checkout?plan=${targetPlan}&email=${encodeURIComponent(user.email)}`
-                            return
-                          }
-                        }
-                      } catch (e) {
-                        console.error('Error getting user email:', e)
-                      }
-                      // Fallback without email
-                      window.location.href = `/api/creem/checkout?plan=${targetPlan}`
-                    }
-                  }}
-                >
-                  {plan.buttonText}
-                </button>
-              </div>
-              )
-            })}
+            {plans.map((plan) => (
+              <PricingCard key={plan.id} plan={plan} t={t} />
+            ))}
           </div>
 
           {/* Credit Usage Info */}
@@ -274,4 +291,3 @@ export default function PricingPage() {
     </div>
   )
 }
-

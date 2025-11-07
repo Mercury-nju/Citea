@@ -1,11 +1,52 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Check, X, Sparkles, Zap, Crown } from 'lucide-react'
+import { Check, X, Sparkles, Zap, Crown, LucideIcon } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
-export default function Pricing() {
-  const { t } = useLanguage()
+interface Plan {
+  id: string
+  name: string
+  price: string
+  period: string
+  credits: string
+  wordLimit: string
+  icon: LucideIcon
+  gradient: string
+  features: string[]
+  limitations: string[]
+  buttonText: string
+  buttonStyle: string
+  popular: boolean
+}
+
+function PricingCardItem({ plan, IconComponent, t }: { plan: Plan; IconComponent: LucideIcon; t: any }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`relative bg-white rounded-xl border transition-all duration-300 ${
+        plan.popular
+          ? 'border-blue-600 shadow-xl scale-105'
+          : 'border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300'
+      } ${
+        isHovered && !plan.popular
+          ? 'scale-105 border-blue-300 -translate-y-2'
+          : ''
+      }`}
+      style={{
+        transform: isHovered && !plan.popular 
+          ? 'scale(1.05) translateY(-8px)' 
+          : plan.popular 
+          ? 'scale(1.05)' 
+          : 'scale(1)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+    >
 
   const plans = [
     {
