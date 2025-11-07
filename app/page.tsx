@@ -1,5 +1,6 @@
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
+import WorkflowHighlights from '@/components/WorkflowHighlights'
 import Features from '@/components/Features'
 import DetailedFeatures from '@/components/DetailedFeatures'
 import ToolsShowcase from '@/components/ToolsShowcase'
@@ -13,6 +14,7 @@ export default function Home() {
     <main className="min-h-screen">
       <Header />
       <Hero />
+      <WorkflowHighlights />
       <Features />
       <DetailedFeatures />
       <ToolsShowcase />
