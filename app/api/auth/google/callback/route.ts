@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { signJwt } from '@/lib/auth'
 import { getUserByEmail, createUser } from '@/lib/userStore'
 
+// 强制动态渲染，因为这个路由需要处理查询参数
+export const dynamic = 'force-dynamic'
+
 interface GoogleTokenResponse {
   access_token: string
   expires_in: number
@@ -23,6 +26,9 @@ interface GoogleUserInfo {
 // Google OAuth 回调端点
 export async function GET(request: NextRequest) {
   try {
+    // 获取基础 URL，如果环境变量未设置则使用请求的 origin
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+    
     const searchParams = request.nextUrl.searchParams
     const code = searchParams.get('code')
     const error = searchParams.get('error')
@@ -31,24 +37,24 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Google OAuth error:', error)
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=google_auth_failed`
+        new URL('/auth/signin?error=google_auth_failed', baseUrl)
       )
     }
 
     if (!code) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=no_code`
+        new URL('/auth/signin?error=no_code', baseUrl)
       )
     }
 
     const clientId = process.env.GOOGLE_CLIENT_ID
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`
+    const redirectUri = new URL('/api/auth/google/callback', baseUrl).toString()
 
     if (!clientId || !clientSecret) {
       console.error('Missing Google OAuth credentials')
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=config_error`
+        new URL('/auth/signin?error=config_error', baseUrl)
       )
     }
 
@@ -71,7 +77,7 @@ export async function GET(request: NextRequest) {
       const errorData = await tokenResponse.json()
       console.error('Google token exchange failed:', errorData)
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=token_exchange_failed`
+        new URL('/auth/signin?error=token_exchange_failed', baseUrl)
       )
     }
 
@@ -87,7 +93,7 @@ export async function GET(request: NextRequest) {
     if (!userInfoResponse.ok) {
       console.error('Failed to fetch Google user info')
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=user_info_failed`
+        new URL('/auth/signin?error=user_info_failed', baseUrl)
       )
     }
 
@@ -138,7 +144,7 @@ export async function GET(request: NextRequest) {
     if (!user) {
       console.error('User is null after creation/update')
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=user_creation_failed`
+        new URL('/auth/signin?error=user_creation_failed', baseUrl)
       )
     }
 
@@ -151,7 +157,7 @@ export async function GET(request: NextRequest) {
     })
 
     // 8. 重定向到 dashboard，并在 URL 中携带 token
-    const dashboardUrl = new URL('/dashboard', process.env.NEXT_PUBLIC_APP_URL)
+    const dashboardUrl = new URL('/dashboard', baseUrl)
     dashboardUrl.searchParams.append('token', token)
     dashboardUrl.searchParams.append('user', JSON.stringify({
       id: user.id,
@@ -164,8 +170,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(dashboardUrl.toString())
   } catch (error) {
     console.error('Google OAuth callback error:', error)
+    // 在 catch 块中也需要获取 baseUrl
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (request ? request.nextUrl.origin : 'https://citea.vercel.app')
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin?error=unexpected_error`
+      new URL('/auth/signin?error=unexpected_error', baseUrl)
     )
   }
 }
