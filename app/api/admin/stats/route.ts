@@ -1,137 +1,109 @@
-import { NextResponse } from 'next/server'
-import { getAdminSession } from '@/lib/adminAuth'
-import Redis from 'ioredis'
+import { NextRequest, NextResponse } from 'next/server'
+import { getUserByEmail } from '@/lib/userStore'
 
-function getRedisClient() {
-  if (!process.env.REDIS_URL) {
-    return null
-  }
-  
-  const redisUrl = process.env.REDIS_URL
-  if (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://')) {
-    return null
-  }
-  
-  return new Redis(redisUrl, {
-    maxRetriesPerRequest: 3,
-    retryStrategy: (times: number) => {
-      if (times > 3) return null
-      return Math.min(times * 50, 2000)
-    }
-  })
-}
+// 简单的管理员认证
+const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
 
-export async function GET() {
+// 获取用户统计信息（仅管理员）
+export async function GET(request: NextRequest) {
   try {
-    // 检查管理员权限
-    const session = await getAdminSession()
-    if (!session) {
+    // 检查认证
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!process.env.REDIS_URL) {
-      return NextResponse.json({
-        totalUsers: 0,
-        newUsersToday: 0,
-        activeUsersToday: 0,
-        activeUsersThisMonth: 0,
-        paidUsers: 0,
-        retentionRate: 0,
-      })
+    const token = authHeader.substring(7)
+    const { verifyJwt } = await import('@/lib/auth')
+    const jwtUser = await verifyJwt(token)
+    
+    if (!jwtUser || !ADMIN_EMAILS.includes(jwtUser.email)) {
+      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
 
-    const redis = getRedisClient()
-    if (!redis) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 500 })
+    const stats = {
+      total: 0,
+      byPlan: {
+        free: 0,
+        weekly: 0,
+        monthly: 0,
+        yearly: 0
+      },
+      verified: 0,
+      unverified: 0,
+      withActiveSubscription: 0,
+      expiredSubscription: 0,
+      storage: process.env.KV_REST_API_URL ? 'KV' : process.env.REDIS_URL ? 'Redis' : 'File'
     }
 
-    try {
-      // 获取所有用户
-      const userKeys = await redis.keys('user:*')
-      const users = []
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const thisMonth = new Date()
-      thisMonth.setDate(1)
-      thisMonth.setHours(0, 0, 0, 0)
-
-      let newUsersToday = 0
-      let activeUsersToday = 0
-      let activeUsersThisMonth = 0
-      let paidUsers = 0
-
-      for (const key of userKeys) {
-        const userData = await redis.hgetall(key)
-        if (userData && userData.email) {
-          users.push(userData)
-
-          // 统计新用户（今天注册）
-          if (userData.createdAt) {
-            const createdAt = new Date(userData.createdAt)
-            if (createdAt >= today) {
-              newUsersToday++
+    // 根据存储类型获取统计
+    const Redis = require('ioredis')
+    
+    // Redis 存储
+    if (process.env.REDIS_URL && process.env.REDIS_URL.startsWith('redis://')) {
+      try {
+        const redis = new Redis(process.env.REDIS_URL)
+        const keys = await redis.keys('user:*')
+        
+        for (const key of keys) {
+          const email = key.replace('user:', '')
+          const user = await getUserByEmail(email)
+          if (user) {
+            stats.total++
+            stats.byPlan[user.plan] = (stats.byPlan[user.plan] || 0) + 1
+            if (user.emailVerified) stats.verified++
+            else stats.unverified++
+            if (user.subscriptionExpiresAt) {
+              if (new Date(user.subscriptionExpiresAt) > new Date()) {
+                stats.withActiveSubscription++
+              } else {
+                stats.expiredSubscription++
+              }
             }
-          }
-
-          // 统计活跃用户（今天登录）
-          if (userData.lastLoginAt) {
-            const lastLogin = new Date(userData.lastLoginAt)
-            if (lastLogin >= today) {
-              activeUsersToday++
-            }
-            if (lastLogin >= thisMonth) {
-              activeUsersThisMonth++
-            }
-          }
-
-          // 统计付费用户
-          if (userData.plan && userData.plan !== 'free') {
-            paidUsers++
           }
         }
+
+        await redis.quit()
+      } catch (error) {
+        console.error('Redis error:', error)
       }
-
-      // 计算留存率（简化版：7天留存）
-      const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-      sevenDaysAgo.setHours(0, 0, 0, 0)
-
-      const usersRegisteredWeekAgo = users.filter(u => {
-        if (!u.createdAt) return false
-        const createdAt = new Date(u.createdAt)
-        return createdAt >= sevenDaysAgo && createdAt < new Date(sevenDaysAgo.getTime() + 24 * 60 * 60 * 1000)
-      })
-
-      const usersActiveThisWeek = users.filter(u => {
-        if (!u.lastLoginAt) return false
-        const lastLogin = new Date(u.lastLoginAt)
-        return lastLogin >= sevenDaysAgo
-      })
-
-      const retentionRate = usersRegisteredWeekAgo.length > 0
-        ? (usersActiveThisWeek.length / usersRegisteredWeekAgo.length) * 100
-        : 0
-
-      await redis.quit()
-
-      return NextResponse.json({
-        totalUsers: users.length,
-        newUsersToday,
-        activeUsersToday,
-        activeUsersThisMonth,
-        paidUsers,
-        retentionRate: Math.min(100, Math.max(0, retentionRate)),
-      })
-    } catch (error) {
-      await redis.quit()
-      throw error
     }
-  } catch (error: any) {
-    console.error('Stats API error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch stats', message: error.message },
-      { status: 500 }
-    )
+
+    // 文件存储
+    if (stats.total === 0 && !process.env.KV_REST_API_URL && !process.env.REDIS_URL) {
+      try {
+        const fs = require('fs').promises
+        const path = require('path')
+        const DATA_DIR = path.join(process.cwd(), 'data')
+        const USERS_FILE = path.join(DATA_DIR, 'users.json')
+        
+        const raw = await fs.readFile(USERS_FILE, 'utf8')
+        const json = JSON.parse(raw || '{"users":[]}')
+        
+        for (const user of json.users || []) {
+          stats.total++
+          stats.byPlan[user.plan] = (stats.byPlan[user.plan] || 0) + 1
+          if (user.emailVerified) stats.verified++
+          else stats.unverified++
+          if (user.subscriptionExpiresAt) {
+            if (new Date(user.subscriptionExpiresAt) > new Date()) {
+              stats.withActiveSubscription++
+            } else {
+              stats.expiredSubscription++
+            }
+          }
+        }
+      } catch (error) {
+        console.error('File storage error:', error)
+      }
+    }
+
+    return NextResponse.json(stats)
+  } catch (error) {
+    console.error('Admin stats API error:', error)
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
-
