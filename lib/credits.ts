@@ -18,7 +18,7 @@ export function getPlanLimits(plan: PlanType): CreditLimits {
       return {
         maxCredits: 3,
         resetPeriod: 'daily',
-        wordLimit: 300,
+        wordLimit: 1000,
         hasAdvancedDatabases: false,
         hasChatAccess: false
       }
