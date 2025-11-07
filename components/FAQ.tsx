@@ -40,8 +40,16 @@ export default function FAQ() {
   // Safely get FAQ items with proper type checking
   let faqs: FAQColumn[] = []
   try {
-    if (t.faq?.items && Array.isArray(t.faq.items)) {
-      faqs = t.faq.items as FAQColumn[]
+    const items = t.faq?.items
+    if (items && Array.isArray(items) && items.length > 0) {
+      // Validate that items is a 2D array structure
+      const isValidStructure = items.every(col => Array.isArray(col) && col.length > 0)
+      if (isValidStructure) {
+        faqs = items as FAQColumn[]
+      } else {
+        // If structure is invalid, try to fix it or log for debugging
+        console.warn('FAQ items structure is invalid:', items)
+      }
     }
   } catch (error) {
     console.error('Error loading FAQ items:', error)
@@ -49,7 +57,7 @@ export default function FAQ() {
   }
 
   // If no FAQs available, show empty state
-  if (!faqs || faqs.length === 0) {
+  if (!faqs || faqs.length === 0 || faqs.every(col => !col || col.length === 0)) {
     return (
       <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
