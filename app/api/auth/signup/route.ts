@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       console.warn('[Signup] 跳过邮件验证（SKIP_EMAIL_VERIFICATION=true）')
       // 直接标记为已验证
       const Redis = require('ioredis')
-      if (process.env.REDIS_URL && process.env.REDIS_URL.startsWith('redis://')) {
+      if (process.env.REDIS_URL && (process.env.REDIS_URL.startsWith('redis://') || process.env.REDIS_URL.startsWith('rediss://'))) {
         try {
           const redis = new Redis(process.env.REDIS_URL)
           await redis.hset(`user:${email.toLowerCase()}`, {

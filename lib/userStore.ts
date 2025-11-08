@@ -196,12 +196,42 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
   return user
 }
 
+// 维护 KV 用户索引
+async function maintainKVUserIndex(email: string, action: 'add' | 'remove' = 'add'): Promise<void> {
+  if (kv && process.env.KV_REST_API_URL) {
+    try {
+      const indexKey = 'users:index'
+      const existingIndex = await kv.get(indexKey) as string[] | null
+      const emailLower = email.toLowerCase()
+      
+      if (action === 'add') {
+        // 添加到索引
+        if (!existingIndex) {
+          await kv.set(indexKey, [emailLower])
+        } else if (!existingIndex.includes(emailLower)) {
+          await kv.set(indexKey, [...existingIndex, emailLower])
+        }
+      } else if (action === 'remove') {
+        // 从索引中移除
+        if (existingIndex) {
+          await kv.set(indexKey, existingIndex.filter(e => e !== emailLower))
+        }
+      }
+    } catch (error) {
+      console.error('KV index maintenance error:', error)
+      // 不抛出错误，索引维护失败不应该阻止用户创建
+    }
+  }
+}
+
 export async function createUser(user: StoredUser): Promise<void> {
   // Check if KV is available (production with env vars)
   if (kv && process.env.KV_REST_API_URL) {
     try {
       console.log('Saving user to KV:', user.email)
       await kv.hset(`user:${user.email.toLowerCase()}`, user)
+      // 维护用户索引
+      await maintainKVUserIndex(user.email, 'add')
       console.log('User saved successfully to KV')
       return
     } catch (error) {

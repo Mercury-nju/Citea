@@ -25,7 +25,13 @@ export default function DashboardStats() {
 
   async function fetchStats() {
     try {
-      const res = await fetch('/api/admin/stats')
+      const res = await fetch('/api/admin/stats', {
+        credentials: 'include', // 包含 cookie
+      })
+      if (!res.ok) {
+        console.error('Failed to fetch stats:', res.status, res.statusText)
+        return
+      }
       const data = await res.json()
       setStats(data)
     } catch (error) {

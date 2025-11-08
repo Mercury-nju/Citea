@@ -13,21 +13,29 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // 使用 cookie 认证（优先）或 Bearer token（兼容）
         const token = localStorage.getItem('citea_auth_token')
-        if (!token) {
-          router.push('/auth/signin')
-          return
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        }
+        
+        // 如果有 token，也添加到 header（兼容旧方式）
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
         }
 
         // 获取统计信息
         const statsRes = await fetch('/api/admin/stats', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers,
+          credentials: 'include', // 包含 cookie
         })
 
         if (!statsRes.ok) {
-          if (statsRes.status === 403) {
+          if (statsRes.status === 401) {
+            // 未授权，重定向到登录页
+            router.push('/admin/login')
+            return
+          } else if (statsRes.status === 403) {
             setError('您没有管理员权限')
           } else {
             setError('获取统计信息失败')
@@ -41,14 +49,16 @@ export default function AdminPage() {
 
         // 获取用户列表
         const usersRes = await fetch('/api/admin/users', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers,
+          credentials: 'include', // 包含 cookie
         })
 
         if (usersRes.ok) {
           const usersData = await usersRes.json()
           setUsers(usersData.users || [])
+        } else if (usersRes.status === 401) {
+          router.push('/admin/login')
+          return
         }
       } catch (err) {
         console.error('Error fetching admin data:', err)
@@ -141,9 +151,9 @@ export default function AdminPage() {
         )}
 
         {/* 用户列表 */}
-        {users.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">用户列表</h2>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">用户列表</h2>
+          {users.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -197,8 +207,13 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <p>暂无用户数据</p>
+              <p className="text-sm mt-2">当有用户注册后，数据将显示在这里</p>
+            </div>
+          )}
+        </div>
 
         <div className="mt-8">
           <button

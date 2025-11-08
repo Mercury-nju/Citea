@@ -25,7 +25,13 @@ export default function UsersTable() {
 
   async function fetchUsers() {
     try {
-      const res = await fetch('/api/admin/users')
+      const res = await fetch('/api/admin/users', {
+        credentials: 'include', // 包含 cookie
+      })
+      if (!res.ok) {
+        console.error('Failed to fetch users:', res.status, res.statusText)
+        return
+      }
       const data = await res.json()
       setUsers(data.users || [])
     } catch (error) {
