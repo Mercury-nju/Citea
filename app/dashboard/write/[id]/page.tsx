@@ -827,6 +827,7 @@ export default function WriteEditorPage() {
         </div>
       </div>
     </div>
+    </Fragment>
   )
 }
 
