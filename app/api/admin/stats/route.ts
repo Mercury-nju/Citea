@@ -31,11 +31,18 @@ export async function GET(request: NextRequest) {
     // 根据存储类型获取所有用户
     const Redis = require('ioredis')
     
-    // Redis 存储
+    // Redis 存储（优先）
     if (process.env.REDIS_URL && (process.env.REDIS_URL.startsWith('redis://') || process.env.REDIS_URL.startsWith('rediss://'))) {
       try {
-        const redis = new Redis(process.env.REDIS_URL)
+        const redis = new Redis(process.env.REDIS_URL, {
+          maxRetriesPerRequest: 3,
+          retryStrategy: (times) => {
+            if (times > 3) return null
+            return Math.min(times * 50, 2000)
+          }
+        })
         const keys = await redis.keys('user:*')
+        console.log(`[Admin Stats] Found ${keys.length} user keys in Redis`)
         
         for (const key of keys) {
           const email = key.replace('user:', '')
@@ -46,33 +53,42 @@ export async function GET(request: NextRequest) {
         }
 
         await redis.quit()
+        console.log(`[Admin Stats] Successfully loaded ${users.length} users from Redis`)
       } catch (error) {
-        console.error('Redis error:', error)
+        console.error('[Admin Stats] Redis error:', error)
+        // Redis 连接失败，继续尝试其他存储方式
       }
     }
-    // Vercel KV 存储
-    else if (process.env.KV_REST_API_URL) {
+    
+    // 如果 Redis 没有数据，尝试 Vercel KV 存储
+    if (users.length === 0 && process.env.KV_REST_API_URL) {
       try {
         const kv = require('@vercel/kv')
+        console.log('[Admin Stats] Using Vercel KV storage')
         // 从用户索引获取所有用户邮箱
         const userIndex = await kv.get('users:index') as string[] | null
-        if (userIndex && Array.isArray(userIndex)) {
+        if (userIndex && Array.isArray(userIndex) && userIndex.length > 0) {
+          console.log(`[Admin Stats] Found ${userIndex.length} users in KV index`)
           for (const email of userIndex) {
             const user = await getUserByEmail(email)
             if (user) {
               users.push(user)
             }
           }
+          console.log(`[Admin Stats] Successfully loaded ${users.length} users from KV`)
         } else {
-          console.warn('KV storage: User index not found. No users will be displayed.')
+          console.warn('[Admin Stats] KV storage: User index not found or empty.')
+          console.warn('[Admin Stats] This means users were registered before the index feature was added.')
+          console.warn('[Admin Stats] Solution: Use /api/admin/rebuild-index endpoint to rebuild the index.')
         }
       } catch (error) {
-        console.error('KV error:', error)
+        console.error('[Admin Stats] KV error:', error)
       }
     }
-    // 文件存储
-    else {
+    // 文件存储（仅用于本地开发，如果Redis和KV都没有数据）
+    if (users.length === 0 && !process.env.REDIS_URL && !process.env.KV_REST_API_URL) {
       try {
+        console.log('[Admin Stats] Using file storage (local development)')
         const fs = require('fs').promises
         const path = require('path')
         const DATA_DIR = path.join(process.cwd(), 'data')
@@ -82,16 +98,23 @@ export async function GET(request: NextRequest) {
           const raw = await fs.readFile(USERS_FILE, 'utf8')
           const json = JSON.parse(raw || '{"users":[]}')
           users.push(...(json.users || []))
+          console.log(`[Admin Stats] Loaded ${users.length} users from file storage`)
         } catch (fileError: any) {
           // 文件不存在或无法读取，继续处理
           if (fileError.code !== 'ENOENT') {
-            console.error('File storage error:', fileError)
+            console.error('[Admin Stats] File storage error:', fileError)
+          } else {
+            console.log('[Admin Stats] Users file not found (normal for production)')
           }
         }
       } catch (error) {
-        console.error('File storage error:', error)
+        console.error('[Admin Stats] File storage error:', error)
       }
     }
+
+    // 记录最终结果
+    console.log(`[Admin Stats] Total users loaded: ${users.length}`)
+    console.log(`[Admin Stats] Storage type: ${process.env.KV_REST_API_URL ? 'KV' : process.env.REDIS_URL ? 'Redis' : 'File'}`)
 
     // 计算统计信息
     const stats = {
@@ -134,12 +157,21 @@ export async function GET(request: NextRequest) {
       storage: process.env.KV_REST_API_URL ? 'KV' : process.env.REDIS_URL ? 'Redis' : 'File'
     }
 
+    console.log(`[Admin Stats] Returning stats:`, {
+      totalUsers: stats.totalUsers,
+      storage: stats.storage,
+      verified: stats.verified,
+      unverified: stats.unverified
+    })
+    
     return NextResponse.json(stats)
   } catch (error) {
-    console.error('Admin stats API error:', error)
+    console.error('[Admin Stats] API error:', error)
+    console.error('[Admin Stats] Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     return NextResponse.json({ 
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error',
+      details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined
     }, { status: 500 })
   }
 }
