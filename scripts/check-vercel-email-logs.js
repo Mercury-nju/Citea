@@ -39,7 +39,7 @@ async function checkEmailLogs() {
     
     // 3. 检查环境变量
     const envVars = await vercelApiRequest(`/v9/projects/${PROJECT_NAME}/env?teamId=${VERCEL_TEAM_ID}`)
-    const brevoKey = envVars.find((v: any) => v.key === 'BREVO_API_KEY')
+    const brevoKey = envVars.find((v) => v.key === 'BREVO_API_KEY')
     
     console.log('🔑 BREVO_API_KEY 配置:')
     if (brevoKey) {
