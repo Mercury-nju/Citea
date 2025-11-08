@@ -375,7 +375,6 @@ export default function WriteEditorPage() {
       }])
     } catch (error) {
       console.error('Chat error:', error)
-      const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
       setChatMessages(prev => [...prev, { 
         role: 'assistant', 
         content: t.dashboard?.errorRetry || 'Sorry, I encountered an error. Please try again.' 
@@ -680,7 +679,7 @@ export default function WriteEditorPage() {
                   )
                 })}
               </div>
-              <style jsx global>{`
+              <style dangerouslySetInnerHTML={{__html: `
                 div[contenteditable][data-placeholder]:empty:before {
                   content: attr(data-placeholder);
                   color: #9ca3af;
@@ -690,7 +689,7 @@ export default function WriteEditorPage() {
                   top: 1rem;
                   left: 1rem;
                 }
-              `}</style>
+              `}} />
               </div>
             </div>
           </div>
