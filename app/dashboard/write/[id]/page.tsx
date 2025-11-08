@@ -338,7 +338,7 @@ export default function WriteEditorPage() {
       if (document) {
         outlineText = document.outline.map((section: Section | string, idx: number) => {
           const title = typeof section === 'string' ? section : section.title
-          return `${idx + 1}. ${title}`
+          return (idx + 1) + '. ' + title
         }).join('\n')
       }
       
