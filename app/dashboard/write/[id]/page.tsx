@@ -63,7 +63,7 @@ export default function WriteEditorPage() {
       }
       
       const docId = params.id as string
-      const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+      const savedDocs = JSON.parse(localStorage.getItem('citea_documents_' + user.email) || '[]')
       const doc = savedDocs.find((d: Document) => d.id === docId)
       
       if (doc) {
@@ -73,7 +73,7 @@ export default function WriteEditorPage() {
         
         // Save to history
         const historyItem = {
-          id: `write_${docId}`,
+          id: 'write_' + docId,
           title: doc.title || 'Untitled Document',
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           type: 'write',
@@ -81,10 +81,10 @@ export default function WriteEditorPage() {
           timestamp: Date.now()
         }
         
-        const savedHistory = localStorage.getItem(`citea_search_history_${user.email}`)
+        const savedHistory = localStorage.getItem('citea_search_history_' + user.email)
         const history = savedHistory ? JSON.parse(savedHistory) : []
         const updated = [historyItem, ...history.filter((d: any) => d.id !== historyItem.id)].slice(0, 50)
-        localStorage.setItem(`citea_search_history_${user.email}`, JSON.stringify(updated))
+        localStorage.setItem('citea_search_history_' + user.email, JSON.stringify(updated))
       } else {
         router.push('/dashboard/write')
       }
@@ -107,7 +107,7 @@ export default function WriteEditorPage() {
         return
       }
       
-      const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+      const savedDocs = JSON.parse(localStorage.getItem('citea_documents_' + user.email) || '[]')
       const index = savedDocs.findIndex((d: Document) => d.id === document.id)
       
       const updatedDoc = { ...document, updatedAt: Date.now() }
@@ -138,12 +138,12 @@ export default function WriteEditorPage() {
       const user = JSON.parse(localStorage.getItem('citea_user') || '{}')
       if (!user.email) return
       
-      const savedDocs = JSON.parse(localStorage.getItem(`citea_documents_${user.email}`) || '[]')
+      const savedDocs = JSON.parse(localStorage.getItem('citea_documents_' + user.email) || '[]')
       const index = savedDocs.findIndex((d: Document) => d.id === updatedDoc.id)
       
       if (index >= 0) {
         savedDocs[index] = { ...updatedDoc, updatedAt: Date.now() }
-        localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
+        localStorage.setItem('citea_documents_' + user.email, JSON.stringify(savedDocs.slice(0, 50)))
         setSaveStatus('saved')
         setLastSaved(new Date())
       }
@@ -394,7 +394,7 @@ export default function WriteEditorPage() {
   }
 
   return (
-    <div className={'min-h-screen h-screen bg-white flex'}>
+    <div className="min-h-screen h-screen bg-white flex">
       {/* Left Sidebar - Simplified */}
       <aside className={(isSidebarOpen ? 'w-16' : 'w-0') + ' bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all h-full'}>
         {isSidebarOpen && (
