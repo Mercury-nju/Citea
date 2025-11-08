@@ -25,10 +25,15 @@ import { Document as DocxDocument, Packer, Paragraph, TextRun, HeadingLevel } fr
 // @ts-ignore - file-saver types may not be available
 import { saveAs } from 'file-saver'
 
+interface Section {
+  title: string
+  content: string
+}
+
 interface Document {
   id: string
   title: string
-  outline: string[]
+  outline: string[] | Section[]
   content: string
   createdAt: number
   updatedAt: number
@@ -173,7 +178,8 @@ export default function WriteEditorPage() {
 
       // Fallback to document state if DOM extraction fails
       if (sections.length === 0 && document.outline.length > 0) {
-        document.outline.forEach((sectionTitle) => {
+        document.outline.forEach((section) => {
+          const sectionTitle = typeof section === 'string' ? section : section.title
           sections.push({
             heading: sectionTitle,
             content: document.content || ''
@@ -331,8 +337,9 @@ export default function WriteEditorPage() {
       // Add document context to the message with improved prompt
       let outlineText = ''
       if (document) {
-        outlineText = document.outline.map((section: string, idx: number) => {
-          return (idx + 1) + '. ' + section
+        outlineText = document.outline.map((section: string | Section, idx: number) => {
+          const sectionTitle = typeof section === 'string' ? section : section.title
+          return (idx + 1) + '. ' + sectionTitle
         }).join('\n')
       }
       
@@ -600,7 +607,9 @@ export default function WriteEditorPage() {
 
               {/* Content Sections - Smaller fonts */}
               <div className="space-y-8">
-                {document.outline.map((section, index) => (
+                {document.outline.map((section, index) => {
+                  const sectionTitle = typeof section === 'string' ? section : section.title
+                  return (
                   <div key={index} className="group">
                     <h2 
                       className="text-xl font-semibold text-gray-900 mb-4 focus:outline-none border-b border-transparent focus:border-blue-300 pb-2 transition-colors"
@@ -608,8 +617,14 @@ export default function WriteEditorPage() {
                       suppressContentEditableWarning
                       onBlur={(e) => {
                         const newOutline = [...document.outline]
-                        newOutline[index] = e.currentTarget.textContent || section
-                        if (newOutline[index] !== section) {
+                        const newTitle = e.currentTarget.textContent || sectionTitle
+                        // 保持格式一致：如果是 Section 格式，更新 title；如果是 string 格式，直接更新
+                        if (typeof section === 'string') {
+                          newOutline[index] = newTitle
+                        } else {
+                          newOutline[index] = { ...section, title: newTitle }
+                        }
+                        if ((typeof section === 'string' ? section : section.title) !== newTitle) {
                           setDocument(prev => prev ? {...prev, outline: newOutline} : null)
                           setSaveStatus('unsaved')
                           autoSave({ ...document, outline: newOutline })
@@ -617,7 +632,7 @@ export default function WriteEditorPage() {
                       }}
                       style={{ minHeight: '32px' }}
                     >
-                      {section}
+                      {sectionTitle}
                     </h2>
                     <div 
                       className="text-gray-700 text-base leading-relaxed focus:outline-none min-h-[150px] p-4 rounded-lg border border-transparent focus-within:border-blue-200 focus-within:bg-blue-50/30 transition-all relative"
@@ -641,7 +656,8 @@ export default function WriteEditorPage() {
                     />
                     <style dangerouslySetInnerHTML={{__html: 'div[contenteditable][data-placeholder]:empty:before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; pointer-events: none; position: absolute; top: 1rem; left: 1rem; }'}} />
                   </div>
-                ))}
+                )
+                })}
               </div>
             </div>
           </div>

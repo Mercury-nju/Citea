@@ -105,12 +105,30 @@ export default function DashboardLayout({
           // Filter to show only past 7 days
           const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
           const recentHistory = history.filter((doc: any) => {
-            const docTimestamp = doc.timestamp || new Date(doc.date).getTime()
-            return docTimestamp >= sevenDaysAgo
+            // 优先使用 timestamp，如果没有则尝试解析 date
+            if (doc.timestamp && typeof doc.timestamp === 'number') {
+              return doc.timestamp >= sevenDaysAgo
+            }
+            // 如果 date 是字符串，尝试解析，但需要更健壮的处理
+            if (doc.date) {
+              try {
+                const parsedDate = new Date(doc.date).getTime()
+                // 检查是否是有效日期
+                if (!isNaN(parsedDate)) {
+                  return parsedDate >= sevenDaysAgo
+                }
+              } catch (e) {
+                // 如果解析失败，默认保留该记录（可能是旧格式）
+                return true
+              }
+            }
+            // 如果既没有 timestamp 也没有有效的 date，默认保留
+            return true
           })
           setDocuments(recentHistory)
         } catch (e) {
           console.error('Failed to load search history:', e)
+          setDocuments([])
         }
       } else {
         setDocuments([])
