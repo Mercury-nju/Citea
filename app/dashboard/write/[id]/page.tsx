@@ -482,7 +482,7 @@ export default function WriteEditorPage() {
                 <>
                   <div className="w-2 h-2 bg-green-500 rounded-full" />
                   <span className="text-xs text-gray-600">
-                    {lastSaved ? `Saved ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Saved'}
+                    {lastSaved ? 'Saved ' + lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Saved'}
                   </span>
                 </>
               )}
