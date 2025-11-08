@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { 
   ArrowLeft, 
@@ -402,7 +402,8 @@ export default function WriteEditorPage() {
   }
 
   return (
-    <div className="min-h-screen h-screen bg-white flex" key="main-container">
+    <Fragment>
+      <div className="min-h-screen h-screen bg-white flex" key="main-container">
       {/* Left Sidebar - Simplified */}
       <aside className={(isSidebarOpen ? 'w-16' : 'w-0') + ' bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all h-full'}>
         {isSidebarOpen && (
