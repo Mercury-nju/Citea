@@ -397,7 +397,7 @@ export default function WriteEditorPage() {
     )
   }
 
-  const mainContent = (
+  return (
     <div className="min-h-screen h-screen bg-white flex">
       {/* Left Sidebar - Simplified */}
       <aside className={isSidebarOpen ? 'w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all h-full' : 'w-0 bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all h-full'}>
@@ -823,7 +823,5 @@ export default function WriteEditorPage() {
       </div>
     </div>
   )
-
-  return mainContent
 }
 
