@@ -601,7 +601,9 @@ export default function WriteEditorPage() {
                 onBlur={(e) => {
                   const newTitle = e.currentTarget.textContent || document.title
                   if (newTitle !== document.title) {
-                    setDocument(prev => prev ? {...prev, title: newTitle} : null)
+                    if (document) {
+                      setDocument({...document, title: newTitle})
+                    }
                     setSaveStatus('unsaved')
                     autoSave({ ...document, title: newTitle })
                   }
@@ -633,7 +635,9 @@ export default function WriteEditorPage() {
                             newOutline[index] = { ...section, title: newTitle }
                           }
                           if (newTitle !== sectionTitle) {
-                            setDocument(prev => prev ? {...prev, outline: newOutline} : null)
+                            if (document) {
+                              setDocument({...document, outline: newOutline})
+                            }
                             setSaveStatus('unsaved')
                             autoSave({ ...document, outline: newOutline })
                           }
@@ -661,14 +665,12 @@ export default function WriteEditorPage() {
                           } else {
                             newOutline[index] = { ...section, content }
                           }
-                          setDocument(prev => prev ? {...prev, outline: newOutline} : null)
+                          if (document) {
+                            setDocument({...document, outline: newOutline})
+                          }
                           autoSave({ ...document, outline: newOutline })
                         }}
-                        style={{ 
-                          fontFamily: 'system-ui, -apple-system, sans-serif',
-                          lineHeight: '1.6',
-                          wordBreak: 'break-word'
-                        }}
+                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif', lineHeight: '1.6', wordBreak: 'break-word' }}
                       >
                         {sectionContent}
                       </div>
