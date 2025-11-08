@@ -827,5 +827,7 @@ export default function WriteEditorPage() {
       </div>
     </div>
   )
+
+  return mainContent
 }
 
