@@ -764,9 +764,7 @@ export default function WriteEditorPage() {
                       className={'flex ' + (msg.role === 'user' ? 'justify-end' : 'justify-start')}
                     >
                       <div
-                        className={'max-w-[85%] rounded-xl px-4 py-3 ' + (msg.role === 'user'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200')}
+                        className={'max-w-[85%] rounded-xl px-4 py-3 ' + (msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200')}
                       >
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                       </div>
