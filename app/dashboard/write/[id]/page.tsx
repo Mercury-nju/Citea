@@ -75,7 +75,7 @@ export default function WriteEditorPage() {
         const historyItem = {
           id: `write_${docId}`,
           title: doc.title || 'Untitled Document',
-          date: new Date().toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }),
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           type: 'write',
           docId: docId,
           timestamp: Date.now()
@@ -394,7 +394,7 @@ export default function WriteEditorPage() {
   }
 
   return (
-    <div className="min-h-screen h-screen bg-white flex">
+    <div className={'min-h-screen h-screen bg-white flex'}>
       {/* Left Sidebar - Simplified */}
       <aside className={(isSidebarOpen ? 'w-16' : 'w-0') + ' bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all h-full'}>
         {isSidebarOpen && (
