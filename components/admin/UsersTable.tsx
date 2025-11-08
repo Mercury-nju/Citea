@@ -19,16 +19,21 @@ export default function UsersTable() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const limit = 50 // 每页显示 50 条
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    fetchUsers(page)
+  }, [page])
 
-  async function fetchUsers() {
+  async function fetchUsers(pageNum: number = 1) {
     try {
       setError(null)
-      console.log('[UsersTable] Fetching users from /api/admin/users...')
-      const res = await fetch('/api/admin/users', {
+      setLoading(true)
+      console.log('[UsersTable] Fetching users from /api/admin/users...', { page: pageNum, limit })
+      const res = await fetch(`/api/admin/users?page=${pageNum}&limit=${limit}`, {
         credentials: 'include', // 包含 cookie
       })
       console.log('[UsersTable] Response status:', res.status, res.statusText)
@@ -43,6 +48,8 @@ export default function UsersTable() {
       const data = await res.json()
       console.log('[UsersTable] Received data:', {
         total: data.total,
+        page: data.page,
+        totalPages: data.totalPages,
         usersCount: data.users?.length || 0,
         storage: data.storage,
         stats: data.stats
@@ -50,10 +57,14 @@ export default function UsersTable() {
       
       if (data.users && Array.isArray(data.users)) {
         setUsers(data.users)
-        console.log(`[UsersTable] Set ${data.users.length} users`)
+        setTotal(data.total || 0)
+        setTotalPages(data.totalPages || 1)
+        console.log(`[UsersTable] Set ${data.users.length} users (page ${data.page} of ${data.totalPages})`)
       } else {
         console.warn('[UsersTable] No users array in response:', data)
         setUsers([])
+        setTotal(0)
+        setTotalPages(0)
       }
     } catch (error) {
       console.error('[UsersTable] Failed to fetch users:', error)
@@ -101,7 +112,7 @@ export default function UsersTable() {
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg m-6">
           <p className="text-red-700 text-sm">{error}</p>
           <button
-            onClick={fetchUsers}
+            onClick={() => fetchUsers(page)}
             className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
           >
             重试
@@ -221,9 +232,41 @@ export default function UsersTable() {
       </div>
 
       <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-        <p className="text-sm text-gray-600">
-          共 <span className="font-semibold">{filteredUsers.length}</span> 个用户
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            共 <span className="font-semibold">{total}</span> 个用户
+            {searchTerm && (
+              <span className="ml-2">
+                （搜索到 <span className="font-semibold">{filteredUsers.length}</span> 个）
+              </span>
+            )}
+          </p>
+          
+          {/* 分页控件 */}
+          {totalPages > 1 && !searchTerm && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1 || loading}
+                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                上一页
+              </button>
+              
+              <span className="text-sm text-gray-600">
+                第 {page} / {totalPages} 页
+              </span>
+              
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages || loading}
+                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                下一页
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
