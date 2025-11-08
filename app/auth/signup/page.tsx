@@ -46,8 +46,12 @@ export default function SignUpPage() {
       
       // 注册成功，跳转到验证页面
       if (data.needsVerification) {
-        // 若后端在应急模式下返回验证码，则携带到验证页
-        const codeParam = data.verificationCode ? `&code=${encodeURIComponent(data.verificationCode)}` : ''
+        // 生产环境：永远不通过URL传递验证码（安全考虑）
+        // 开发/预览环境：如果后端返回了验证码，可以携带到验证页（仅用于测试）
+        const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        const codeParam = (isDevelopment && data.verificationCode) 
+          ? `&code=${encodeURIComponent(data.verificationCode)}` 
+          : ''
         router.push(`/auth/verify-email?email=${encodeURIComponent(email)}${codeParam}`)
       } else {
         // 旧用户或不需要验证
