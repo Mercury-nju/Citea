@@ -18,6 +18,7 @@ export default function UsersTable() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchUsers()
@@ -25,17 +26,38 @@ export default function UsersTable() {
 
   async function fetchUsers() {
     try {
+      setError(null)
+      console.log('[UsersTable] Fetching users from /api/admin/users...')
       const res = await fetch('/api/admin/users', {
         credentials: 'include', // 包含 cookie
       })
+      console.log('[UsersTable] Response status:', res.status, res.statusText)
+      
       if (!res.ok) {
-        console.error('Failed to fetch users:', res.status, res.statusText)
+        const errorData = await res.json().catch(() => ({}))
+        console.error('[UsersTable] Failed to fetch users:', res.status, res.statusText, errorData)
+        setError(`获取用户失败: ${res.status} ${res.statusText}`)
         return
       }
+      
       const data = await res.json()
-      setUsers(data.users || [])
+      console.log('[UsersTable] Received data:', {
+        total: data.total,
+        usersCount: data.users?.length || 0,
+        storage: data.storage,
+        stats: data.stats
+      })
+      
+      if (data.users && Array.isArray(data.users)) {
+        setUsers(data.users)
+        console.log(`[UsersTable] Set ${data.users.length} users`)
+      } else {
+        console.warn('[UsersTable] No users array in response:', data)
+        setUsers([])
+      }
     } catch (error) {
-      console.error('Failed to fetch users:', error)
+      console.error('[UsersTable] Failed to fetch users:', error)
+      setError('获取用户数据失败，请刷新页面重试')
     } finally {
       setLoading(false)
     }
@@ -75,6 +97,18 @@ export default function UsersTable() {
         </div>
       </div>
 
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg m-6">
+          <p className="text-red-700 text-sm">{error}</p>
+          <button
+            onClick={fetchUsers}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+          >
+            重试
+          </button>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -104,6 +138,17 @@ export default function UsersTable() {
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                   {searchTerm ? '未找到匹配的用户' : '暂无用户'}
+                  {!searchTerm && !loading && (
+                    <div className="mt-4 text-sm text-gray-400">
+                      <p>可能的原因：</p>
+                      <ul className="list-disc list-inside mt-2 space-y-1">
+                        <li>数据库中没有用户数据</li>
+                        <li>Redis 连接失败</li>
+                        <li>数据读取错误</li>
+                      </ul>
+                      <p className="mt-4">请检查浏览器控制台和 Vercel 日志获取更多信息</p>
+                    </div>
+                  )}
                 </td>
               </tr>
             ) : (

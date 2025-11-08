@@ -166,17 +166,30 @@ export async function GET(request: NextRequest) {
       expired: users.filter(u => u.subscriptionExpiresAt && !u.hasActiveSubscription).length,
     }
 
+    const sortedUsers = users.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0).getTime()
+      const dateB = new Date(b.createdAt || 0).getTime()
+      return dateB - dateA // 最新的在前
+    })
+
+    console.log(`[Admin Users] Returning response:`, {
+      total: users.length,
+      usersCount: sortedUsers.length,
+      storage: process.env.KV_REST_API_URL ? 'KV' : process.env.REDIS_URL ? 'Redis' : 'File',
+      stats: {
+        verified: stats.verified,
+        unverified: stats.unverified,
+        byPlan: stats.byPlan
+      }
+    })
+
     return NextResponse.json({
       total: users.length,
       stats: {
         ...stats,
         total: users.length
       },
-      users: users.sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0).getTime()
-        const dateB = new Date(b.createdAt || 0).getTime()
-        return dateB - dateA // 最新的在前
-      }),
+      users: sortedUsers,
       storage: process.env.KV_REST_API_URL ? 'KV' : process.env.REDIS_URL ? 'Redis' : 'File'
     })
   } catch (error) {
