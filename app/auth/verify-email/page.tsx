@@ -24,13 +24,16 @@ function VerifyEmailContent() {
   useEffect(() => {
     if (emailParam) {
       setEmail(emailParam)
-      // 只在明确设置时才显示验证码（生产环境不应暴露验证码）
-      // 如果 URL 中有 code 参数，说明是开发/测试环境
-      if (codeParam) {
+      // 只在开发环境（localhost）且URL中有code参数时才自动填充验证码
+      // 生产环境永远不自动填充验证码（安全考虑）
+      const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      if (isDevelopment && codeParam) {
+        // 仅开发环境：自动填充验证码
         setCode(codeParam)
-        setMessage(t.auth.verifyEmail.codeAutoFilled)
+        setMessage(t.auth.verifyEmail.codeAutoFilled || '验证码已自动填充（仅开发环境）')
       } else {
-        setMessage(t.auth.verifyEmail.codeSent)
+        // 生产环境或没有code参数：提示用户检查邮箱
+        setMessage(t.auth.verifyEmail.codeSent || '验证码已发送到您的邮箱，请查收并输入验证码。')
       }
     }
   }, [emailParam, codeParam, t])
