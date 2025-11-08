@@ -372,22 +372,18 @@ export default function WriteEditorPage() {
 
       const data = await response.json()
       
-      setChatMessages(prev => {
-        const newMsg = { 
-          role: 'assistant' as const, 
-          content: data.response || 'Sorry, I could not process your request.' 
-        }
-        return [...prev, newMsg]
-      })
+      const assistantMsg = { 
+        role: 'assistant' as const, 
+        content: data.response || 'Sorry, I could not process your request.' 
+      }
+      setChatMessages(prev => [...prev, assistantMsg])
     } catch (error) {
       console.error('Chat error:', error)
-      setChatMessages(prev => {
-        const newMsg = { 
-          role: 'assistant' as const, 
-          content: t.dashboard?.errorRetry || 'Sorry, I encountered an error. Please try again.' 
-        }
-        return [...prev, newMsg]
-      })
+      const errorMsg = { 
+        role: 'assistant' as const, 
+        content: t.dashboard?.errorRetry || 'Sorry, I encountered an error. Please try again.' 
+      }
+      setChatMessages(prev => [...prev, errorMsg])
     } finally {
       setIsChatLoading(false)
     }
