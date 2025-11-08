@@ -18,8 +18,20 @@ export async function POST(req: Request) {
     }
 
     const existing = await getUserByEmail(String(email))
+    
+    // 如果用户已存在
     if (existing) {
-      return NextResponse.json({ error: 'Email already registered' }, { status: 409 })
+      // 如果用户已验证，不允许重复注册
+      if (existing.emailVerified) {
+        return NextResponse.json({ 
+          error: 'Email already registered',
+          message: '该邮箱已注册并已验证。请直接登录。',
+          verified: true
+        }, { status: 409 })
+      }
+      
+      // 如果用户未验证，允许重新注册（更新用户信息和验证码）
+      console.log(`[Signup] User ${email} exists but not verified. Allowing re-registration.`)
     }
 
     const passwordHash = await bcrypt.hash(password, 10)
@@ -34,23 +46,32 @@ export async function POST(req: Request) {
     tomorrow.setDate(tomorrow.getDate() + 1)
     tomorrow.setHours(0, 0, 0, 0)
     
+    // 如果用户已存在但未验证，保留原有的 ID 和创建时间
+    const userId = existing && !existing.emailVerified ? existing.id : randomUUID()
+    const createdAt = existing && !existing.emailVerified ? existing.createdAt : new Date().toISOString()
+    
     const user = { 
-      id: randomUUID(), 
+      id: userId, 
       name, 
       email, 
       passwordHash, 
-      plan: 'free' as const,
-      credits: 3, // 免费用户每天3积分
+      plan: (existing && !existing.emailVerified ? existing.plan : 'free') as const,
+      credits: existing && !existing.emailVerified ? existing.credits : 3, // 免费用户每天3积分，重新注册时保留原有积分
       creditsResetDate: tomorrow.toISOString(),
-      createdAt: new Date().toISOString(),
+      createdAt,
       lastLoginAt: new Date().toISOString(),
       emailVerified: false,
       verificationCode,
       verificationExpiry
     }
     
-    // 保存用户
+    // 保存用户（如果已存在未验证用户，会更新用户信息）
     await createUser(user)
+    
+    // 如果是重新注册，记录日志
+    if (existing && !existing.emailVerified) {
+      console.log(`[Signup] Updated unverified user ${email} with new password and verification code`)
+    }
     
     // 临时方案：如果设置了环境变量，跳过邮件验证（用于紧急修复）
     const skipEmailVerification = process.env.SKIP_EMAIL_VERIFICATION === 'true'
@@ -131,10 +152,18 @@ export async function POST(req: Request) {
     // 只在开发环境或明确设置时才返回验证码
     const isDevelopment = process.env.NODE_ENV === 'development'
     const expose = process.env.EXPOSE_VERIFICATION_CODE === 'true'
+    
+    // 如果是重新注册，返回不同的消息
+    const isReregistration = existing && !existing.emailVerified
+    const message = isReregistration 
+      ? '注册信息已更新！新的验证码已发送到您的邮箱，请查收并验证。'
+      : 'Registration successful! Please check your email and enter the verification code.'
+    
     return NextResponse.json({ 
       user: { id: user.id, name: user.name, email: user.email, plan: user.plan },
       needsVerification: true,
-      message: 'Registration successful! Please check your email and enter the verification code.',
+      message,
+      reregistered: isReregistration, // 标记是否为重新注册
       verificationCode: (isDevelopment || expose) ? verificationCode : undefined
     }, { status: 201 })
   } catch (e: any) {
