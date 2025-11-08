@@ -118,7 +118,7 @@ export default function WriteEditorPage() {
         savedDocs.unshift(updatedDoc)
       }
       
-      localStorage.setItem(`citea_documents_${user.email}`, JSON.stringify(savedDocs.slice(0, 50)))
+      localStorage.setItem('citea_documents_' + user.email, JSON.stringify(savedDocs.slice(0, 50)))
       
       setSaveStatus('saved')
       setLastSaved(new Date())
