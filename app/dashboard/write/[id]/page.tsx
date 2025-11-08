@@ -344,7 +344,7 @@ export default function WriteEditorPage() {
       
       let documentContext = ''
       if (document) {
-        documentContext = 'Document Title: "' + document.title + '"\nDocument Outline:\n' + outlineText
+        documentContext = 'Document Title: ' + document.title + '\nDocument Outline:\n' + outlineText
       }
       
       const contextMessage = documentContext + '\nI am working on this academic document. ' + userMessage + '\n\nPlease provide helpful, specific, and actionable advice. If you are suggesting content, make it academic and well-structured.'
