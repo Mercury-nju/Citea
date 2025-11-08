@@ -500,9 +500,7 @@ export default function WriteEditorPage() {
             
             <button
               onClick={handleSave}
-              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (saveStatus === 'saving' 
-                  ? 'bg-blue-100 text-blue-600 cursor-not-allowed' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700')}
+              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (saveStatus === 'saving' ? 'bg-blue-100 text-blue-600 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700')}
               disabled={saveStatus === 'saving'}
             >
               <Save size={16} />
