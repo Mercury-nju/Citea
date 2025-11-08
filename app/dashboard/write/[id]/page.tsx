@@ -25,15 +25,10 @@ import { Document as DocxDocument, Packer, Paragraph, TextRun, HeadingLevel } fr
 // @ts-ignore - file-saver types may not be available
 import { saveAs } from 'file-saver'
 
-interface Section {
-  title: string
-  content: string
-}
-
 interface Document {
   id: string
   title: string
-  outline: Section[]
+  outline: string[]
   content: string
   createdAt: number
   updatedAt: number
@@ -75,7 +70,7 @@ export default function WriteEditorPage() {
         const historyItem = {
           id: 'write_' + docId,
           title: doc.title || 'Untitled Document',
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          date: new Date().toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }),
           type: 'write',
           docId: docId,
           timestamp: Date.now()
@@ -178,10 +173,10 @@ export default function WriteEditorPage() {
 
       // Fallback to document state if DOM extraction fails
       if (sections.length === 0 && document.outline.length > 0) {
-        document.outline.forEach((section) => {
+        document.outline.forEach((sectionTitle) => {
           sections.push({
-            heading: typeof section === 'string' ? section : section.title,
-            content: typeof section === 'string' ? (document.content || '') : (section.content || '')
+            heading: sectionTitle,
+            content: document.content || ''
           })
         })
       }
@@ -336,9 +331,8 @@ export default function WriteEditorPage() {
       // Add document context to the message with improved prompt
       let outlineText = ''
       if (document) {
-        outlineText = document.outline.map((section: Section | string, idx: number) => {
-          const title = typeof section === 'string' ? section : section.title
-          return (idx + 1) + '. ' + title
+        outlineText = document.outline.map((section: string, idx: number) => {
+          return (idx + 1) + '. ' + section
         }).join('\n')
       }
       
@@ -372,18 +366,17 @@ export default function WriteEditorPage() {
 
       const data = await response.json()
       
-      const assistantMsg = { 
-        role: 'assistant' as const, 
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
         content: data.response || 'Sorry, I could not process your request.' 
-      }
-      setChatMessages(prev => [...prev, assistantMsg])
+      }])
     } catch (error) {
       console.error('Chat error:', error)
-      const errorMsg = { 
-        role: 'assistant' as const, 
+      const isChinese = /[\u4e00-\u9fa5]/.test(userMessage)
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
         content: t.dashboard?.errorRetry || 'Sorry, I encountered an error. Please try again.' 
-      }
-      setChatMessages(prev => [...prev, errorMsg])
+      }])
     } finally {
       setIsChatLoading(false)
     }
@@ -392,12 +385,13 @@ export default function WriteEditorPage() {
   if (!document) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
-  return <div className="min-h-screen h-screen bg-white flex">
+  return (
+    <div className="min-h-screen h-screen bg-white flex">
       {/* Left Sidebar - Simplified */}
       <aside className={isSidebarOpen ? 'w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all h-full' : 'w-0 bg-white border-r border-gray-200 flex flex-col items-center py-4 transition-all h-full'}>
         {isSidebarOpen && (
@@ -594,9 +588,7 @@ export default function WriteEditorPage() {
                 onBlur={(e) => {
                   const newTitle = e.currentTarget.textContent || document.title
                   if (newTitle !== document.title) {
-                    if (document) {
-                      setDocument({...document, title: newTitle})
-                    }
+                    setDocument(prev => prev ? {...prev, title: newTitle} : null)
                     setSaveStatus('unsaved')
                     autoSave({ ...document, title: newTitle })
                   }
@@ -608,70 +600,48 @@ export default function WriteEditorPage() {
 
               {/* Content Sections - Smaller fonts */}
               <div className="space-y-8">
-                {document.outline.map((section, index) => {
-                  // Support both old format (string) and new format (Section object)
-                  const sectionTitle = typeof section === 'string' ? section : section.title
-                  const sectionContent = typeof section === 'string' ? '' : (section.content || '')
-                  
-                  return (
-                    <div key={index} className="group">
-                      <h2 
-                        className="text-xl font-semibold text-gray-900 mb-4 focus:outline-none border-b border-transparent focus:border-blue-300 pb-2 transition-colors"
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) => {
-                          const newTitle = e.currentTarget.textContent || sectionTitle
-                          const newOutline = [...document.outline]
-                          if (typeof section === 'string') {
-                            newOutline[index] = newTitle
-                          } else {
-                            newOutline[index] = { ...section, title: newTitle }
-                          }
-                          if (newTitle !== sectionTitle) {
-                            if (document) {
-                              setDocument({...document, outline: newOutline})
-                            }
-                            setSaveStatus('unsaved')
-                            autoSave({ ...document, outline: newOutline })
-                          }
-                        }}
-                        style={{ minHeight: '32px' }}
-                      >
-                        {sectionTitle}
-                      </h2>
-                      <div 
-                        className="text-gray-700 text-base leading-relaxed focus:outline-none min-h-[150px] p-4 rounded-lg border border-transparent focus-within:border-blue-200 focus-within:bg-blue-50/30 transition-all relative"
-                        contentEditable
-                        suppressContentEditableWarning
-                        spellCheck={true}
-                        data-placeholder="Start writing here... Use the AI assistant for help."
-                        onInput={(e) => {
+                {document.outline.map((section, index) => (
+                  <div key={index} className="group">
+                    <h2 
+                      className="text-xl font-semibold text-gray-900 mb-4 focus:outline-none border-b border-transparent focus:border-blue-300 pb-2 transition-colors"
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => {
+                        const newOutline = [...document.outline]
+                        newOutline[index] = e.currentTarget.textContent || section
+                        if (newOutline[index] !== section) {
+                          setDocument(prev => prev ? {...prev, outline: newOutline} : null)
                           setSaveStatus('unsaved')
-                        }}
-                        onBlur={(e) => {
-                          // Auto-save content changes
-                          const content = e.currentTarget.textContent || ''
-                          const newOutline = [...document.outline]
-                          if (typeof section === 'string') {
-                            // Convert old format to new format
-                            newOutline[index] = { title: sectionTitle, content }
-                          } else {
-                            newOutline[index] = { ...section, content }
-                          }
-                          if (document) {
-                            setDocument({...document, outline: newOutline})
-                          }
                           autoSave({ ...document, outline: newOutline })
-                        }}
-                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif', lineHeight: '1.6', wordBreak: 'break-word' }}
-                      >
-                        {sectionContent}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-              <style dangerouslySetInnerHTML={{__html: 'div[contenteditable][data-placeholder]:empty:before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; pointer-events: none; position: absolute; top: 1rem; left: 1rem; }'}} />
+                        }
+                      }}
+                      style={{ minHeight: '32px' }}
+                    >
+                      {section}
+                    </h2>
+                    <div 
+                      className="text-gray-700 text-base leading-relaxed focus:outline-none min-h-[150px] p-4 rounded-lg border border-transparent focus-within:border-blue-200 focus-within:bg-blue-50/30 transition-all relative"
+                      contentEditable
+                      suppressContentEditableWarning
+                      spellCheck={true}
+                      data-placeholder="Start writing here... Use the AI assistant for help."
+                      onInput={(e) => {
+                        setSaveStatus('unsaved')
+                      }}
+                      onBlur={(e) => {
+                        // Auto-save content changes
+                        const content = e.currentTarget.textContent || ''
+                        autoSave({ ...document, content })
+                      }}
+                      style={{ 
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        lineHeight: '1.6',
+                        wordBreak: 'break-word'
+                      }}
+                    />
+                    <style dangerouslySetInnerHTML={{__html: 'div[contenteditable][data-placeholder]:empty:before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; pointer-events: none; position: absolute; top: 1rem; left: 1rem; }'}} />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -815,5 +785,6 @@ export default function WriteEditorPage() {
         </div>
       </div>
     </div>
+  )
 }
 
