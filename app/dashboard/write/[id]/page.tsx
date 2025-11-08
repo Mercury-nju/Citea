@@ -678,17 +678,7 @@ export default function WriteEditorPage() {
                   )
                 })}
               </div>
-              <style dangerouslySetInnerHTML={{__html: `
-                div[contenteditable][data-placeholder]:empty:before {
-                  content: attr(data-placeholder);
-                  color: #9ca3af;
-                  font-style: italic;
-                  pointer-events: none;
-                  position: absolute;
-                  top: 1rem;
-                  left: 1rem;
-                }
-              `}} />
+              <style dangerouslySetInnerHTML={{__html: 'div[contenteditable][data-placeholder]:empty:before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; pointer-events: none; position: absolute; top: 1rem; left: 1rem; }'}} />
               </div>
             </div>
           </div>
