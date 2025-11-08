@@ -284,7 +284,17 @@ export async function createUser(user: StoredUser): Promise<void> {
   await ensureDataFile()
   const raw = await fs.readFile(USERS_FILE, 'utf8')
   const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
-  json.users.push(user)
+  
+  // 检查用户是否已存在（按邮箱）
+  const existingIndex = json.users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase())
+  if (existingIndex >= 0) {
+    // 更新现有用户
+    json.users[existingIndex] = user
+  } else {
+    // 添加新用户
+    json.users.push(user)
+  }
+  
   await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
 }
 
