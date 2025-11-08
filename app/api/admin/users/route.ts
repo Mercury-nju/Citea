@@ -79,44 +79,54 @@ export async function GET(request: NextRequest) {
     }
     
     // 如果 Redis 没有数据，尝试 Vercel KV 存储
-    if (users.length === 0 && process.env.KV_REST_API_URL) {
+    // 注意：如果同时配置了 REDIS_URL 和 KV_REST_API_URL，优先使用 Redis
+    // 只有在 Redis 没有数据且配置了 KV 时才使用 KV
+    if (users.length === 0 && process.env.KV_REST_API_URL && !process.env.REDIS_URL) {
       try {
+        console.log('[Admin Users] Using Vercel KV storage (Redis not configured)')
         const kv = require('@vercel/kv')
-        console.log('[Admin Users] Using Vercel KV storage')
         // 从用户索引获取所有用户邮箱
         const userIndex = await kv.get('users:index') as string[] | null
+        console.log(`[Admin Users] KV user index:`, userIndex ? `${userIndex.length} users` : 'not found')
+        
         if (userIndex && Array.isArray(userIndex) && userIndex.length > 0) {
           console.log(`[Admin Users] Found ${userIndex.length} users in KV index`)
           for (const email of userIndex) {
-            const user = await getUserByEmail(email)
-            if (user) {
-              users.push({
-                id: user.id || user.email, // 使用 id 或 email 作为 id
-                email: user.email,
-                name: user.name || '未设置',
-                plan: user.plan || 'free',
-                emailVerified: user.emailVerified || false,
-                createdAt: user.createdAt || new Date().toISOString(),
-                lastLoginAt: user.lastLoginAt,
-                credits: user.credits || 0,
-                subscriptionExpiresAt: user.subscriptionExpiresAt,
-                hasActiveSubscription: user.subscriptionExpiresAt && new Date(user.subscriptionExpiresAt) > new Date()
-              })
+            try {
+              const user = await getUserByEmail(email)
+              if (user) {
+                users.push({
+                  id: user.id || user.email,
+                  email: user.email,
+                  name: user.name || '未设置',
+                  plan: user.plan || 'free',
+                  emailVerified: user.emailVerified || false,
+                  createdAt: user.createdAt || new Date().toISOString(),
+                  lastLoginAt: user.lastLoginAt,
+                  credits: user.credits || 0,
+                  subscriptionExpiresAt: user.subscriptionExpiresAt,
+                  hasActiveSubscription: user.subscriptionExpiresAt && new Date(user.subscriptionExpiresAt) > new Date()
+                })
+              }
+            } catch (userError) {
+              console.error(`[Admin Users] Error loading user ${email} from KV:`, userError)
             }
           }
           console.log(`[Admin Users] Successfully loaded ${users.length} users from KV`)
         } else {
           console.warn('[Admin Users] KV storage: User index not found or empty.')
           console.warn('[Admin Users] This means users were registered before the index feature was added.')
-          console.warn('[Admin Users] Solution: Use /api/admin/rebuild-index endpoint to rebuild the index.')
+          console.warn('[Admin Users] KV does not support listing all keys, so we need the user index.')
         }
       } catch (error) {
         console.error('[Admin Users] KV error:', error)
+        console.error('[Admin Users] KV error details:', error instanceof Error ? error.message : String(error))
       }
     }
-    // 文件存储
-    else {
+    // 文件存储（仅用于本地开发，如果 Redis 和 KV 都没有配置）
+    if (users.length === 0 && !process.env.REDIS_URL && !process.env.KV_REST_API_URL) {
       try {
+        console.log('[Admin Users] Using file storage (local development only)')
         const fs = require('fs').promises
         const path = require('path')
         const DATA_DIR = path.join(process.cwd(), 'data')
@@ -128,7 +138,7 @@ export async function GET(request: NextRequest) {
           
           for (const user of json.users || []) {
             users.push({
-              id: user.id || user.email, // 使用 id 或 email 作为 id
+              id: user.id || user.email,
               email: user.email,
               name: user.name || '未设置',
               plan: user.plan || 'free',
@@ -140,16 +150,28 @@ export async function GET(request: NextRequest) {
               hasActiveSubscription: user.subscriptionExpiresAt && new Date(user.subscriptionExpiresAt) > new Date()
             })
           }
+          console.log(`[Admin Users] Loaded ${users.length} users from file storage`)
         } catch (fileError: any) {
           // 文件不存在或无法读取，继续处理
           if (fileError.code !== 'ENOENT') {
-            console.error('File storage error:', fileError)
+            console.error('[Admin Users] File storage error:', fileError)
+          } else {
+            console.log('[Admin Users] Users file not found (normal for production)')
           }
         }
       } catch (error) {
-        console.error('File storage error:', error)
+        console.error('[Admin Users] File storage error:', error)
       }
     }
+
+    // 记录最终结果
+    console.log(`[Admin Users] Final result: ${users.length} users loaded`)
+    console.log(`[Admin Users] Storage detection:`, {
+      hasRedis: !!process.env.REDIS_URL,
+      hasKV: !!process.env.KV_REST_API_URL,
+      redisUrlType: process.env.REDIS_URL ? (process.env.REDIS_URL.startsWith('rediss://') ? 'SSL' : 'Standard') : 'None',
+      usersLoaded: users.length
+    })
 
     // 计算统计信息
     const stats = {
