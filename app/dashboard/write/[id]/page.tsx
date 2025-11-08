@@ -342,11 +342,12 @@ export default function WriteEditorPage() {
         }).join('\n')
       }
       
-      const documentContext = document 
-        ? `Document Title: "${document.title}"\nDocument Outline:\n${outlineText}`
-        : ''
+      let documentContext = ''
+      if (document) {
+        documentContext = 'Document Title: "' + document.title + '"\nDocument Outline:\n' + outlineText
+      }
       
-      const contextMessage = `${documentContext}\nI'm working on this academic document. ${userMessage}\n\nPlease provide helpful, specific, and actionable advice. If you're suggesting content, make it academic and well-structured.`
+      const contextMessage = documentContext + '\nI\'m working on this academic document. ' + userMessage + '\n\nPlease provide helpful, specific, and actionable advice. If you\'re suggesting content, make it academic and well-structured.'
 
       const response = await fetch('/api/chat', {
         method: 'POST',
