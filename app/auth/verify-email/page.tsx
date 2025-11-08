@@ -5,9 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
 import { Mail, ArrowRight } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 function VerifyEmailContent() {
   const router = useRouter()
+  const { t } = useLanguage()
   const searchParams = useSearchParams()
   const emailParam = searchParams.get('email')
   const codeParam = searchParams.get('code')
@@ -22,15 +24,16 @@ function VerifyEmailContent() {
   useEffect(() => {
     if (emailParam) {
       setEmail(emailParam)
-      // 如果通过应急模式携带了验证码，直接填入并提示
+      // 只在明确设置时才显示验证码（生产环境不应暴露验证码）
+      // 如果 URL 中有 code 参数，说明是开发/测试环境
       if (codeParam) {
         setCode(codeParam)
-        setMessage('✅ 验证码已生成并自动填入，请直接点击“验证邮箱”。')
+        setMessage(t.auth.verifyEmail.codeAutoFilled)
       } else {
-        setMessage('✅ 注册成功！验证码已发送到您的邮箱，请查收。')
+        setMessage(t.auth.verifyEmail.codeSent)
       }
     }
-  }, [emailParam])
+  }, [emailParam, codeParam, t])
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,24 +51,24 @@ function VerifyEmailContent() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || '验证失败')
+        setError(data.error || t.auth.verifyEmail.verifyError)
         setIsLoading(false)
         return
       }
 
-      setMessage('验证成功！正在跳转...')
+      setMessage(t.auth.verifyEmail.verifySuccess)
       setTimeout(() => {
         window.location.href = '/dashboard'
       }, 1500)
     } catch (err) {
-      setError('验证失败，请重试')
+      setError(t.auth.verifyEmail.verifyError)
       setIsLoading(false)
     }
   }
 
   const handleResend = async () => {
     if (!email) {
-      setError('请输入邮箱')
+      setError(t.auth.verifyEmail.enterEmail)
       return
     }
 
@@ -84,16 +87,18 @@ function VerifyEmailContent() {
       const data = await res.json()
 
       if (!res.ok) {
-        const errorMsg = data.message || data.error || '重新发送失败，请稍后重试'
-        setError(`❌ ${errorMsg}${data.code ? `\n\n验证码（仅开发环境）: ${data.code}` : ''}`)
+        const errorMsg = data.message || data.error || t.auth.verifyEmail.resendError
+        // 如果后端返回了 code，说明是开发/测试环境
+        setError(`❌ ${errorMsg}${data.code ? `\n\n${t.auth.verifyEmail.codeLabel} (Dev only): ${data.code}` : ''}`)
         setIsResending(false)
         return
       }
 
-      setMessage(`✅ ${data.message || '验证码已重新发送！请检查您的邮箱。'}${data.code ? `\n\n验证码（仅开发环境）: ${data.code}` : ''}`)
+      // 如果后端返回了 code，说明是开发/测试环境
+      setMessage(`✅ ${data.message || t.auth.verifyEmail.resendSuccess}${data.code ? `\n\n${t.auth.verifyEmail.codeLabel} (Dev only): ${data.code}` : ''}`)
       setIsResending(false)
     } catch (err) {
-      setError('重新发送失败，请重试')
+      setError(t.auth.verifyEmail.resendError)
       setIsResending(false)
     }
   }
@@ -113,15 +118,15 @@ function VerifyEmailContent() {
               <Mail className="text-blue-600" size={32} />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              验证您的邮箱
+              {t.auth.verifyEmail.title}
             </h1>
             {emailParam ? (
               <p className="text-gray-600">
-                验证码已发送至 <span className="font-semibold text-blue-600">{emailParam}</span>
+                {t.auth.verifyEmail.subtitle} <span className="font-semibold text-blue-600">{emailParam}</span>
               </p>
             ) : (
               <p className="text-gray-600">
-                请输入您的邮箱和收到的 6 位验证码
+                {t.auth.verifyEmail.subtitleNoEmail}
               </p>
             )}
           </div>
@@ -142,7 +147,7 @@ function VerifyEmailContent() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                邮箱地址
+                {t.auth.verifyEmail.emailLabel}
               </label>
               <input
                 type="email"
@@ -158,7 +163,7 @@ function VerifyEmailContent() {
             {/* Verification Code */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                验证码
+                {t.auth.verifyEmail.codeLabel}
               </label>
               <input
                 type="text"
@@ -166,11 +171,11 @@ function VerifyEmailContent() {
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-center text-2xl font-bold tracking-widest"
-                placeholder="000000"
+                placeholder={t.auth.verifyEmail.codePlaceholder}
                 maxLength={6}
               />
               <p className="mt-2 text-sm text-gray-500 text-center">
-                验证码有效期：10 分钟
+                {t.auth.verifyEmail.codeExpiry}
               </p>
             </div>
 
@@ -184,7 +189,7 @@ function VerifyEmailContent() {
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  验证邮箱
+                  {t.auth.verifyEmail.verifyButton}
                   <ArrowRight size={20} />
                 </>
               )}
@@ -194,29 +199,29 @@ function VerifyEmailContent() {
           {/* Resend Code */}
           <div className="mt-6 text-center">
             <p className="text-gray-600 text-sm mb-2">
-              没有收到验证码？
+              {t.auth.verifyEmail.resendQuestion}
             </p>
             <button
               onClick={handleResend}
               disabled={isResending}
               className="text-blue-600 hover:text-blue-700 font-semibold text-sm disabled:opacity-50"
             >
-              {isResending ? '发送中...' : '重新发送验证码'}
+              {isResending ? t.auth.verifyEmail.resending : t.auth.verifyEmail.resendButton}
             </button>
           </div>
 
           {/* Back to Sign In */}
           <div className="mt-6 text-center">
             <Link href="/auth/signin" className="text-gray-600 hover:text-gray-800 text-sm">
-              返回登录
+              {t.auth.verifyEmail.backToSignIn}
             </Link>
           </div>
         </div>
 
         {/* Help Text */}
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>检查邮件可能需要几分钟时间</p>
-          <p>请同时查看垃圾邮件文件夹</p>
+          <p>{t.auth.verifyEmail.helpText1}</p>
+          <p>{t.auth.verifyEmail.helpText2}</p>
         </div>
       </div>
     </div>
@@ -229,7 +234,7 @@ export default function VerifyEmailPage() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">加载中...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     }>
