@@ -68,6 +68,9 @@ export async function GET() {
       email: {
         hasBrevo,
         hasBrevoEmail,
+        brevoKeyPrefix: process.env.BREVO_API_KEY ? process.env.BREVO_API_KEY.substring(0, 15) + '...' : 'NOT SET',
+        brevoKeyFormat: process.env.BREVO_API_KEY?.startsWith('xkeysib-') ? '✅ 正确' : process.env.BREVO_API_KEY ? '❌ 可能不正确' : 'NOT SET',
+        fromEmail: process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com (默认)',
       },
       diagnosis: getDiagnosis(hasRedis, hasKV, redisUrlType, redisConnectionTest),
     })
