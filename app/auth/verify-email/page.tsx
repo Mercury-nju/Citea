@@ -74,6 +74,7 @@ function VerifyEmailContent() {
     setMessage('')
 
     try {
+      setIsResending(true)
       const res = await fetch('/api/auth/resend-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,12 +84,13 @@ function VerifyEmailContent() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || '重新发送失败')
+        const errorMsg = data.message || data.error || '重新发送失败，请稍后重试'
+        setError(`❌ ${errorMsg}${data.code ? `\n\n验证码（仅开发环境）: ${data.code}` : ''}`)
         setIsResending(false)
         return
       }
 
-      setMessage('验证码已重新发送！请检查您的邮箱。')
+      setMessage(`✅ ${data.message || '验证码已重新发送！请检查您的邮箱。'}${data.code ? `\n\n验证码（仅开发环境）: ${data.code}` : ''}`)
       setIsResending(false)
     } catch (err) {
       setError('重新发送失败，请重试')

@@ -37,7 +37,20 @@ export async function POST(req: Request) {
     const emailResult = await sendVerificationEmail(email, verificationCode, user.name)
     
     if (!emailResult.success) {
-      return NextResponse.json({ error: '邮件发送失败' }, { status: 500 })
+      console.error('重新发送验证码失败:', emailResult.error)
+      // 检查是否是邮件服务未配置
+      if (emailResult.error === 'Email service not configured' || !process.env.BREVO_API_KEY) {
+        return NextResponse.json({ 
+          error: '邮件服务未配置',
+          message: '验证码邮件发送失败：邮件服务未正确配置。请联系管理员。'
+        }, { status: 500 })
+      }
+      return NextResponse.json({ 
+        error: '邮件发送失败',
+        message: `验证码邮件发送失败：${emailResult.error || '未知错误'}`,
+        // 在开发环境或应急模式下，可以返回验证码
+        code: process.env.EXPOSE_VERIFICATION_CODE === 'true' ? verificationCode : undefined
+      }, { status: 500 })
     }
 
     // 在受控环境下暴露验证码（仅用于紧急排障）

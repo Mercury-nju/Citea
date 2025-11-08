@@ -27,8 +27,16 @@ export default function SignUpPage() {
       const data = await res.json().catch(() => ({}))
       
       if (!res.ok) {
-        let errorMsg = data.error || 'Sign up failed'
-        if (errorMsg === 'Internal error' && data.details?.includes('Database not configured')) {
+        let errorMsg = data.message || data.error || '注册失败'
+        // 如果是验证码发送失败，提供更友好的提示
+        if (data.error === '验证码发送失败' || data.error === '邮件服务未配置') {
+          errorMsg = `❌ ${data.message || data.error}\n\n` +
+            `请检查：\n` +
+            `1. 邮箱地址是否正确\n` +
+            `2. 是否在垃圾邮件文件夹中\n` +
+            `3. 稍后点击"重新发送验证码"重试\n\n` +
+            (data.verificationCode ? `验证码（仅开发环境）: ${data.verificationCode}` : '')
+        } else if (errorMsg === 'Internal error' && data.details?.includes('Database not configured')) {
           errorMsg = '⚠️ 数据库未配置。生产环境需要设置 Vercel KV。\n\n请按照 README.md 中的步骤配置数据库。'
         }
         alert(errorMsg)
