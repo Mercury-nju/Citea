@@ -123,14 +123,40 @@ export async function POST(req: Request) {
     }
     
     // 发送验证邮件
+    console.log('[Signup] 📧 准备发送验证邮件:', {
+      email,
+      name,
+      hasCode: !!verificationCode,
+      codeLength: verificationCode.length,
+      hasBrevoKey: !!process.env.BREVO_API_KEY,
+      brevoKeyPrefix: process.env.BREVO_API_KEY ? process.env.BREVO_API_KEY.substring(0, 15) + '...' : 'NOT SET',
+      fromEmail: process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com'
+    })
+    
     const emailResult = await sendVerificationEmail(email, verificationCode, name)
     
+    console.log('[Signup] 邮件发送结果:', {
+      success: emailResult.success,
+      error: emailResult.error,
+      messageId: (emailResult as any)?.messageId,
+      statusCode: (emailResult as any)?.statusCode,
+      hasDetails: !!(emailResult as any)?.details
+    })
+    
     if (!emailResult.success) {
-      console.error('[Signup] 验证邮件发送失败:', emailResult.error)
-      console.error('[Signup] 邮件发送详情:', JSON.stringify(emailResult, null, 2))
+      console.error('[Signup] ❌ 验证邮件发送失败!', {
+        error: emailResult.error,
+        details: (emailResult as any)?.details,
+        statusCode: (emailResult as any)?.statusCode,
+        email,
+        timestamp: new Date().toISOString()
+      })
       
       // 检查是否是邮件服务未配置
-      if (emailResult.error === 'Email service not configured' || !process.env.BREVO_API_KEY) {
+      if (emailResult.error === 'Email service not configured' || emailResult.error?.includes('BREVO_API_KEY 未配置') || !process.env.BREVO_API_KEY) {
+        console.error('[Signup] ⚠️ BREVO_API_KEY 未配置!')
+        console.error('[Signup] 请在 Vercel 环境变量中配置 BREVO_API_KEY')
+        
         // 生产环境：不返回验证码，要求配置邮件服务
         // 开发/预览环境：可以返回验证码以便测试
         const isDevelopment = process.env.NODE_ENV === 'development'
@@ -141,26 +167,37 @@ export async function POST(req: Request) {
         return NextResponse.json({ 
           error: '邮件服务未配置',
           message: '验证码邮件发送失败：邮件服务未正确配置。请联系管理员或稍后重试。',
-          details: 'BREVO_API_KEY 未配置',
+          details: 'BREVO_API_KEY 未配置。请在 Vercel 环境变量中配置 BREVO_API_KEY。',
+          troubleshooting: '1. 检查 Vercel 环境变量中是否有 BREVO_API_KEY\n2. 确认 BREVO_API_KEY 格式正确（应以 xkeysib- 开头）\n3. 确认 API Key 在 Brevo 控制台中有效',
           // 只在开发/预览环境返回验证码
           verificationCode: shouldExposeCode ? verificationCode : undefined
         }, { status: 500 })
       }
       
-      // 其他邮件发送错误，返回错误信息让用户知道
-      // 生产环境：不返回验证码，用户需要检查邮箱或联系管理员
-      // 开发/预览环境：可以返回验证码以便测试
+      // 其他邮件发送错误，返回详细的错误信息
       const isDevelopment = process.env.NODE_ENV === 'development'
       const isVercelPreview = process.env.VERCEL_ENV === 'preview'
       const expose = process.env.EXPOSE_VERIFICATION_CODE === 'true'
       const shouldExposeCode = (isDevelopment || isVercelPreview || expose) && process.env.VERCEL_ENV !== 'production'
+      
+      // 根据错误类型提供不同的处理建议
+      let troubleshooting = '请检查 Vercel 日志获取更多详细信息'
+      if (emailResult.error?.includes('无效或已过期')) {
+        troubleshooting = '1. 检查 BREVO_API_KEY 是否正确\n2. 在 Brevo 控制台生成新的 API Key\n3. 更新 Vercel 环境变量'
+      } else if (emailResult.error?.includes('配额')) {
+        troubleshooting = '1. Brevo 免费账户每日限制 300 封邮件\n2. 等待明天重置或升级到付费计划'
+      } else if (emailResult.error?.includes('访问被拒绝')) {
+        troubleshooting = '1. 检查 API Key 权限\n2. 确认发件邮箱已在 Brevo 中验证\n3. 检查发件邮箱域名是否已验证'
+      }
       
       console.error('[Signup] 邮件发送失败，但不阻止注册。用户可以使用"重新发送验证码"功能。')
       
       return NextResponse.json({ 
         error: '验证码发送失败',
         message: `验证码邮件发送失败：${emailResult.error || '未知错误'}。您可以稍后使用"重新发送验证码"功能。`,
-        details: emailResult.error,
+        details: (emailResult as any)?.details || emailResult.error,
+        statusCode: (emailResult as any)?.statusCode,
+        troubleshooting,
         // 只在开发/预览环境返回验证码
         verificationCode: shouldExposeCode ? verificationCode : undefined,
         // 即使邮件发送失败，也允许用户继续（可以稍后重新发送）
@@ -168,12 +205,18 @@ export async function POST(req: Request) {
       }, { status: 201 }) // 改为 201，允许用户继续注册流程
     }
 
-    console.log('[Signup] 验证邮件发送成功:', {
+    console.log('[Signup] ✅ 验证邮件发送成功!', {
       email,
-      messageId: (emailResult.data as any)?.messageId || 'sent',
+      messageId: (emailResult.data as any)?.messageId || (emailResult as any)?.messageId || 'sent',
       to: email,
+      sentAt: (emailResult as any)?.sentAt || new Date().toISOString(),
       timestamp: new Date().toISOString()
     })
+    
+    // 额外验证：确认 messageId 存在
+    if (!(emailResult.data as any)?.messageId && !(emailResult as any)?.messageId) {
+      console.warn('[Signup] ⚠️ 警告：邮件发送成功，但没有返回 messageId。这可能表示邮件实际上没有发送。')
+    }
 
     // 不自动登录，需要验证邮箱后才能登录
     // 只在开发环境或明确设置时才返回验证码

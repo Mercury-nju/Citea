@@ -14,11 +14,25 @@ function getBrevoClient() {
 }
 
 export async function sendVerificationEmail(email: string, code: string, name: string) {
-  // 如果没有配置 API key，返回错误但不阻止构建
+  // 检查 API key 配置
   if (!process.env.BREVO_API_KEY) {
-    console.warn('BREVO_API_KEY not configured, skipping email send')
-    return { success: false, error: 'Email service not configured' }
+    console.error('[Email] ❌ BREVO_API_KEY not configured')
+    console.error('[Email] 请在 Vercel 环境变量中配置 BREVO_API_KEY')
+    return { success: false, error: 'Email service not configured', details: 'BREVO_API_KEY 未配置' }
   }
+  
+  // 检查 API key 格式
+  if (!process.env.BREVO_API_KEY.startsWith('xkeysib-')) {
+    console.warn('[Email] ⚠️ BREVO_API_KEY 格式可能不正确（应该以 xkeysib- 开头）')
+  }
+  
+  console.log('[Email] 📧 开始发送验证码邮件:', {
+    to: email,
+    codeLength: code.length,
+    hasApiKey: !!process.env.BREVO_API_KEY,
+    apiKeyPrefix: process.env.BREVO_API_KEY?.substring(0, 15) + '...',
+    timestamp: new Date().toISOString()
+  })
   
   try {
     const apiInstance = getBrevoClient()
@@ -28,7 +42,14 @@ export async function sendVerificationEmail(email: string, code: string, name: s
     // 优先使用环境变量，否则使用已验证的邮箱
     // 重要：发件邮箱必须在Brevo账户中验证
     const senderEmail = process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com'
-    console.log('[Email] 发送验证码邮件:', { to: email, from: senderEmail })
+    console.log('[Email] 邮件配置:', { 
+      to: email, 
+      from: senderEmail,
+      subject: `Citea 账户验证码：${code}`,
+      hasHtml: true,
+      hasText: true
+    })
+    
     sendSmtpEmail.sender = {
       email: senderEmail,
       name: 'Citea'
@@ -87,47 +108,111 @@ export async function sendVerificationEmail(email: string, code: string, name: s
       </html>
     `
 
+    console.log('[Email] 📤 正在调用 Brevo API 发送邮件...')
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
     
     // 记录完整的响应信息，包括 messageId
-    const messageId = (result as any)?.messageId || (result as any)?.body?.messageId || 'unknown'
-    console.log('邮件发送成功:', {
+    const messageId = (result as any)?.messageId || (result as any)?.body?.messageId || (result as any)?.messageId || 'unknown'
+    
+    console.log('[Email] ✅ 邮件发送成功!', {
       messageId,
       to: email,
       from: sendSmtpEmail.sender.email,
       subject: sendSmtpEmail.subject,
-      code: code.substring(0, 2) + '****',
-      fullResponse: JSON.stringify(result, null, 2)
+      codePreview: code.substring(0, 2) + '****',
+      timestamp: new Date().toISOString(),
+      responseType: typeof result,
+      hasMessageId: !!messageId
     })
     
-    return { success: true, data: result as any, messageId }
+    // 如果 result 有 body 属性，记录它
+    if ((result as any)?.body) {
+      console.log('[Email] Brevo API 响应 body:', JSON.stringify((result as any).body, null, 2))
+    }
+    
+    return { 
+      success: true, 
+      data: result as any, 
+      messageId,
+      sentAt: new Date().toISOString()
+    }
   } catch (error: any) {
-    console.error('邮件发送异常:', {
-      error: error.message,
+    // 详细记录错误信息
+    console.error('[Email] ❌ 邮件发送失败!', {
+      errorType: error.constructor?.name,
+      errorMessage: error.message,
       statusCode: error.statusCode,
-      response: error.response?.body,
-      to: email
+      status: error.status,
+      code: error.code,
+      to: email,
+      timestamp: new Date().toISOString()
     })
+    
+    // 记录响应体
+    if (error.response) {
+      console.error('[Email] 错误响应:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        headers: error.response.headers,
+        body: error.response.body
+      })
+    }
     
     // 提供更详细的错误信息
     let errorMessage = error.message || 'Unknown error'
+    let errorDetails: any = {
+      originalError: error.message,
+      statusCode: error.statusCode || error.status,
+      code: error.code
+    }
+    
     if (error.response?.body) {
-      const body = typeof error.response.body === 'string' 
-        ? JSON.parse(error.response.body) 
-        : error.response.body
-      errorMessage = body.message || body.error || errorMessage
-      
-      // Brevo 特定错误提示
-      if (error.statusCode === 401) {
-        errorMessage = 'BREVO_API_KEY 无效或已过期'
-      } else if (error.statusCode === 400) {
-        errorMessage = `邮件格式错误: ${errorMessage}`
-      } else if (error.statusCode === 402) {
-        errorMessage = 'Brevo 配额已用完（每日 300 封）'
+      let body: any
+      try {
+        body = typeof error.response.body === 'string' 
+          ? JSON.parse(error.response.body) 
+          : error.response.body
+        errorDetails.brevoResponse = body
+        errorMessage = body.message || body.error || errorMessage
+        
+        // Brevo 特定错误提示
+        if (error.statusCode === 401 || error.status === 401) {
+          errorMessage = 'BREVO_API_KEY 无效或已过期。请检查 Vercel 环境变量中的 BREVO_API_KEY 是否正确。'
+          errorDetails.suggestion = '请在 Brevo 控制台生成新的 API Key 并更新到 Vercel'
+        } else if (error.statusCode === 400 || error.status === 400) {
+          errorMessage = `邮件格式错误: ${errorMessage}`
+          if (body.errors) {
+            errorDetails.validationErrors = body.errors
+          }
+        } else if (error.statusCode === 402 || error.status === 402) {
+          errorMessage = 'Brevo 配额已用完（每日 300 封免费邮件）。请升级到付费计划或等待明天重置。'
+        } else if (error.statusCode === 403 || error.status === 403) {
+          errorMessage = 'Brevo API 访问被拒绝。请检查 API Key 权限和发件邮箱是否已验证。'
+        }
+      } catch (parseError) {
+        console.error('[Email] 无法解析错误响应体:', parseError)
+        errorDetails.rawBody = error.response.body
       }
     }
     
-    return { success: false, error: errorMessage, details: error.response?.body }
+    // 网络错误
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      errorMessage = '无法连接到 Brevo 邮件服务。请检查网络连接。'
+      errorDetails.networkError = true
+    }
+    
+    console.error('[Email] 最终错误信息:', {
+      errorMessage,
+      errorDetails,
+      suggestion: '请检查 Vercel 日志获取更多详细信息'
+    })
+    
+    return { 
+      success: false, 
+      error: errorMessage, 
+      details: errorDetails,
+      statusCode: error.statusCode || error.status
+    }
   }
 }
 

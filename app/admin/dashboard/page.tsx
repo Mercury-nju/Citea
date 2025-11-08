@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getAdminSession } from '@/lib/adminAuth'
 import DashboardStats from '@/components/admin/DashboardStats'
 import DashboardCharts from '@/components/admin/DashboardCharts'
+import RebuildIndexButton from '@/components/admin/RebuildIndexButton'
 
 // 确保这是动态路由
 export const dynamic = 'force-dynamic'
@@ -21,6 +22,10 @@ export default async function AdminDashboardPage() {
       </div>
 
       <DashboardStats />
+      
+      {/* 如果数据为 0，显示重建索引按钮 */}
+      <RebuildIndexButton />
+      
       <DashboardCharts />
     </div>
   )
