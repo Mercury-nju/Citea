@@ -34,21 +34,45 @@ export async function GET(request: NextRequest) {
     // Redis 存储（优先）
     if (process.env.REDIS_URL && (process.env.REDIS_URL.startsWith('redis://') || process.env.REDIS_URL.startsWith('rediss://'))) {
       try {
+        console.log('[Admin Stats] Connecting to Redis...')
         const redis = new Redis(process.env.REDIS_URL, {
           maxRetriesPerRequest: 3,
           retryStrategy: (times) => {
             if (times > 3) return null
             return Math.min(times * 50, 2000)
-          }
+          },
+          lazyConnect: false
         })
+        
+        // 测试连接
+        await redis.ping()
+        console.log('[Admin Stats] Redis connected successfully')
+        
+        // 获取所有用户键
         const keys = await redis.keys('user:*')
         console.log(`[Admin Stats] Found ${keys.length} user keys in Redis`)
         
+        // 直接读取每个用户的数据
         for (const key of keys) {
-          const email = key.replace('user:', '')
-          const user = await getUserByEmail(email)
-          if (user) {
-            users.push(user)
+          try {
+            const userData = await redis.hgetall(key)
+            if (userData && userData.id && userData.email) {
+              // 解析用户数据
+              const userPlan = (userData.plan || 'free') as any
+              users.push({
+                id: userData.id,
+                name: userData.name || '',
+                email: userData.email,
+                plan: userPlan,
+                emailVerified: userData.emailVerified === 'true' || userData.emailVerified === true,
+                createdAt: userData.createdAt || new Date().toISOString(),
+                lastLoginAt: userData.lastLoginAt,
+                credits: userData.credits ? parseInt(userData.credits, 10) : 0,
+                subscriptionExpiresAt: userData.subscriptionExpiresAt,
+              })
+            }
+          } catch (userError) {
+            console.error(`[Admin Stats] Error reading user from key ${key}:`, userError)
           }
         }
 
@@ -56,6 +80,7 @@ export async function GET(request: NextRequest) {
         console.log(`[Admin Stats] Successfully loaded ${users.length} users from Redis`)
       } catch (error) {
         console.error('[Admin Stats] Redis error:', error)
+        console.error('[Admin Stats] Redis error details:', error instanceof Error ? error.message : String(error))
         // Redis 连接失败，继续尝试其他存储方式
       }
     }
