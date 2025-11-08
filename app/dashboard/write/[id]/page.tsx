@@ -308,7 +308,7 @@ export default function WriteEditorPage() {
       }
     } catch (error) {
       console.error('Export error:', error)
-      alert(`Failed to export as ${format.toUpperCase()}. Please try again.`)
+      alert('Failed to export as ' + format.toUpperCase() + '. Please try again.')
     }
   }
 
