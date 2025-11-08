@@ -246,20 +246,20 @@ export default function WriteEditorPage() {
           }
         })
 
-        pdf.save(`${fileName}.pdf`)
+        pdf.save(fileName + '.pdf')
       } else if (format === 'md') {
-        let markdown = `# ${title}\n\n`
+        let markdown = '# ' + title + '\n\n'
         sections.forEach((section) => {
           if (section.heading) {
-            markdown += `## ${section.heading}\n\n`
+            markdown += '## ' + section.heading + '\n\n'
           }
           if (section.content) {
-            markdown += `${section.content}\n\n`
+            markdown += section.content + '\n\n'
           }
         })
 
         const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
-        saveAs(blob, `${fileName}.md`)
+        saveAs(blob, fileName + '.md')
       } else if (format === 'docx') {
         const docxSections = [
           new Paragraph({
@@ -304,7 +304,7 @@ export default function WriteEditorPage() {
         })
 
         const blob = await Packer.toBlob(doc)
-        saveAs(blob, `${fileName}.docx`)
+        saveAs(blob, fileName + '.docx')
       }
     } catch (error) {
       console.error('Export error:', error)
