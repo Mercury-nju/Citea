@@ -33,7 +33,7 @@ interface Section {
 interface Document {
   id: string
   title: string
-  outline: string[] | Section[]
+  outline: (string | Section)[]
   content: string
   createdAt: number
   updatedAt: number
