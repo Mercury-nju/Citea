@@ -326,7 +326,7 @@ export default function WriteEditorPage() {
       const token = localStorage.getItem('citea_auth_token')
       const headers: HeadersInit = { 'Content-Type': 'application/json' }
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`
+        headers['Authorization'] = 'Bearer ' + token
       }
 
       // Detect language
