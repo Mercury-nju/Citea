@@ -50,12 +50,18 @@ export async function POST(req: Request) {
     const userId = existing && !existing.emailVerified ? existing.id : randomUUID()
     const createdAt = existing && !existing.emailVerified ? existing.createdAt : new Date().toISOString()
     
+    // 确定用户的计划类型
+    let userPlan: 'free' | 'weekly' | 'monthly' | 'yearly' = 'free'
+    if (existing && !existing.emailVerified) {
+      userPlan = existing.plan || 'free'
+    }
+    
     const user = { 
       id: userId, 
       name, 
       email, 
       passwordHash, 
-      plan: (existing && !existing.emailVerified ? existing.plan : 'free') as const,
+      plan: userPlan,
       credits: existing && !existing.emailVerified ? existing.credits : 3, // 免费用户每天3积分，重新注册时保留原有积分
       creditsResetDate: tomorrow.toISOString(),
       createdAt,
