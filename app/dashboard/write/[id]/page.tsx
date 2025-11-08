@@ -347,7 +347,9 @@ export default function WriteEditorPage() {
         documentContext = 'Document Title: ' + document.title + '\nDocument Outline:\n' + outlineText
       }
       
-      const contextMessage = documentContext + '\nI am working on this academic document. ' + userMessage + '\n\nPlease provide helpful, specific, and actionable advice. If you are suggesting content, make it academic and well-structured.'
+      const part1 = documentContext + '\nI am working on this academic document. ' + userMessage
+      const part2 = '\n\nPlease provide helpful, specific, and actionable advice. If you are suggesting content, make it academic and well-structured.'
+      const contextMessage = part1 + part2
 
       const response = await fetch('/api/chat', {
         method: 'POST',
