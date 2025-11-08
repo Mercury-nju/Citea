@@ -5,9 +5,16 @@ import { getAdminSession } from '@/lib/adminAuth'
 // 获取所有用户（仅管理员）
 export async function GET(request: NextRequest) {
   try {
+    console.log('[Admin Users] Checking authentication...')
     // 检查管理员认证（使用 cookie）
     const session = await getAdminSession()
+    console.log('[Admin Users] Session check result:', {
+      hasSession: !!session,
+      username: session?.username
+    })
+    
     if (!session) {
+      console.log('[Admin Users] No session found, checking Authorization header...')
       // 也支持 Bearer token 方式（兼容旧的认证方式）
       const authHeader = request.headers.get('Authorization')
       if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -16,11 +23,21 @@ export async function GET(request: NextRequest) {
         const jwtUser = await verifyJwt(token)
         const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
         if (!jwtUser || !ADMIN_EMAILS.includes(jwtUser.email)) {
+          console.log('[Admin Users] Bearer token authentication failed')
           return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
         }
+        console.log('[Admin Users] Bearer token authentication successful')
       } else {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        console.log('[Admin Users] No session and no Authorization header, returning 401')
+        // 返回更详细的错误信息
+        return NextResponse.json({ 
+          error: 'Unauthorized',
+          message: '请先登录管理员账号',
+          hint: 'Cookie authentication failed. Please log in again.'
+        }, { status: 401 })
       }
+    } else {
+      console.log('[Admin Users] Session authentication successful')
     }
 
     // 根据存储类型获取用户列表

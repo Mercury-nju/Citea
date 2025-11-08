@@ -19,10 +19,31 @@ export async function POST(req: Request) {
     const token = await createAdminSession('admin')
     await setAdminCookie(token)
 
-    return NextResponse.json({
+    // 创建响应并设置 cookie（确保 cookie 被正确设置）
+    const response = NextResponse.json({
       success: true,
       message: '登录成功'
     })
+
+    // 也在响应中设置 cookie（双重保险）
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+    response.cookies.set('admin_auth', token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: '/', // 根路径，确保所有路径都可以读取
+    })
+
+    console.log('[Admin Login] Cookie set in response:', {
+      hasToken: !!token,
+      secure: isProduction,
+      path: '/',
+      isProduction,
+      vercel: process.env.VERCEL
+    })
+
+    return response
   } catch (error) {
     console.error('Admin login error:', error)
     return NextResponse.json({ error: '登录失败' }, { status: 500 })

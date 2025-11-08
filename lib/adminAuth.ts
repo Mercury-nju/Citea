@@ -26,9 +26,19 @@ export async function createAdminSession(username: string): Promise<string> {
 export async function getAdminSession(): Promise<AdminSession | null> {
   try {
     const cookieStore = await cookies()
-    const token = cookieStore.get('admin_auth')?.value
+    const adminCookie = cookieStore.get('admin_auth')
+    const token = adminCookie?.value
+
+    console.log('[Admin Auth] Getting session:', {
+      hasCookie: !!adminCookie,
+      hasToken: !!token,
+      cookieName: adminCookie?.name,
+      cookiePath: adminCookie?.path,
+      tokenLength: token?.length || 0
+    })
 
     if (!token) {
+      console.log('[Admin Auth] No token found in cookie')
       return null
     }
 
@@ -36,14 +46,20 @@ export async function getAdminSession(): Promise<AdminSession | null> {
     const { payload } = await jwtVerify(token, secret)
 
     if (payload.isAdmin) {
+      console.log('[Admin Auth] Session verified successfully:', {
+        username: payload.username,
+        isAdmin: payload.isAdmin
+      })
       return {
         username: payload.username as string,
         isAdmin: true,
       }
     }
 
+    console.log('[Admin Auth] Token verified but isAdmin is false')
     return null
-  } catch {
+  } catch (error) {
+    console.error('[Admin Auth] Error getting session:', error)
     return null
   }
 }
@@ -54,12 +70,28 @@ export async function verifyAdminPassword(password: string): Promise<boolean> {
 
 export async function setAdminCookie(token: string) {
   const cookieStore = await cookies()
+  // 生产环境使用 secure cookie（HTTPS 必须）
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+  
   cookieStore.set('admin_auth', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProduction, // 生产环境启用 secure
     sameSite: 'lax',
     maxAge: 60 * 60 * 24, // 24 hours
-    path: '/admin',
+    path: '/', // 改为根路径，这样所有路径都可以读取（包括 /api/admin/*）
+  })
+  
+  console.log('[Admin Auth] Cookie set:', {
+    name: 'admin_auth',
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24,
+    tokenLength: token.length,
+    isProduction,
+    vercel: process.env.VERCEL,
+    nodeEnv: process.env.NODE_ENV
   })
 }
 
