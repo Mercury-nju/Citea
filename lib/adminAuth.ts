@@ -33,7 +33,6 @@ export async function getAdminSession(): Promise<AdminSession | null> {
       hasCookie: !!adminCookie,
       hasToken: !!token,
       cookieName: adminCookie?.name,
-      cookiePath: adminCookie?.path,
       tokenLength: token?.length || 0
     })
 
