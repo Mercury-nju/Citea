@@ -534,9 +534,7 @@ export default function WriteEditorPage() {
 
             <button
               onClick={() => setActiveTool(activeTool === 'finder' ? 'none' : 'finder')}
-              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (activeTool === 'finder' 
-                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-gray-100 hover:bg-blue-50 text-gray-700')}
+              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (activeTool === 'finder' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 hover:bg-blue-50 text-gray-700')}
             >
               <Sparkles size={16} />
               Find Sources
@@ -544,9 +542,7 @@ export default function WriteEditorPage() {
 
             <button
               onClick={() => setActiveTool(activeTool === 'checker' ? 'none' : 'checker')}
-              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (activeTool === 'checker' 
-                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-gray-100 hover:bg-blue-50 text-gray-700')}
+              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (activeTool === 'checker' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 hover:bg-blue-50 text-gray-700')}
             >
               <CheckCircle size={16} />
               Verify Citations
