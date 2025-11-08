@@ -126,51 +126,89 @@ export async function POST(req: Request) {
     const emailResult = await sendVerificationEmail(email, verificationCode, name)
     
     if (!emailResult.success) {
-      console.error('验证邮件发送失败:', emailResult.error)
-      console.error('邮件发送详情:', JSON.stringify(emailResult, null, 2))
+      console.error('[Signup] 验证邮件发送失败:', emailResult.error)
+      console.error('[Signup] 邮件发送详情:', JSON.stringify(emailResult, null, 2))
       
       // 检查是否是邮件服务未配置
       if (emailResult.error === 'Email service not configured' || !process.env.BREVO_API_KEY) {
+        // 生产环境：不返回验证码，要求配置邮件服务
+        // 开发/预览环境：可以返回验证码以便测试
+        const isDevelopment = process.env.NODE_ENV === 'development'
+        const isVercelPreview = process.env.VERCEL_ENV === 'preview'
+        const expose = process.env.EXPOSE_VERIFICATION_CODE === 'true'
+        const shouldExposeCode = (isDevelopment || isVercelPreview || expose) && process.env.VERCEL_ENV !== 'production'
+        
         return NextResponse.json({ 
           error: '邮件服务未配置',
           message: '验证码邮件发送失败：邮件服务未正确配置。请联系管理员或稍后重试。',
-          details: 'BREVO_API_KEY 未配置'
+          details: 'BREVO_API_KEY 未配置',
+          // 只在开发/预览环境返回验证码
+          verificationCode: shouldExposeCode ? verificationCode : undefined
         }, { status: 500 })
       }
       
       // 其他邮件发送错误，返回错误信息让用户知道
+      // 生产环境：不返回验证码，用户需要检查邮箱或联系管理员
+      // 开发/预览环境：可以返回验证码以便测试
+      const isDevelopment = process.env.NODE_ENV === 'development'
+      const isVercelPreview = process.env.VERCEL_ENV === 'preview'
+      const expose = process.env.EXPOSE_VERIFICATION_CODE === 'true'
+      const shouldExposeCode = (isDevelopment || isVercelPreview || expose) && process.env.VERCEL_ENV !== 'production'
+      
+      console.error('[Signup] 邮件发送失败，但不阻止注册。用户可以使用"重新发送验证码"功能。')
+      
       return NextResponse.json({ 
         error: '验证码发送失败',
-        message: `验证码邮件发送失败：${emailResult.error || '未知错误'}`,
+        message: `验证码邮件发送失败：${emailResult.error || '未知错误'}。您可以稍后使用"重新发送验证码"功能。`,
         details: emailResult.error,
-        // 在开发环境或应急模式下，可以返回验证码
-        verificationCode: process.env.EXPOSE_VERIFICATION_CODE === 'true' ? verificationCode : undefined
-      }, { status: 500 })
+        // 只在开发/预览环境返回验证码
+        verificationCode: shouldExposeCode ? verificationCode : undefined,
+        // 即使邮件发送失败，也允许用户继续（可以稍后重新发送）
+        needsVerification: true
+      }, { status: 201 }) // 改为 201，允许用户继续注册流程
     }
 
-    console.log('验证邮件发送成功:', {
+    console.log('[Signup] 验证邮件发送成功:', {
       email,
       messageId: (emailResult.data as any)?.messageId || 'sent',
-      to: email
+      to: email,
+      timestamp: new Date().toISOString()
     })
 
     // 不自动登录，需要验证邮箱后才能登录
     // 只在开发环境或明确设置时才返回验证码
+    // 注意：生产环境不应该返回验证码，这会导致安全风险
     const isDevelopment = process.env.NODE_ENV === 'development'
+    const isVercelPreview = process.env.VERCEL_ENV === 'preview' // Vercel 预览环境
     const expose = process.env.EXPOSE_VERIFICATION_CODE === 'true'
+    
+    // 只有在开发环境、预览环境或明确设置时才返回验证码
+    // 生产环境（production）永远不返回验证码
+    const shouldExposeCode = (isDevelopment || isVercelPreview || expose) && process.env.VERCEL_ENV !== 'production'
     
     // 如果是重新注册，返回不同的消息
     const isReregistration = existing && !existing.emailVerified
     const message = isReregistration 
       ? '注册信息已更新！新的验证码已发送到您的邮箱，请查收并验证。'
-      : 'Registration successful! Please check your email and enter the verification code.'
+      : '注册成功！验证码已发送到您的邮箱，请查收并验证。'
+    
+    console.log('[Signup] Registration successful:', {
+      email,
+      messageSent: true,
+      exposeCode: shouldExposeCode,
+      isDevelopment,
+      isVercelPreview,
+      vercelEnv: process.env.VERCEL_ENV,
+      nodeEnv: process.env.NODE_ENV
+    })
     
     return NextResponse.json({ 
       user: { id: user.id, name: user.name, email: user.email, plan: user.plan },
       needsVerification: true,
       message,
       reregistered: isReregistration, // 标记是否为重新注册
-      verificationCode: (isDevelopment || expose) ? verificationCode : undefined
+      // 生产环境不返回验证码，必须通过邮箱获取
+      verificationCode: shouldExposeCode ? verificationCode : undefined
     }, { status: 201 })
   } catch (e: any) {
     console.error('Signup error:', e)
