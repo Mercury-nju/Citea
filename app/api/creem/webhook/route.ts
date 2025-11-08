@@ -135,8 +135,8 @@ export async function POST(request: NextRequest) {
             email: normalizedEmail,
             name: normalizedEmail.split('@')[0] || 'User',
             passwordHash: passwordHash,
-            plan: planFromProduct as any,
-            credits: limits.maxCredits,
+          plan: planFromProduct as any,
+          credits: limits.maxCredits,
             creditsResetDate: creditsResetDate,
             subscriptionStartDate: now.toISOString(),
             subscriptionExpiresAt: subscriptionExpiresAt.toISOString(),
@@ -171,8 +171,8 @@ export async function POST(request: NextRequest) {
           console.log(`[Webhook] Downgrading user ${normalizedEmail} to free plan`)
           
           await updateUser(normalizedEmail, {
-            plan: 'free',
-            subscriptionEndDate: new Date().toISOString(),
+          plan: 'free',
+          subscriptionEndDate: new Date().toISOString(),
             subscriptionExpiresAt: '', // 清除过期时间
             credits: limits.maxCredits,
             creditsResetDate: creditsResetDate,

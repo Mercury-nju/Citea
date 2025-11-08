@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Logo from '@/components/Logo'
 import { 
@@ -10,7 +10,8 @@ import {
   Sparkles,
   CheckCircle,
   MessageSquare,
-  Home as HomeIcon
+  Home as HomeIcon,
+  Trash2
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -95,7 +96,7 @@ export default function DashboardLayout({
     checkAuth()
   }, [router])
 
-  useEffect(() => {
+  const loadDocuments = useCallback(() => {
     if (user) {
       const savedHistory = localStorage.getItem(`citea_search_history_${user.email}`)
       if (savedHistory) {
@@ -111,9 +112,32 @@ export default function DashboardLayout({
         } catch (e) {
           console.error('Failed to load search history:', e)
         }
+      } else {
+        setDocuments([])
       }
     }
   }, [user])
+
+  useEffect(() => {
+    loadDocuments()
+  }, [loadDocuments])
+
+  const handleDeleteDocument = (docId: string, e: React.MouseEvent) => {
+    e.stopPropagation() // 防止触发父元素的点击事件
+    if (!user) return
+
+    try {
+      const savedHistory = localStorage.getItem(`citea_search_history_${user.email}`)
+      if (savedHistory) {
+        const history = JSON.parse(savedHistory)
+        const updated = history.filter((doc: any) => doc.id !== docId)
+        localStorage.setItem(`citea_search_history_${user.email}`, JSON.stringify(updated))
+        loadDocuments() // 重新加载文档列表
+      }
+    } catch (e) {
+      console.error('Failed to delete document:', e)
+    }
+  }
 
   // 定期刷新用户数据（每30秒），确保支付后权益能及时显示
   useEffect(() => {
@@ -392,28 +416,30 @@ export default function DashboardLayout({
               </h3>
               <div className="space-y-1">
                 {documents.slice(0, 5).map((doc) => (
-                  <button
+                  <div
                     key={doc.id}
-                    onClick={() => {
-                      if (doc.type === 'write' && doc.docId) {
-                        router.push(`/dashboard/write/${doc.docId}`)
-                      } else if (doc.type === 'finder') {
-                        router.push('/dashboard?tab=finder')
-                        setTimeout(() => {
-                          const event = new CustomEvent('setActiveTab', { detail: 'finder' })
-                          window.dispatchEvent(event)
-                        }, 100)
-                      } else if (doc.type === 'checker') {
-                        router.push('/dashboard?tab=checker')
-                        setTimeout(() => {
-                          const event = new CustomEvent('setActiveTab', { detail: 'checker' })
-                          window.dispatchEvent(event)
-                        }, 100)
-                      }
-                    }}
-                    className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-gray-100 transition group"
+                    className="w-full px-3 py-2.5 rounded-lg hover:bg-gray-100 transition group flex items-start gap-2"
                   >
-                    <div className="flex items-start gap-2">
+                    <button
+                      onClick={() => {
+                        if (doc.type === 'write' && doc.docId) {
+                          router.push(`/dashboard/write/${doc.docId}`)
+                        } else if (doc.type === 'finder') {
+                          router.push('/dashboard?tab=finder')
+                          setTimeout(() => {
+                            const event = new CustomEvent('setActiveTab', { detail: 'finder' })
+                            window.dispatchEvent(event)
+                          }, 100)
+                        } else if (doc.type === 'checker') {
+                          router.push('/dashboard?tab=checker')
+                          setTimeout(() => {
+                            const event = new CustomEvent('setActiveTab', { detail: 'checker' })
+                            window.dispatchEvent(event)
+                          }, 100)
+                        }
+                      }}
+                      className="flex-1 text-left flex items-start gap-2 min-w-0"
+                    >
                       <FileText size={16} className="text-gray-400 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-900 truncate">
@@ -438,8 +464,15 @@ export default function DashboardLayout({
                           )}
                         </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteDocument(doc.id, e)}
+                      className="p-1.5 hover:bg-red-100 rounded-lg transition opacity-0 group-hover:opacity-100 flex-shrink-0"
+                      title={t.dashboard?.delete || 'Delete'}
+                    >
+                      <Trash2 size={14} className="text-gray-400 hover:text-red-600" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
