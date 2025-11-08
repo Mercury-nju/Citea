@@ -427,9 +427,7 @@ export default function WriteEditorPage() {
             
             <button 
               onClick={handleSave}
-              className={`p-3 rounded-lg transition mb-2 group relative ${
-                saveStatus === 'saving' ? 'bg-blue-100' : 'hover:bg-blue-50'
-              }`}
+              className={'p-3 rounded-lg transition mb-2 group relative ' + (saveStatus === 'saving' ? 'bg-blue-100' : 'hover:bg-blue-50')}
               title="Save Document"
               disabled={saveStatus === 'saving'}
             >
@@ -498,11 +496,9 @@ export default function WriteEditorPage() {
             
             <button
               onClick={handleSave}
-              className={`px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ${
-                saveStatus === 'saving' 
+              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (saveStatus === 'saving' 
                   ? 'bg-blue-100 text-blue-600 cursor-not-allowed' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+                  : 'bg-blue-600 text-white hover:bg-blue-700')}
               disabled={saveStatus === 'saving'}
             >
               <Save size={16} />
@@ -534,11 +530,9 @@ export default function WriteEditorPage() {
 
             <button
               onClick={() => setActiveTool(activeTool === 'finder' ? 'none' : 'finder')}
-              className={`px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ${
-                activeTool === 'finder' 
+              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (activeTool === 'finder' 
                   ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-gray-100 hover:bg-blue-50 text-gray-700'
-              }`}
+                  : 'bg-gray-100 hover:bg-blue-50 text-gray-700')}
             >
               <Sparkles size={16} />
               Find Sources
@@ -546,11 +540,9 @@ export default function WriteEditorPage() {
 
             <button
               onClick={() => setActiveTool(activeTool === 'checker' ? 'none' : 'checker')}
-              className={`px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ${
-                activeTool === 'checker' 
+              className={'px-4 py-2 rounded-lg transition text-sm font-medium flex items-center gap-2 ' + (activeTool === 'checker' 
                   ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-gray-100 hover:bg-blue-50 text-gray-700'
-              }`}
+                  : 'bg-gray-100 hover:bg-blue-50 text-gray-700')}
             >
               <CheckCircle size={16} />
               Verify Citations
@@ -779,14 +771,12 @@ export default function WriteEditorPage() {
                   {chatMessages.map((msg, idx) => (
                     <div
                       key={idx}
-                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      className={'flex ' + (msg.role === 'user' ? 'justify-end' : 'justify-start')}
                     >
                       <div
-                        className={`max-w-[85%] rounded-xl px-4 py-3 ${
-                          msg.role === 'user'
+                        className={'max-w-[85%] rounded-xl px-4 py-3 ' + (msg.role === 'user'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
-                        }`}
+                            : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200')}
                       >
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                       </div>
