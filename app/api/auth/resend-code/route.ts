@@ -11,15 +11,22 @@ export async function POST(req: Request) {
 
     const supabaseAdmin = createSupabaseAdmin()
 
-    // 检查用户是否存在
-    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(email)
+    // 检查用户是否存在 - 使用 listUsers 并过滤邮箱
+    const { data: usersData, error: userError } = await supabaseAdmin.auth.admin.listUsers()
     
-    if (userError || !userData?.user) {
+    if (userError) {
+      return NextResponse.json({ error: '查询用户失败' }, { status: 500 })
+    }
+
+    // 查找匹配邮箱的用户
+    const user = usersData.users.find(u => u.email?.toLowerCase() === email.toLowerCase())
+    
+    if (!user) {
       return NextResponse.json({ error: '用户不存在' }, { status: 404 })
     }
 
     // 如果已验证，不需要重新发送
-    if (userData.user.email_confirmed_at) {
+    if (user.email_confirmed_at) {
       return NextResponse.json({ error: '邮箱已验证' }, { status: 400 })
     }
 
@@ -43,43 +50,39 @@ export async function POST(req: Request) {
     // 我们需要使用 Supabase 的 resend 功能，但这通常需要在客户端调用
     // 作为替代方案，我们可以使用 Supabase 的 Admin API 发送邀请邮件
     
-    // 尝试使用 inviteUserByEmail（会发送验证邮件）
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      data: {
-        name: userData.user.user_metadata?.name || email
-      }
+    // 使用 generateLink 生成验证链接，然后通过客户端发送
+    // 或者使用 resend 功能（需要客户端调用）
+    // 最简单的方式：删除并重新创建用户（会触发验证邮件）
+    const userMetadata = user.user_metadata || {}
+    
+    // 删除未验证用户
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
+    
+    if (deleteError) {
+      console.error('[Resend] Failed to delete user:', deleteError)
+      return NextResponse.json({ 
+        error: '邮件发送失败',
+        message: '无法重新发送验证邮件，请稍后重试。'
+      }, { status: 500 })
+    }
+    
+    // 重新创建用户（会触发验证邮件）
+    const { data: newUserData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: Math.random().toString(36).slice(-12), // 随机密码，用户需要重置
+      email_confirm: false,
+      user_metadata: userMetadata
     })
 
-    if (inviteError) {
-      console.error('[Resend] Failed to invite user:', inviteError)
-      // 如果邀请失败，尝试直接更新用户并触发邮件
-      // 实际上，Supabase 的邮件发送主要是通过客户端触发的
-      // 服务端可以删除并重新创建用户来触发验证邮件
-      
-      // 方案：删除未验证用户，重新创建（会触发验证邮件）
-      await supabaseAdmin.auth.admin.deleteUser(userData.user.id)
-      
-      const { data: newUserData, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password: 'temp_password_will_be_reset', // 临时密码，用户需要重置
-        email_confirm: false,
-        user_metadata: userData.user.user_metadata
-      })
-
-      if (createError || !newUserData.user) {
-        return NextResponse.json({ 
-          error: '邮件发送失败',
-          message: '无法重新发送验证邮件，请稍后重试。'
-        }, { status: 500 })
-      }
-
-      // 重新创建用户会触发验证邮件
+    if (createError || !newUserData.user) {
+      console.error('[Resend] Failed to recreate user:', createError)
       return NextResponse.json({ 
-        success: true,
-        message: '验证码已重新发送！请检查您的邮箱。'
-      })
+        error: '邮件发送失败',
+        message: '无法重新发送验证邮件，请稍后重试。'
+      }, { status: 500 })
     }
 
+    // 重新创建用户会触发验证邮件
     return NextResponse.json({ 
       success: true,
       message: '验证码已重新发送！请检查您的邮箱。'

@@ -10,12 +10,13 @@ export async function POST(req: Request) {
 
     const supabaseAdmin = createSupabaseAdmin()
 
-    // 检查用户是否已存在
-    const { data: existingUser } = await supabaseAdmin.auth.admin.getUserByEmail(email)
+    // 检查用户是否已存在 - 使用 listUsers 并过滤邮箱
+    const { data: usersData } = await supabaseAdmin.auth.admin.listUsers()
+    const existingUser = usersData?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase())
     
-    if (existingUser?.user) {
+    if (existingUser) {
       // 如果用户已验证，不允许重复注册
-      if (existingUser.user.email_confirmed_at) {
+      if (existingUser.email_confirmed_at) {
         return NextResponse.json({ 
           error: 'Email already registered',
           message: '该邮箱已注册并已验证。请直接登录。',
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
       
       // 如果用户未验证，删除旧用户，允许重新注册
       console.log(`[Signup] User ${email} exists but not verified. Deleting and allowing re-registration.`)
-      await supabaseAdmin.auth.admin.deleteUser(existingUser.user.id)
+      await supabaseAdmin.auth.admin.deleteUser(existingUser.id)
     }
 
     // 使用 Supabase Auth 注册用户
