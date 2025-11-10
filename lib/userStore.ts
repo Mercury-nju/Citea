@@ -143,8 +143,9 @@ export async function getUserByEmail(email: string): Promise<StoredUser | null> 
       const data = await redis.hgetall(key)
       console.log('Redis: received data', data ? Object.keys(data) : 'null/empty')
       
+      console.log('Redis: full data received:', JSON.stringify(data, null, 2))
       if (!data || Object.keys(data).length === 0 || !data.id) {
-        console.log('Redis: user not found')
+        console.log('Redis: user not found - missing data or id')
         return null
       }
       
@@ -236,7 +237,8 @@ export async function createUser(user: StoredUser): Promise<void> {
       return
     } catch (error) {
       console.error('KV write error:', error)
-      throw new Error(`Failed to save user to database: ${error}`)
+      console.log('Falling back to file storage due to KV error')
+      // Don't throw, continue to file storage fallback
     }
   }
   // Try Redis if available
@@ -266,7 +268,8 @@ export async function createUser(user: StoredUser): Promise<void> {
       return
     } catch (error) {
       console.error('Redis write error:', error)
-      throw new Error(`Failed to save user to Redis: ${error}`)
+      console.log('Falling back to file storage due to Redis error')
+      // Don't throw, continue to file storage fallback
     }
   }
   
@@ -281,21 +284,27 @@ export async function createUser(user: StoredUser): Promise<void> {
   }
   
   // Fallback to file storage (local dev) or in-memory (Vercel without DB)
-  await ensureDataFile()
-  const raw = await fs.readFile(USERS_FILE, 'utf8')
-  const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
-  
-  // 检查用户是否已存在（按邮箱）
-  const existingIndex = json.users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase())
-  if (existingIndex >= 0) {
-    // 更新现有用户
-    json.users[existingIndex] = user
-  } else {
-    // 添加新用户
-    json.users.push(user)
+  try {
+    await ensureDataFile()
+    const raw = await fs.readFile(USERS_FILE, 'utf8')
+    const json = JSON.parse(raw || '{"users":[]}') as { users: StoredUser[] }
+    
+    // 检查用户是否已存在（按邮箱）
+    const existingIndex = json.users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase())
+    if (existingIndex >= 0) {
+      // 更新现有用户
+      json.users[existingIndex] = user
+    } else {
+      // 添加新用户
+      json.users.push(user)
+    }
+    
+    await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
+    console.log('User saved successfully to file storage')
+  } catch (error) {
+    console.error('File storage error:', error)
+    throw error
   }
-  
-  await fs.writeFile(USERS_FILE, JSON.stringify(json, null, 2), 'utf8')
 }
 
 export async function updateUserVerification(email: string, code: string, expiry: string): Promise<void> {
