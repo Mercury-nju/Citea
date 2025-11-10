@@ -32,27 +32,7 @@ export async function POST(req: Request) {
 
     // 使用 Supabase Admin API 重新发送验证邮件
     // 注意：Supabase 的 resend 功能需要通过客户端 SDK 调用
-    // 服务端可以使用 admin API 的 generateLink 方法
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'signup',
-      email: email
-    })
-
-    if (linkError) {
-      console.error('[Resend] Failed to generate verification link:', linkError)
-      return NextResponse.json({ 
-        error: '邮件发送失败',
-        message: linkError.message || '验证码邮件发送失败，请稍后重试。'
-      }, { status: 500 })
-    }
-
-    // 注意：Supabase 的 generateLink 会生成一个链接，但不会直接发送邮件
-    // 我们需要使用 Supabase 的 resend 功能，但这通常需要在客户端调用
-    // 作为替代方案，我们可以使用 Supabase 的 Admin API 发送邀请邮件
-    
-    // 使用 generateLink 生成验证链接，然后通过客户端发送
-    // 或者使用 resend 功能（需要客户端调用）
-    // 最简单的方式：删除并重新创建用户（会触发验证邮件）
+    // 服务端方案：删除并重新创建用户（会触发验证邮件）
     const userMetadata = user.user_metadata || {}
     
     // 删除未验证用户
