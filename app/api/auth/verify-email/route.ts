@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdmin, createSupabaseClient } from '@/lib/supabase'
 import { signJwt, setAuthCookie } from '@/lib/auth'
 import { sendWelcomeEmail } from '@/lib/email'
+import { getUserByEmail, updateUserVerification, verifyUserEmail } from '@/lib/userStore'
 
 export async function POST(req: Request) {
   try {
@@ -9,6 +10,64 @@ export async function POST(req: Request) {
     
     if (!email) {
       return NextResponse.json({ error: '缺少邮箱' }, { status: 400 })
+    }
+
+    // 首先检查是否是本地存储用户
+    const localUser = await getUserByEmail(email.toLowerCase())
+    
+    if (localUser && !localUser.emailVerified) {
+      // 本地存储用户验证逻辑
+      if (!code) {
+        return NextResponse.json({ error: '缺少验证码' }, { status: 400 })
+      }
+
+      // 验证验证码
+      if (localUser.verificationCode !== code) {
+        return NextResponse.json({ 
+          error: '验证码无效',
+          message: '验证码不正确，请检查后重新输入。'
+        }, { status: 400 })
+      }
+
+      // 检查验证码是否过期
+      const now = new Date()
+      const expiry = new Date(localUser.verificationExpiry)
+      if (now > expiry) {
+        return NextResponse.json({ 
+          error: '验证码已过期',
+          message: '验证码已过期，请重新获取验证码。'
+        }, { status: 400 })
+      }
+
+      // 验证成功，标记邮箱为已验证
+      await verifyUserEmail(email.toLowerCase(), code)
+
+      // 发送欢迎邮件
+      try {
+        await sendWelcomeEmail(email, localUser.name || email)
+      } catch (emailError) {
+        console.error('[Verify] Welcome email failed:', emailError)
+      }
+
+      // 生成 JWT token
+      const token = await signJwt({ 
+        id: localUser.id, 
+        name: localUser.name || email, 
+        email: localUser.email, 
+        plan: localUser.plan || 'free' 
+      })
+      await setAuthCookie(token)
+
+      return NextResponse.json({ 
+        success: true,
+        user: { 
+          id: localUser.id, 
+          name: localUser.name || email, 
+          email: localUser.email, 
+          plan: localUser.plan || 'free' 
+        },
+        message: '邮箱验证成功！'
+      })
     }
 
     // 如果提供了 sessionToken，说明客户端已经通过 Supabase 验证了 OTP
@@ -78,6 +137,20 @@ export async function POST(req: Request) {
     // 如果没有 sessionToken，尝试使用 code 验证（向后兼容）
     if (!code) {
       return NextResponse.json({ error: '缺少验证码或 session token' }, { status: 400 })
+    }
+
+    // 如果是本地存储用户且已验证，直接返回成功
+    if (localUser && localUser.emailVerified) {
+      return NextResponse.json({ 
+        success: true,
+        user: { 
+          id: localUser.id, 
+          name: localUser.name || email, 
+          email: localUser.email, 
+          plan: localUser.plan || 'free' 
+        },
+        message: '邮箱已经验证成功！'
+      })
     }
 
     const supabaseAdmin = createSupabaseAdmin()

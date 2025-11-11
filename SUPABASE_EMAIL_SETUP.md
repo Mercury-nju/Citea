@@ -92,3 +92,8 @@ https://app.supabase.com/project/[你的项目ID]/auth/providers
 3. 重新部署应用
 4. 测试注册和验证流程
 
+
+
+
+
+

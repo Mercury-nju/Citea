@@ -54,15 +54,19 @@ function VerifyEmailContent() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || t.auth.verifyEmail.verifyError)
+        // 更详细的错误信息
+        const errorMessage = data.message || data.error || t.auth.verifyEmail.verifyError
+        setError(`❌ ${errorMessage}`)
         setIsLoading(false)
         return
       }
 
-      setMessage(t.auth.verifyEmail.verifySuccess)
+      setMessage(`✅ ${t.auth.verifyEmail.verifySuccess}`)
+      
+      // 延迟跳转，让用户看到成功消息
       setTimeout(() => {
-        window.location.href = '/dashboard'
-      }, 1500)
+        router.push('/dashboard')
+      }, 2000)
     } catch (err) {
       setError(t.auth.verifyEmail.verifyError)
       setIsLoading(false)
@@ -80,7 +84,6 @@ function VerifyEmailContent() {
     setMessage('')
 
     try {
-      setIsResending(true)
       const res = await fetch('/api/auth/resend-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,14 +94,25 @@ function VerifyEmailContent() {
 
       if (!res.ok) {
         const errorMsg = data.message || data.error || t.auth.verifyEmail.resendError
-        // 如果后端返回了 code，说明是开发/测试环境
-        setError(`❌ ${errorMsg}${data.code ? `\n\n${t.auth.verifyEmail.codeLabel} (Dev only): ${data.code}` : ''}`)
+        setError(`❌ ${errorMsg}`)
         setIsResending(false)
         return
       }
 
-      // 如果后端返回了 code，说明是开发/测试环境
-      setMessage(`✅ ${data.message || t.auth.verifyEmail.resendSuccess}${data.code ? `\n\n${t.auth.verifyEmail.codeLabel} (Dev only): ${data.code}` : ''}`)
+      // 构建成功消息
+      let successMessage = `✅ ${data.message || t.auth.verifyEmail.resendSuccess}`
+      
+      // 开发环境下显示验证码（如果返回了）
+      if (data.code && process.env.NODE_ENV === 'development') {
+        successMessage += `\n\n${t.auth.verifyEmail.codeLabel} (Dev only): ${data.code}`
+      }
+      
+      // 如果邮件发送失败但有具体错误信息
+      if (data.emailSent === false && data.emailError) {
+        successMessage += `\n\n⚠️ 注意: ${data.emailError}`
+      }
+      
+      setMessage(successMessage)
       setIsResending(false)
     } catch (err) {
       setError(t.auth.verifyEmail.resendError)

@@ -90,3 +90,8 @@ BREVO_FROM_EMAIL=你的发件邮箱
 2. 检查 Vercel 环境变量是否已设置（生产环境）
 3. 确认变量名完全匹配（包括 `NEXT_PUBLIC_` 前缀）
 
+
+
+
+
+

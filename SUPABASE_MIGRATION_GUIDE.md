@@ -175,3 +175,8 @@ BREVO_FROM_EMAIL=你的发件邮箱（可选）
 
 完成以上步骤后，你的应用就已经成功迁移到 Supabase Auth 了！🎉
 
+
+
+
+
+
