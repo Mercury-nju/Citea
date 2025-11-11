@@ -31,6 +31,12 @@ export async function POST(req: Request) {
 
       // 检查验证码是否过期
       const now = new Date()
+      if (!localUser.verificationExpiry) {
+        return NextResponse.json({ 
+          error: '验证码已过期',
+          message: '验证码已过期，请重新获取验证码。'
+        }, { status: 400 })
+      }
       const expiry = new Date(localUser.verificationExpiry)
       if (now > expiry) {
         return NextResponse.json({ 

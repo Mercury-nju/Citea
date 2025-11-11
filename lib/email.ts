@@ -36,9 +36,7 @@ async function sendVerificationEmailViaSupabase(
 
     console.log('[Supabase Email] ✅ Magic Link 生成成功:', {
       email,
-      linkGenerated: !!data.properties?.action_link,
-      hasHtml: !!data.email_data?.html,
-      hasText: !!data.email_data?.text
+      linkGenerated: !!data.properties?.action_link
     })
 
     // 注意：Supabase 会自动发送邮件，但我们无法自定义验证码内容

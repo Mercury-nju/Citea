@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       message: '验证码已发送',
       email: testEmail,
       code: testCode, // 仅用于测试，生产环境不应该返回
-      messageId: (emailResult.data as any)?.messageId
+      messageId: emailResult.success ? 'sent' : 'failed'
     })
   } catch (error: any) {
     console.error('发送测试验证码失败:', error)
