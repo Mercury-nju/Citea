@@ -12,80 +12,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '缺少邮箱' }, { status: 400 })
     }
 
-    // 首先检查是否是本地存储用户
-    const localUser = await getUserByEmail(email.toLowerCase())
-    
-    if (localUser && !localUser.emailVerified) {
-      // 本地存储用户验证逻辑
-      if (!code) {
-        return NextResponse.json({ error: '缺少验证码' }, { status: 400 })
-      }
-
-      // 验证验证码
-      if (localUser.verificationCode !== code) {
-        return NextResponse.json({ 
-          error: '验证码无效',
-          message: '验证码不正确，请检查后重新输入。'
-        }, { status: 400 })
-      }
-
-      // 检查验证码是否过期
-      const now = new Date()
-      if (!localUser.verificationExpiry) {
-        return NextResponse.json({ 
-          error: '验证码已过期',
-          message: '验证码已过期，请重新获取验证码。'
-        }, { status: 400 })
-      }
-      const expiry = new Date(localUser.verificationExpiry)
-      if (now > expiry) {
-        return NextResponse.json({ 
-          error: '验证码已过期',
-          message: '验证码已过期，请重新获取验证码。'
-        }, { status: 400 })
-      }
-
-      // 验证成功，标记邮箱为已验证
-      await verifyUserEmail(email.toLowerCase(), code)
-
-      // 发送欢迎邮件
-      try {
-        await sendWelcomeEmail(email, localUser.name || email)
-      } catch (emailError) {
-        console.error('[Verify] Welcome email failed:', emailError)
-      }
-
-      // 生成 JWT token
-      const token = await signJwt({ 
-        id: localUser.id, 
-        name: localUser.name || email, 
-        email: localUser.email, 
-        plan: localUser.plan || 'free' 
-      })
-      await setAuthCookie(token)
-
-      return NextResponse.json({ 
-        success: true,
-        user: { 
-          id: localUser.id, 
-          name: localUser.name || email, 
-          email: localUser.email, 
-          plan: localUser.plan || 'free' 
-        },
-        message: '邮箱验证成功！'
-      })
-    }
-
-    // 如果提供了 sessionToken，说明客户端已经通过 Supabase 验证了 OTP
-    // 我们只需要验证 session 并生成 JWT
+    // Magic Link 模式：如果提供了 sessionToken，说明用户已通过点击 Magic Link 完成验证
     if (sessionToken) {
+      console.log('[Verify] Magic Link 验证模式 - 使用 sessionToken 验证')
       const supabaseClient = createSupabaseClient()
       const { data: { user }, error: sessionError } = await supabaseClient.auth.getUser(sessionToken)
 
       if (sessionError || !user) {
         return NextResponse.json({ 
           error: '验证失败',
-          message: 'Session 无效或已过期。'
+          message: 'Magic Link 无效或已过期。'
         }, { status: 400 })
       }
 
@@ -112,7 +48,7 @@ export async function POST(req: Request) {
           .eq('id', user.id)
       }
 
-      // 发送欢迎邮件（可选）
+      // 发送欢迎邮件
       try {
         await sendWelcomeEmail(email, profile?.name || user.user_metadata?.name || email)
       } catch (emailError) {
@@ -140,12 +76,22 @@ export async function POST(req: Request) {
       })
     }
 
-    // 如果没有 sessionToken，尝试使用 code 验证（向后兼容）
-    if (!code) {
-      return NextResponse.json({ error: '缺少验证码或 session token' }, { status: 400 })
+    // Magic Link 模式：不再支持本地存储用户的 code 验证
+    // 所有验证都通过 Supabase Magic Link 完成
+
+    // Magic Link 模式：如果用户点击了 Magic Link，会携带 sessionToken
+    // 这个逻辑已经移到前面处理，这里不再需要重复处理
+
+    // Magic Link 模式：如果没有 sessionToken，返回错误信息
+    if (!sessionToken) {
+      return NextResponse.json({ 
+        error: 'Magic Link 验证失败',
+        message: '请通过邮箱中的验证链接进行验证，或重新注册。'
+      }, { status: 400 })
     }
 
     // 如果是本地存储用户且已验证，直接返回成功
+    const localUser = await getUserByEmail(email.toLowerCase())
     if (localUser && localUser.emailVerified) {
       return NextResponse.json({ 
         success: true,
@@ -159,80 +105,17 @@ export async function POST(req: Request) {
       })
     }
 
-    const supabaseAdmin = createSupabaseAdmin()
-
-    // 尝试使用客户端实例验证 OTP（Supabase 的 verifyOtp 主要在客户端使用）
-    // 服务端验证需要创建临时客户端实例
-    try {
-      const supabaseClient = createSupabaseClient()
-      const { data: verifyData, error: verifyError } = await supabaseClient.auth.verifyOtp({
-        email,
-        token: code,
-        type: 'signup'
-      })
-
-      if (verifyError || !verifyData.user) {
-        console.error('[Verify] OTP verification error:', verifyError)
-        return NextResponse.json({ 
-          error: '验证码无效或已过期',
-          message: verifyError?.message || '验证码无效或已过期，请重新获取。'
-        }, { status: 400 })
-      }
-
-      // 验证成功，更新用户邮箱确认状态
-      await supabaseAdmin.auth.admin.updateUserById(
-        verifyData.user.id,
-        { email_confirm: true }
-      )
-
-      // 获取 profile
-      const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('*')
-        .eq('id', verifyData.user.id)
-        .single()
-
-      // 更新 profile
-      if (profile) {
-        await supabaseAdmin
-          .from('profiles')
-          .update({ last_login_at: new Date().toISOString() })
-          .eq('id', verifyData.user.id)
-      }
-
-      // 发送欢迎邮件
-      try {
-        await sendWelcomeEmail(email, profile?.name || verifyData.user.user_metadata?.name || email)
-      } catch (emailError) {
-        console.error('[Verify] Welcome email failed:', emailError)
-      }
-
-      // 生成 JWT token
-      const token = await signJwt({ 
-        id: verifyData.user.id, 
-        name: profile?.name || verifyData.user.user_metadata?.name || email, 
-        email: verifyData.user.email!, 
-        plan: (profile?.plan as any) || 'free' 
-      })
-      await setAuthCookie(token)
-
-      return NextResponse.json({ 
-        success: true,
-        user: { 
-          id: verifyData.user.id, 
-          name: profile?.name || verifyData.user.user_metadata?.name || email, 
-          email: verifyData.user.email!, 
-          plan: (profile?.plan as any) || 'free' 
-        },
-        message: '邮箱验证成功！'
-      })
-    } catch (error) {
-      console.error('[Verify] Verification error:', error)
-      return NextResponse.json({ 
-        error: '验证失败',
-        message: '验证过程中发生错误，请稍后重试。'
-      }, { status: 500 })
-    }
+    // Magic Link 模式：不再支持 code 验证，只支持 sessionToken
+    // 如果到达这里，说明没有有效的 sessionToken
+    return NextResponse.json({ 
+      error: 'Magic Link 验证失败',
+      message: '验证链接无效或已过期，请重新注册获取新的验证链接。'
+    }, { status: 400 })
+    // Magic Link 模式：本地存储用户也不再使用 code 验证
+    return NextResponse.json({ 
+      error: 'Magic Link 验证失败',
+      message: '本地用户验证功能已更新为 Magic Link 模式，请重新注册。'
+    }, { status: 400 })
   } catch (error) {
     console.error('Email verification error:', error)
     return NextResponse.json({ 

@@ -23,12 +23,8 @@ export async function POST(req: Request) {
     // Hash the password
     const passwordHash = await bcrypt.hash(password, 10)
     
-    // 生成验证码
-    const verificationCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-    const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24小时后过期
-    
-    // Create user with local storage
-    console.log('Creating user with local storage...')
+    // Create user with local storage - Magic Link 模式不需要验证码
+    console.log('Creating user with local storage (Magic Link mode)...')
     const userData = {
       id: randomUUID(), // Generate unique ID
       name,
@@ -37,9 +33,8 @@ export async function POST(req: Request) {
       plan: 'free' as const,
       credits: 3,
       emailVerified: false, // Require email verification
-      verificationCode,
-      verificationExpiry,
       authProvider: 'email' as const
+      // Magic Link 模式：移除了 verificationCode 和 verificationExpiry
     }
     
     console.log('About to call createUser with:', email.toLowerCase())
@@ -60,8 +55,8 @@ export async function POST(req: Request) {
     console.log('[Signup] ✅ 用户注册成功!', {
       userId: newUser.id,
       email,
-      name,
-      verificationCode
+      name
+      // Magic Link 模式：移除了 verificationCode 日志
     })
     
     // 尝试发送验证邮件
@@ -79,8 +74,8 @@ export async function POST(req: Request) {
         const serviceName = hasSupabaseService ? 'Supabase' : (hasBrevoService ? 'Brevo' : 'Resend')
         console.log(`[Signup] ${serviceName} 邮件服务可用，正在发送验证码邮件...`)
         
-        // 调用邮件发送函数
-        const emailResult = await sendVerificationEmail(email, verificationCode, name)
+        // 调用邮件发送函数 - Magic Link 模式
+        const emailResult = await sendVerificationEmail(email, '', name) // 验证码参数不再使用
         
         if (emailResult.success) {
           console.log(`[Signup] ✅ 验证码邮件发送成功! MessageId: ${emailResult.messageId}`)
@@ -128,8 +123,8 @@ export async function POST(req: Request) {
       needsVerification: true, // 需要邮箱验证
       emailSent: emailSent,
       emailError: emailError,
-      verificationCode: process.env.NODE_ENV === 'development' ? verificationCode : undefined, // 开发环境返回验证码用于测试
-      message: '注册成功！请检查您的邮箱并验证您的账户。'
+      // Magic Link 模式：移除了 verificationCode 返回
+      message: '注册成功！请检查您的邮箱并点击验证链接完成注册。'
     }, { status: 201 })
   } catch (e: any) {
     console.error('Signup error:', e)

@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * 测试 Supabase 邮件发送功能
+ * 测试 Supabase 邮件发送功能 - 使用新的项目配置
  * 
  * 使用方法:
  *   node scripts/test-supabase-email.js [邮箱地址]
+ * 
+ * 注意：在运行此脚本前，请确保已更新 .env.local 中的 Supabase 配置
  */
 
 const path = require('path')
@@ -15,14 +17,16 @@ process.chdir(path.join(__dirname, '..'))
 // 加载环境变量
 require('dotenv').config({ path: '.env.local' })
 
+// 直接使用 TypeScript 文件，让 Node.js 处理
 const { sendVerificationEmail } = require('../lib/email.ts')
 
-const TEST_EMAIL = process.argv[2] || '2945235656@qq.com'
+const TEST_EMAIL = process.argv[2] || '66597405@qq.com'
 const TEST_NAME = 'Test User'
 
 async function testSupabaseEmail() {
   console.log('📧 测试 Supabase 邮件发送功能\n')
   console.log(`收件邮箱: ${TEST_EMAIL}`)
+  console.log(`Supabase URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL || '未配置'}`)
   
   // 检查 Supabase 配置
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -30,6 +34,7 @@ async function testSupabaseEmail() {
     console.log('\n需要配置的环境变量:')
     console.log('NEXT_PUBLIC_SUPABASE_URL=your-supabase-url')
     console.log('SUPABASE_SERVICE_ROLE_KEY=your-service-role-key')
+    console.log('\n💡 请参考 CREATE_NEW_SUPABASE_PROJECT.md 创建新项目')
     process.exit(1)
   }
   
@@ -73,6 +78,13 @@ async function testSupabaseEmail() {
         console.error('  1. 检查 Supabase Dashboard 中的 Service Role Key')
         console.error('  2. 重新生成 Service Role Key（如果需要）')
         console.error('  3. 更新 .env.local 文件')
+        console.error('  4. 参考 CREATE_NEW_SUPABASE_PROJECT.md 创建新项目')
+      } else if (result.error?.includes('fetch failed')) {
+        console.error('\n💡 网络连接失败')
+        console.error('解决方案:')
+        console.error('  1. 检查网络连接')
+        console.error('  2. 确认 Supabase 项目是否存在')
+        console.error('  3. 可能需要创建新的 Supabase 项目')
       }
     }
     
