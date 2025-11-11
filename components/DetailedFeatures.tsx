@@ -159,19 +159,19 @@ export default function DetailedFeatures() {
                       <div className="flex justify-end">
                         <div className="bg-gray-900 rounded-lg rounded-tr-sm p-2 max-w-[75%]">
                           <p className="text-xs text-white leading-tight">
-                            如何在APA格式中引用有多位作者的期刊文章？
+                            How do I cite a journal article with multiple authors in APA format?
                           </p>
                         </div>
                       </div>
                       <div className="flex justify-start">
                         <div className="bg-white border border-gray-200 rounded-lg rounded-tl-sm p-2 max-w-[80%]">
                           <p className="text-xs text-gray-800 leading-tight mb-1">
-                            在APA格式中，对于多位作者：
+                            In APA format, for multiple authors:
                           </p>
                           <p className="text-[10px] text-gray-600 leading-tight">
-                            • 1-2位作者：列出所有作者<br/>
-                            • 3-20位作者：列出所有作者<br/>
-                            • 21+位：前19位 + "..." + 最后一位
+                            • 1-2 authors: List all authors<br/>
+                            • 3-20 authors: List all authors<br/>
+                            • 21+ authors: First 19 + "..." + last author
                           </p>
                         </div>
                       </div>
@@ -180,7 +180,7 @@ export default function DetailedFeatures() {
                     <div className="bg-gray-100 rounded border border-gray-200 p-2">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 bg-white rounded border border-gray-200"></div>
-                        <p className="text-xs text-gray-500 flex-1">输入你的学术问题...</p>
+                        <p className="text-xs text-gray-500 flex-1">Enter your academic question...</p>
                       </div>
                     </div>
                   </div>
