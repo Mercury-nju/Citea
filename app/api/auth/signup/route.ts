@@ -88,10 +88,7 @@ export async function POST(req: Request) {
         console.log('[Signup] ⚠️ 未配置邮件服务，无法发送验证码')
         emailError = '邮件服务未配置'
         
-        // 开发环境下记录验证码用于测试
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[Signup] 开发环境 - 验证码: ${verificationCode}`)
-        }
+        // Magic Link 模式：不再使用验证码
       }
     } catch (error) {
       console.error('[Signup] 邮件发送失败:', error)

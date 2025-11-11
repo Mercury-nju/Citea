@@ -1,4 +1,4 @@
-import { createSupabaseAdmin } from './supabase.ts'
+import { createSupabaseAdmin } from './supabase'
 
 // 注意：已经完全迁移到 Supabase 邮件服务
 // Brevo 依赖已移除
