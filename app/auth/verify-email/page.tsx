@@ -25,14 +25,14 @@ function VerifyEmailContent() {
     if (emailParam) {
       setEmail(emailParam)
       // Magic Link 模式：用户点击邮件中的链接即可验证，无需输入验证码
-      setMessage('📧 验证邮件已发送到您的邮箱，请点击邮件中的链接完成验证。')
+      setMessage(t.auth.verifyEmail.magicLinkSent || 'Verification email has been sent. Please check your email and click the verification link.')
     }
   }, [emailParam, t])
 
   // Magic Link 模式：不再需要验证码验证
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage('📧 Magic Link 模式：请检查您的邮箱并点击验证链接完成注册。')
+    setMessage(t.auth.verifyEmail.magicLinkSent || 'Please check your email and click the verification link to complete registration.')
   }
 
   // Magic Link 模式：重新发送验证邮件
@@ -62,7 +62,7 @@ function VerifyEmailContent() {
         return
       }
 
-      setMessage('✅ 验证邮件已重新发送，请检查您的邮箱并点击链接完成验证。')
+      setMessage(t.auth.verifyEmail.resendSuccess || 'Verification email has been resent. Please check your email and click the link to complete verification.')
       setIsResending(false)
     } catch (err) {
       setError(t.auth.verifyEmail.resendError)
@@ -115,14 +115,14 @@ function VerifyEmailContent() {
             <div className="flex items-start gap-3">
               <Mail className="text-blue-600 mt-0.5" size={20} />
               <div className="text-sm text-blue-800">
-                <p className="font-semibold mb-1">📧 Magic Link 验证模式</p>
-                <p>请检查您的邮箱并点击邮件中的验证链接完成注册。无需输入验证码。</p>
+                <p className="font-semibold mb-1">{t.auth.verifyEmail.magicLinkTitle || '📧 Magic Link Verification'}</p>
+                <p>{t.auth.verifyEmail.magicLinkDesc || 'Please check your email and click the verification link to complete registration. No verification code needed.'}</p>
               </div>
             </div>
           </div>
 
           {/* Resend Code */}
-          <div className="text-center">
+          <div className="text-center mb-4">
             <p className="text-gray-600 text-sm mb-2">
               {t.auth.verifyEmail.resendQuestion}
             </p>
@@ -136,20 +136,7 @@ function VerifyEmailContent() {
           </div>
 
           {/* Back to Sign In */}
-          <div className="mt-6 text-center">
-            <Link href="/auth/signin" className="text-gray-600 hover:text-gray-800 text-sm">
-              {t.auth.verifyEmail.backToSignIn}
-            </Link>
-          </div>
-
-          {/* Help Text */}
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <p>📧 请检查您的邮箱并点击验证链接</p>
-            <p>如果未收到邮件，请检查垃圾邮件文件夹</p>
-          </div>
-
-          {/* Back to Sign In */}
-          <div className="mt-6 text-center">
+          <div className="text-center">
             <Link href="/auth/signin" className="text-gray-600 hover:text-gray-800 text-sm">
               {t.auth.verifyEmail.backToSignIn}
             </Link>
@@ -159,7 +146,7 @@ function VerifyEmailContent() {
         {/* Back to Home */}
         <div className="mt-6 text-center">
           <Link href="/" className="text-blue-600 hover:text-blue-700 text-sm">
-            返回首页
+            {t.auth.verifyEmail.backToHome || 'Back to homepage'}
           </Link>
         </div>
       </div>

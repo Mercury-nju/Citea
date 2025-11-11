@@ -30,6 +30,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
+    // 检查邮箱是否已验证（Google登录用户除外，因为Google已验证了邮箱）
+    if (!user.emailVerified && user.authProvider !== 'google') {
+      return NextResponse.json({ 
+        error: 'Email not verified',
+        message: 'Please verify your email before signing in. Check your email for the verification link.',
+        needsVerification: true
+      }, { status: 403 })
+    }
+
     await updateUserLastLogin(user.email)
 
     // 生成 token

@@ -48,6 +48,14 @@ export async function POST(req: Request) {
           .eq('id', user.id)
       }
 
+      // 更新本地存储用户的 emailVerified 状态（如果存在）
+      const localUser = await getUserByEmail(email.toLowerCase())
+      if (localUser && !localUser.emailVerified) {
+        const { updateUser } = await import('@/lib/userStore')
+        await updateUser(email.toLowerCase(), { emailVerified: true })
+        console.log('[Verify] ✅ 已更新本地用户的邮箱验证状态')
+      }
+
       // 发送欢迎邮件
       try {
         await sendWelcomeEmail(email, profile?.name || user.user_metadata?.name || email)
