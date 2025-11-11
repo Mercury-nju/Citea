@@ -59,7 +59,7 @@ export default function ToolsShowcase() {
                 {/* Example Query */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    Bardeen-Cooper-Schrieffer (BCS) theory, where electrons form Cooper pairs through phonon interactions. However, high-temperature superconductors, such as cuprates and iron-based compounds, cannot be fully explained by this model.
+                    Neural network-based models have been applied to predict protein folding structures with accuracy comparable to experimental methods.
                   </p>
                 </div>
 

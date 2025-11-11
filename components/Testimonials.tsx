@@ -9,7 +9,7 @@ const earlyAccessQuotes = [
     role: 'Early Beta Researcher'
   },
   {
-    quote: 'Citea has become part of my daily writing workflow. It’s like fact-checking for references.',
+    quote: 'Citea has become part of my daily writing workflow. It's like fact-checking for references.',
     author: 'John P.',
     role: 'Graduate Student, Early Access'
   },
@@ -17,6 +17,36 @@ const earlyAccessQuotes = [
     quote: 'As someone reviewing student papers, I love how quickly Citea flags fabricated sources.',
     author: 'Dr. L. Nguyen',
     role: 'Lecturer, Early Access'
+  },
+  {
+    quote: 'The source finder feature is incredibly accurate. It helped me discover relevant papers I would have missed otherwise.',
+    author: 'Dr. Sarah Chen',
+    role: 'Postdoctoral Researcher'
+  },
+  {
+    quote: 'I use Citea before submitting every paper. It gives me confidence that my references are legitimate.',
+    author: 'Prof. Michael R.',
+    role: 'Associate Professor, Computer Science'
+  },
+  {
+    quote: 'The AI assistant answered my citation questions instantly. Much faster than searching through style guides.',
+    author: 'Emily T.',
+    role: 'PhD Candidate, Early Access'
+  },
+  {
+    quote: 'As an editor, Citea helps me verify citations in submitted manuscripts quickly and efficiently.',
+    author: 'Dr. James W.',
+    role: 'Journal Editor, Early Access'
+  },
+  {
+    quote: 'This tool should be mandatory for all academic writing. It prevents so many citation errors.',
+    author: 'Dr. Anna Martinez',
+    role: 'Research Fellow'
+  },
+  {
+    quote: 'The combination of source finding and citation verification in one platform is brilliant.',
+    author: 'Prof. David Kim',
+    role: 'Full Professor, Early Access'
   }
 ]
 
