@@ -137,28 +137,10 @@ export default function DashboardPage() {
             <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <button
-                onClick={() => router.push('/dashboard/write')}
-                className="group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-                style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                }}
-              >
-                <div className="relative z-10">
-                  <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                    <Edit3 size={20} />
-                    Write
-                  </h3>
-                  <p className="text-sm text-white/90">
-                    Paraphrase, rewrite, auto-cite, and more
-                  </p>
-                </div>
-              </button>
-
-              <button
                 onClick={() => setActiveTab('finder')}
                 className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
-                  activeTab === 'finder' 
-                    ? 'shadow-xl scale-105' 
+                  activeTab === 'finder'
+                    ? 'shadow-xl scale-105'
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
                 }`}
                 style={{
@@ -179,8 +161,8 @@ export default function DashboardPage() {
               <button
                 onClick={() => setActiveTab('checker')}
                 className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
-                  activeTab === 'checker' 
-                    ? 'shadow-xl scale-105' 
+                  activeTab === 'checker'
+                    ? 'shadow-xl scale-105'
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
                 }`}
                 style={{
@@ -199,10 +181,28 @@ export default function DashboardPage() {
               </button>
 
               <button
+                onClick={() => router.push('/dashboard/write')}
+                className="group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                }}
+              >
+                <div className="relative z-10">
+                  <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                    <Edit3 size={20} />
+                    Write
+                  </h3>
+                  <p className="text-sm text-white/90">
+                    Paraphrase, rewrite, auto-cite, and more
+                  </p>
+                </div>
+              </button>
+
+              <button
                 onClick={() => setActiveTab('assistant')}
                 className={`group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
-                  activeTab === 'assistant' 
-                    ? 'shadow-xl scale-105' 
+                  activeTab === 'assistant'
+                    ? 'shadow-xl scale-105'
                     : 'shadow-lg hover:shadow-xl hover:scale-105'
                 }`}
                 style={{
