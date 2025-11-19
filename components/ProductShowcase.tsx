@@ -1,0 +1,122 @@
+'use client'
+
+import { useState } from 'react'
+import { Sparkles } from 'lucide-react'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+// 动态导入功能组件（避免SSR问题）
+const SourceFinderDemo = dynamic(() => import('./demos/SourceFinderDemo'), { ssr: false })
+const CitationCheckerDemo = dynamic(() => import('./demos/CitationCheckerDemo'), { ssr: false })
+const AIAssistantDemo = dynamic(() => import('./demos/AIAssistantDemo'), { ssr: false })
+
+export default function ProductShowcase() {
+  const [currentTab, setCurrentTab] = useState<'finder' | 'checker' | 'assistant'>('finder')
+
+  const demos = {
+    finder: {
+      title: '文献查找',
+      description: 'AI 驱动的智能搜索，从学术数据库中自动查找相关文献',
+    },
+    checker: {
+      title: '引用验证',
+      description: '实时验证引用真实性，识别虚假文献，确保学术诚信',
+    },
+    assistant: {
+      title: 'AI 研究助手',
+      description: '智能对话助手，回答学术问题，提供引用建议',
+    }
+  }
+
+  return (
+    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full mb-6 border border-gray-200">
+            <Sparkles className="text-blue-600" size={18} />
+            <span className="text-sm font-semibold text-gray-900">产品演示</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            看看 Citea 如何工作
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            真实的操作界面，完整的学术研究工作流程
+          </p>
+        </div>
+
+        {/* Screenshot Display */}
+        <div className="max-w-6xl mx-auto">
+          {/* Tab Navigation */}
+          <div className="flex justify-center gap-3 mb-8">
+            {(['finder', 'checker', 'assistant'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setCurrentTab(tab)}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                  currentTab === tab
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                {demos[tab].title}
+              </button>
+            ))}
+          </div>
+
+          {/* Live Demo Container */}
+          <div className="relative">
+            {/* Main Demo Display */}
+            <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-white">
+              {/* Browser Chrome */}
+              <div className="bg-gray-50 px-4 py-3 flex items-center gap-2 border-b border-gray-200">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                  <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                  <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                </div>
+                <div className="flex-1 bg-white rounded-md px-3 py-1.5 text-sm text-gray-600 font-mono border border-gray-200">
+                  citea.app/{currentTab === 'finder' ? 'source-finder' : currentTab === 'checker' ? 'citation-checker' : 'ai-assistant'}
+                </div>
+              </div>
+
+              {/* Live Demo Content */}
+              <div className="relative bg-white" style={{ minHeight: '500px', maxHeight: '600px' }}>
+                {currentTab === 'finder' && <SourceFinderDemo />}
+                {currentTab === 'checker' && <CitationCheckerDemo />}
+                {currentTab === 'assistant' && <AIAssistantDemo />}
+                
+                {/* Overlay with CTA */}
+                <div className="absolute inset-0 bg-white/80 pointer-events-none flex items-end justify-center pb-8">
+                  <Link 
+                    href="/auth/signin"
+                    className="pointer-events-auto bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all"
+                  >
+                    🚀 开始使用完整功能
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="mt-8 text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              {demos[currentTab].title}
+            </h3>
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto mb-6">
+              {demos[currentTab].description}
+            </p>
+            <Link
+              href="/auth/signin"
+              className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-all"
+            >
+              <span>开始使用</span>
+              <span>→</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

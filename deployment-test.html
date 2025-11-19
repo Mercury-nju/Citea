@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citea部署测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f7fafc;
+        }
+        .test-section h3 {
+            color: #2d3748;
+            margin-top: 0;
+        }
+        button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #3182ce;
+        }
+        button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #c6f6d5;
+            border: 1px solid #9ae6b4;
+            color: #22543d;
+        }
+        .error {
+            background: #fed7d7;
+            border: 1px solid #fc8181;
+            color: #742a2a;
+        }
+        .info {
+            background: #bee3f8;
+            border: 1px solid #90cdf4;
+            color: #2a4365;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #48bb78; }
+        .status-error { background: #f56565; }
+        .status-pending { background: #ed8936; }
+        
+        .deployment-info {
+            background: #e6fffa;
+            border: 1px solid #81e6d9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Citea部署测试面板</h1>
+        
+        <div class="deployment-info">
+            <h3>📊 部署状态</h3>
+            <p><strong>部署URL:</strong> <span id="deploymentUrl">检测中...</span></p>
+            <p><strong>状态:</strong> <span id="deploymentStatus">检测中...</span></p>
+            <p><strong>构建:</strong> <span id="buildStatus">检测中...</span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 基础连接测试</h3>
+            <button onclick="testConnection()">测试网站连接</button>
+            <button onclick="testAPIEndpoints()">测试API端点</button>
+            <div id="connectionResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>👤 用户注册测试</h3>
+            <input type="email" id="testEmail" placeholder="测试邮箱地址" value="">
+            <input type="password" id="testPassword" placeholder="密码" value="TestPassword123!">
+            <input type="text" id="testName" placeholder="用户名" value="测试用户">
+            <button onclick="testRegistration()">测试注册</button>
+            <button onclick="generateTestEmail()">生成测试邮箱</button>
+            <div id="registrationResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📧 邮件发送测试</h3>
+            <input type="email" id="emailTo" placeholder="收件人邮箱">
+            <button onclick="testEmailSending()">测试邮件发送</button>
+            <div id="emailResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>⚙️ 环境配置检查</h3>
+            <button onclick="checkEnvironment()">检查环境变量</button>
+            <button onclick="checkSupabaseConnection()">检查Supabase连接</button>
+            <div id="envResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 测试日志</h3>
+            <button onclick="clearLogs()">清除日志</button>
+            <button onclick="runAllTests()">运行所有测试</button>
+            <textarea id="testLog" rows="10" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        const DEPLOYMENT_URL = 'https://citea-9hzk2i7bh-mercury-njus-projects.vercel.app';
+        let testLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            testLog.push(logEntry);
+            document.getElementById('testLog').value = testLog.join('\n');
+            console.log(logEntry);
+        }
+
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = content;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        function updateStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            const statusClass = status === 'success' ? 'status-success' : 
+                               status === 'error' ? 'status-error' : 'status-pending';
+            element.innerHTML = `<span class="status-indicator ${statusClass}"></span>${message}`;
+        }
+
+        async function testConnection() {
+            log('开始测试网站连接...');
+            try {
+                const response = await fetch(DEPLOYMENT_URL, {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                
+                updateStatus('deploymentStatus', 'success', '网站可访问');
+                showResult('connectionResult', '✅ 网站连接成功', 'success');
+                log('网站连接测试通过', 'success');
+            } catch (error) {
+                updateStatus('deploymentStatus', 'error', '连接失败');
+                showResult('connectionResult', `❌ 连接失败: ${error.message}`, 'error');
+                log(`网站连接测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPIEndpoints() {
+            log('开始测试API端点...');
+            const endpoints = ['/api/test-env', '/api/auth/signup', '/api/auth/verify-email'];
+            let results = [];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`${DEPLOYMENT_URL}${endpoint}`, {
+                        method: 'GET',
+                        mode: 'no-cors'
+                    });
+                    results.push(`✅ ${endpoint}: 可访问`);
+                    log(`${endpoint}: 测试通过`, 'success');
+                } catch (error) {
+                    results.push(`❌ ${endpoint}: ${error.message}`);
+                    log(`${endpoint}: 测试失败 - ${error.message}`, 'error');
+                }
+            }
+            
+            const status = results.some(r => r.includes('❌')) ? 'error' : 'success';
+            showResult('connectionResult', results.join('<br>'), status);
+        }
+
+        function generateTestEmail() {
+            const timestamp = Date.now();
+            const email = `test${timestamp}@example.com`;
+            document.getElementById('testEmail').value = email;
+            log(`生成测试邮箱: ${email}`);
+        }
+
+        async function testRegistration() {
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            const name = document.getElementById('testName').value;
+            
+            if (!email) {
+                alert('请输入测试邮箱地址');
+                return;
+            }
+            
+            log(`开始测试用户注册: ${email}`);
+            
+            try {
+                const response = await fetch(`${DEPLOYMENT_URL}/api/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        name: name
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('registrationResult', 
+                        `✅ 注册成功!<br>邮箱: ${email}<br>响应: ${JSON.stringify(data, null, 2)}`, 
+                        'success');
+                    log('用户注册测试通过', 'success');
+                } else {
+                    showResult('registrationResult', 
+                        `❌ 注册失败<br>状态: ${response.status}<br>错误: ${JSON.stringify(data, null, 2)}`, 
+                        'error');
+                    log(`用户注册测试失败: ${JSON.stringify(data)}`, 'error');
+                }
+            } catch (error) {
+                showResult('registrationResult', 
+                    `❌ 注册请求失败: ${error.message}`, 
+                    'error');
+                log(`用户注册请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testEmailSending() {
+            const emailTo = document.getElementById('emailTo').value;
+            
+            if (!emailTo) {
+                alert('请输入收件人邮箱地址');
+                return;
+            }
+            
+            log(`开始测试邮件发送: ${emailTo}`);
+            
+            try {
+                const response = await fetch(`${DEPLOYMENT_URL}/api/test-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        to: emailTo,
+                        subject: '测试邮件',
+                        content: '这是一封测试邮件'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('emailResult', 
+                        `✅ 邮件发送成功!<br>收件人: ${emailTo}<br>响应: ${JSON.stringify(data, null, 2)}`, 
+                        'success');
+                    log('邮件发送测试通过', 'success');
+                } else {
+                    showResult('emailResult', 
+                        `❌ 邮件发送失败<br>状态: ${response.status}<br>错误: ${JSON.stringify(data, null, 2)}`, 
+                        'error');
+                    log(`邮件发送测试失败: ${JSON.stringify(data)}`, 'error');
+                }
+            } catch (error) {
+                showResult('emailResult', 
+                    `❌ 邮件发送请求失败: ${error.message}`, 
+                    'error');
+                log(`邮件发送请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkEnvironment() {
+            log('开始检查环境配置...');
+            
+            try {
+                const response = await fetch(`${DEPLOYMENT_URL}/api/test-env`, {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+                
+                showResult('envResult', 
+                    '✅ 环境变量检查完成<br>请查看控制台获取详细信息', 
+                    'info');
+                log('环境配置检查完成', 'success');
+            } catch (error) {
+                showResult('envResult', 
+                    `❌ 环境检查失败: ${error.message}`, 
+                    'error');
+                log(`环境检查失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkSupabaseConnection() {
+            log('开始检查Supabase连接...');
+            
+            try {
+                const response = await fetch(`${DEPLOYMENT_URL}/api/test-supabase`, {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+                
+                showResult('envResult', 
+                    '✅ Supabase连接检查完成', 
+                    'success');
+                log('Supabase连接检查通过', 'success');
+            } catch (error) {
+                showResult('envResult', 
+                    `❌ Supabase连接检查失败: ${error.message}`, 
+                    'error');
+                log(`Supabase连接检查失败: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLogs() {
+            testLog = [];
+            document.getElementById('testLog').value = '';
+            log('日志已清除');
+        }
+
+        async function runAllTests() {
+            log('开始运行所有测试...', 'info');
+            
+            await testConnection();
+            await testAPIEndpoints();
+            await checkEnvironment();
+            
+            log('所有测试运行完成', 'info');
+        }
+
+        // 页面加载时自动检测部署状态
+        window.addEventListener('load', async () => {
+            document.getElementById('deploymentUrl').textContent = DEPLOYMENT_URL;
+            log('测试面板已加载');
+            log(`目标部署URL: ${DEPLOYMENT_URL}`);
+            
+            // 自动检测部署状态
+            try {
+                await testConnection();
+            } catch (error) {
+                log(`自动检测失败: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

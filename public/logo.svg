@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#0ea5e9" opacity="0.1"/>
+  
+  <!-- Book Icon -->
+  <path d="M60 50 L60 150 L140 150 L140 50 Z" fill="#0ea5e9" opacity="0.2"/>
+  <path d="M70 60 L70 140 L130 140 L130 60 Z" fill="#0ea5e9"/>
+  
+  <!-- Checkmark -->
+  <path d="M85 100 L95 110 L115 80" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Text -->
+  <text x="100" y="180" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#0ea5e9" text-anchor="middle">Citea</text>
+</svg>
