@@ -18,33 +18,34 @@ async function sendVerificationEmailViaSupabase(
 
     const supabaseAdmin = createSupabaseAdmin()
     
-    // Magic Link 模式：使用 Supabase 的 generateLink 生成验证链接
-    const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+    // 使用 signInWithOtp 发送 Magic Link 邮件
+    // 这会自动发送邮件给用户
+    const { data, error } = await supabaseAdmin.auth.signInWithOtp({
       email,
-      type: 'magiclink'  // 生成 Magic Link 验证链接
+      options: {
+        shouldCreateUser: true, // 如果用户不存在则创建
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://citea.app'}/auth/verify-email?verified=true`
+      }
     })
 
     if (error) {
-      console.error('[Supabase Email] ❌ 生成验证链接失败:', error)
+      console.error('[Supabase Email] ❌ 发送 Magic Link 失败:', error)
       return { 
         success: false, 
-        error: error.message || 'Failed to generate verification link',
-        details: 'Supabase 验证链接生成失败'
+        error: error.message || 'Failed to send magic link',
+        details: 'Supabase Magic Link 发送失败'
       }
     }
 
-    console.log('[Supabase Email] ✅ Magic Link 生成成功:', {
+    console.log('[Supabase Email] ✅ Magic Link 邮件发送成功:', {
       email,
-      linkGenerated: !!data.properties?.action_link
+      timestamp: new Date().toISOString()
     })
 
-    // Magic Link 模式：Supabase 自动生成并发送验证邮件，用户点击链接即可验证
-    
     return { 
       success: true, 
       messageId: `supabase-magiclink-${Date.now()}`,
       details: 'Supabase Magic Link 验证邮件已发送',
-      actionLink: data.properties?.action_link,
       note: '用户点击邮件中的 Magic Link 链接即可完成验证，无需输入验证码'
     }
   } catch (error) {
