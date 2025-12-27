@@ -1,43 +1,43 @@
 import { createClient } from '@supabase/supabase-js'
 
-// 环境变量
+// Supabase 配置
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
+// 检查配置
 if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('[Supabase] 警告: Supabase URL 或 Anon Key 未配置')
+  console.warn('[Supabase] 配置不完整:', {
+    hasUrl: !!supabaseUrl,
+    hasAnonKey: !!supabaseAnonKey,
+    hasServiceKey: !!supabaseServiceKey
+  })
 }
 
-// 客户端 Supabase 实例（用于前端和一般后端操作）
+// 创建客户端实例
 export function createSupabaseClient() {
-    if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Supabase 配置不完整: 缺少 URL 或 Anon Key')
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase 配置不完整')
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
     }
-
-    return createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-        }
-    })
+  })
 }
 
-// 服务端 Supabase 实例（用于管理员操作，如创建用户）
+// 创建管理员客户端（用于服务端操作）
 export function createSupabaseAdmin() {
-    if (!supabaseUrl || !supabaseServiceKey) {
-        throw new Error('Supabase 管理员配置不完整: 缺少 URL 或 Service Role Key')
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Supabase 管理员配置不完整')
+  }
+  
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
     }
-
-    return createClient(supabaseUrl, supabaseServiceKey, {
-        auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-        }
-    })
+  })
 }
-
-// 默认导出客户端实例
-export const supabase = supabaseUrl && supabaseAnonKey
-    ? createSupabaseClient()
-    : null

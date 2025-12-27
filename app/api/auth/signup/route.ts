@@ -1,89 +1,131 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseAdmin } from '@/lib/supabase'
+import { createUser, getUserByEmail } from '@/lib/userStore'
+import bcrypt from 'bcryptjs'
+import { randomUUID } from 'crypto'
+import { sendVerificationEmail } from '@/lib/email'
 
 export async function POST(req: Request) {
-    try {
-        const { email, password, name } = await req.json()
-
-        // 验证输入
-        if (!email || !password || !name) {
-            return NextResponse.json(
-                { error: '缺少必填字段' },
-                { status: 400 }
-            )
-        }
-
-        // 验证邮箱格式
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(email)) {
-            return NextResponse.json(
-                { error: '邮箱格式不正确' },
-                { status: 400 }
-            )
-        }
-
-        // 验证密码长度
-        if (password.length < 6) {
-            return NextResponse.json(
-                { error: '密码至少需要 6 个字符' },
-                { status: 400 }
-            )
-        }
-
-        console.log('[Signup] 开始注册用户:', email)
-
-        // 使用 Supabase Admin 创建用户
-        const supabase = createSupabaseAdmin()
-
-        const { data, error } = await supabase.auth.admin.createUser({
-            email: email.toLowerCase(),
-            password,
-            email_confirm: false, // 需要邮件验证
-            user_metadata: {
-                name,
-                plan: 'free',
-                credits: 3
-            }
-        })
-
-        if (error) {
-            console.error('[Signup] Supabase 创建用户失败:', error)
-
-            // 处理常见错误
-            if (error.message.includes('already registered')) {
-                return NextResponse.json(
-                    { error: '该邮箱已被注册' },
-                    { status: 409 }
-                )
-            }
-
-            return NextResponse.json(
-                { error: error.message || '注册失败' },
-                { status: 400 }
-            )
-        }
-
-        console.log('[Signup] ✅ 用户创建成功:', data.user?.id)
-
-        // Supabase 会自动发送验证邮件
-        return NextResponse.json({
-            success: true,
-            message: '注册成功！我们已向您的邮箱发送了验证链接，请查收邮件完成验证。',
-            user: {
-                id: data.user?.id,
-                email: data.user?.email,
-                name
-            }
-        }, { status: 201 })
-
-    } catch (error) {
-        console.error('[Signup] 注册异常:', error)
-        return NextResponse.json(
-            {
-                error: '注册失败',
-                message: error instanceof Error ? error.message : '服务器错误，请稍后重试'
-            },
-            { status: 500 }
-        )
+  try {
+    const { name, email, password } = await req.json()
+    if (!name || !email || !password) {
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
+
+    // Check if user already exists
+    const existingUser = await getUserByEmail(email)
+    if (existingUser) {
+      return NextResponse.json({ 
+        error: 'Email already registered',
+        message: '该邮箱已注册。请直接登录或使用忘记密码功能。',
+      }, { status: 409 })
+    }
+
+    // Hash the password
+    const passwordHash = await bcrypt.hash(password, 10)
+    
+    // Create user with local storage - Magic Link 模式不需要验证码
+    console.log('Creating user with local storage (Magic Link mode)...')
+    const userData = {
+      id: randomUUID(), // Generate unique ID
+      name,
+      email: email.toLowerCase(),
+      passwordHash,
+      plan: 'free' as const,
+      credits: 3,
+      emailVerified: false, // Require email verification
+      authProvider: 'email' as const
+      // Magic Link 模式：移除了 verificationCode 和 verificationExpiry
+    }
+    
+    console.log('About to call createUser with:', email.toLowerCase())
+    await createUser(userData)
+    console.log('User created successfully:', email.toLowerCase())
+    
+    // Get the newly created user
+    console.log('Retrieving newly created user...')
+    const newUser = await getUserByEmail(email.toLowerCase())
+    console.log('Retrieved user:', newUser ? 'found' : 'not found')
+    if (!newUser) {
+      return NextResponse.json({ 
+        error: 'Registration failed',
+        message: '注册失败，请稍后重试。'
+      }, { status: 500 })
+    }
+    
+    console.log('[Signup] ✅ 用户注册成功!', {
+      userId: newUser.id,
+      email,
+      name
+      // Magic Link 模式：移除了 verificationCode 日志
+    })
+    
+    // 尝试发送验证邮件
+    let emailSent = false
+    let emailError = null
+    
+    try {
+      // 检查 Supabase 邮件服务配置
+      const hasSupabaseService = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
+      
+      if (hasSupabaseService) {
+        console.log('[Signup] Supabase 邮件服务可用，正在发送 Magic Link 验证邮件...')
+        
+        // 调用邮件发送函数 - Magic Link 模式
+        const emailResult = await sendVerificationEmail(email, '', name)
+        
+        if (emailResult.success) {
+          console.log(`[Signup] ✅ Magic Link 邮件发送成功! MessageId: ${emailResult.messageId}`)
+          emailSent = true
+        } else {
+          console.error('[Signup] ❌ Magic Link 邮件发送失败:', emailResult.error)
+          emailError = emailResult.error || '邮件发送失败'
+        }
+      } else {
+        console.log('[Signup] ⚠️ Supabase 邮件服务未配置')
+        emailError = '邮件服务未配置'
+      }
+    } catch (error) {
+      console.error('[Signup] 邮件发送失败:', error)
+      emailError = '邮件发送失败'
+    }
+    
+    // 注意：注册时不生成JWT token，用户必须通过邮箱验证后才能登录
+    // const token = await signJwt({
+    //   id: newUser.id,
+    //   name: newUser.name,
+    //   email: newUser.email,
+    //   plan: newUser.plan
+    // })
+    
+    console.log('[Signup] ✅ 用户注册成功! 需要邮箱验证。', {
+      userId: newUser.id,
+      email,
+      name
+    })
+    
+    return NextResponse.json({ 
+      user: { 
+        id: newUser.id, 
+        name: newUser.name, 
+        email: newUser.email, 
+        plan: newUser.plan 
+      },
+      // token, // 不返回token，用户必须通过验证
+      needsVerification: true, // 需要邮箱验证
+      emailSent: emailSent,
+      emailError: emailError,
+      // Magic Link 模式：移除了 verificationCode 返回
+      message: '注册成功！请检查您的邮箱并点击验证链接完成注册。'
+    }, { status: 201 })
+  } catch (e: any) {
+    console.error('Signup error:', e)
+    console.error('Error stack:', e?.stack)
+    
+    return NextResponse.json({ 
+      error: 'Internal error', 
+      message: e?.message || 'An unexpected error occurred. Please try again later.',
+      details: process.env.NODE_ENV === 'development' ? (e?.message + '\n' + e?.stack) : '注册过程中发生错误，请稍后重试。',
+      errorType: e?.constructor?.name || 'UnknownError'
+    }, { status: 500 })
+  }
 }
