@@ -230,14 +230,14 @@ async function analyzeUserIntent(text: string): Promise<SearchStrategy> {
               content: `You are an intelligent research assistant. Analyze the user's text and determine:
 1. What type of research they need (medical/science/technology/social/general)
 2. Extract 3-5 key search keywords
-3. Which databases would be most relevant (CrossRef for general academic, PubMed for medical, Semantic Scholar for citations, arXiv for preprints)
+3. Which databases would be most relevant (CrossRef for general academic, PubMed for medical, Semantic Scholar for citations, arXiv for preprints, OpenAlex for comprehensive academic data)
 4. Provide reasoning for your choices
 
 Respond in JSON format:
 {
   "searchType": "medical|science|technology|social|general",
   "keywords": ["keyword1", "keyword2", ...],
-  "databases": ["CrossRef", "PubMed", "Semantic Scholar", "arXiv"],
+  "databases": ["CrossRef", "PubMed", "Semantic Scholar", "arXiv", "OpenAlex"],
   "reasoning": "explanation in Chinese"
 }`
             },
@@ -288,28 +288,28 @@ async function fallbackExtraction(text: string): Promise<SearchStrategy> {
   
   // 智能判断领域
   let searchType: SearchStrategy['searchType'] = 'general'
-  let databases = ['CrossRef', 'Semantic Scholar']
+  let databases = ['CrossRef', 'Semantic Scholar', 'OpenAlex']
   
   if (lowerText.includes('医学') || lowerText.includes('medical') || 
       lowerText.includes('病') || lowerText.includes('药') ||
       lowerText.includes('health') || lowerText.includes('clinical')) {
     searchType = 'medical'
-    databases = ['PubMed', 'CrossRef', 'Semantic Scholar']
+    databases = ['PubMed', 'CrossRef', 'Semantic Scholar', 'OpenAlex']
   } else if (lowerText.includes('计算机') || lowerText.includes('computer') ||
              lowerText.includes('算法') || lowerText.includes('algorithm') ||
              lowerText.includes('machine learning') || lowerText.includes('AI')) {
     searchType = 'technology'
-    databases = ['CrossRef', 'arXiv', 'Semantic Scholar']
+    databases = ['CrossRef', 'arXiv', 'Semantic Scholar', 'OpenAlex']
   } else if (lowerText.includes('物理') || lowerText.includes('physics') ||
              lowerText.includes('化学') || lowerText.includes('chemistry') ||
              lowerText.includes('生物') || lowerText.includes('biology')) {
     searchType = 'science'
-    databases = ['CrossRef', 'PubMed', 'Semantic Scholar']
+    databases = ['CrossRef', 'PubMed', 'Semantic Scholar', 'OpenAlex']
   } else if (lowerText.includes('社会') || lowerText.includes('social') ||
              lowerText.includes('经济') || lowerText.includes('economic') ||
              lowerText.includes('心理') || lowerText.includes('psychology')) {
     searchType = 'social'
-    databases = ['CrossRef', 'Semantic Scholar']
+    databases = ['CrossRef', 'Semantic Scholar', 'OpenAlex']
   }
 
   // 提取关键词
@@ -332,12 +332,15 @@ async function intelligentSearch(strategy: SearchStrategy, hasAdvancedDatabases:
 
   // 免费用户只能使用基础数据库
   if (!hasAdvancedDatabases) {
-    // 免费用户只能使用 CrossRef 和 Semantic Scholar
+    // 免费用户只能使用 CrossRef、Semantic Scholar 和 OpenAlex
     if (strategy.databases.includes('CrossRef')) {
       searchPromises.push(searchCrossRef(strategy.keywords))
     }
     if (strategy.databases.includes('Semantic Scholar')) {
       searchPromises.push(searchSemanticScholar(strategy.keywords))
+    }
+    if (strategy.databases.includes('OpenAlex')) {
+      searchPromises.push(searchOpenAlex(strategy.keywords))
     }
   } else {
     // 付费用户可以使用所有数据库
@@ -352,6 +355,9 @@ async function intelligentSearch(strategy: SearchStrategy, hasAdvancedDatabases:
     }
     if (strategy.databases.includes('arXiv')) {
       searchPromises.push(searchArxiv(strategy.keywords))
+    }
+    if (strategy.databases.includes('OpenAlex')) {
+      searchPromises.push(searchOpenAlex(strategy.keywords))
     }
   }
 
@@ -540,6 +546,57 @@ async function searchArxiv(keywords: string[]): Promise<Source[]> {
     }).filter((s: Source) => s.title !== 'Untitled')
   } catch (error) {
     console.error('arXiv search error:', error)
+    return []
+  }
+}
+
+/**
+ * 搜索 OpenAlex - 开放学术数据库（包含超过 2.5 亿篇学术作品）
+ */
+async function searchOpenAlex(keywords: string[]): Promise<Source[]> {
+  try {
+    const query = keywords.join(' ')
+    const response = await fetch(
+      `https://api.openalex.org/works?search=${encodeURIComponent(query)}&per_page=5&select=id,doi,title,authorships,publication_year,primary_location`,
+      {
+        headers: {
+          'User-Agent': 'Citea/1.0 (mailto:support@citea.app)',
+          'Accept': 'application/json'
+        }
+      }
+    )
+
+    if (!response.ok) return []
+
+    const data = await response.json()
+    
+    return (data.results || []).map((work: any) => {
+      // 提取作者名
+      const authors = work.authorships
+        ?.slice(0, 3)
+        ?.map((a: any) => a.author?.display_name)
+        ?.filter(Boolean)
+        ?.join(', ') || 'Unknown'
+      
+      // 提取期刊名
+      const journal = work.primary_location?.source?.display_name || 'Unknown'
+      
+      // 提取 DOI（去掉 https://doi.org/ 前缀）
+      const doi = work.doi ? work.doi.replace('https://doi.org/', '') : null
+
+      return {
+        id: work.id || `openalex-${Math.random()}`,
+        title: work.title || 'Untitled',
+        authors,
+        year: work.publication_year?.toString() || 'N/A',
+        journal,
+        doi,
+        source: 'OpenAlex',
+        verified: true
+      }
+    }).filter((s: Source) => s.title !== 'Untitled')
+  } catch (error) {
+    console.error('OpenAlex search error:', error)
     return []
   }
 }
