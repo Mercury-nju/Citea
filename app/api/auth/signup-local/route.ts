@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { signJwt } from '@/lib/auth'
 import { getUserByEmail, createUser, updateUserVerification } from '@/lib/userStore'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
     // 创建用户对象
     const newUser = {
-      id: uuidv4(),
+      id: randomUUID(),
       name: name.trim(),
       email: normalizedEmail,
       passwordHash,

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { updateUser, getUserByEmail, createUser } from '@/lib/userStore'
 import { getPlanLimits } from '@/lib/credits'
 import bcrypt from 'bcryptjs'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 
 // Minimal webhook receiver for Creem. Replace logic to fit your user model.
 export async function POST(request: NextRequest) {
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
           console.log(`[Webhook] User ${normalizedEmail} does not exist, creating new account...`)
           
           // 生成随机密码（用户可以通过邮箱重置密码）
-          const tempPassword = uuidv4() + Date.now().toString()
+          const tempPassword = randomUUID() + Date.now().toString()
           const passwordHash = await bcrypt.hash(tempPassword, 10)
           
           const newUser = {
-            id: uuidv4(),
+            id: randomUUID(),
             email: normalizedEmail,
             name: normalizedEmail.split('@')[0] || 'User',
             passwordHash: passwordHash,
@@ -127,11 +127,11 @@ export async function POST(request: NextRequest) {
         if (!user) {
           console.error(`[Webhook] ⚠️ User ${normalizedEmail} not found for renewal, creating account...`)
           // 如果用户不存在，创建账户（不应该发生，但作为保险）
-          const tempPassword = uuidv4() + Date.now().toString()
+          const tempPassword = randomUUID() + Date.now().toString()
           const passwordHash = await bcrypt.hash(tempPassword, 10)
           
           const newUser = {
-            id: uuidv4(),
+            id: randomUUID(),
             email: normalizedEmail,
             name: normalizedEmail.split('@')[0] || 'User',
             passwordHash: passwordHash,
