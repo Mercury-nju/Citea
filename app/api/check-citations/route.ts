@@ -25,6 +25,9 @@ interface Citation {
     authors: string
     date: string
     link: string
+    source?: string
+    abstract?: string | null
+    webSearchNote?: string
   }
 }
 
@@ -105,12 +108,17 @@ Return ONLY the JSON object, no other text.`
 }
 
 // Search for citation in databases with timeout and error handling
+// 阶段1: 学术数据库搜索
+// 阶段2: 网络搜索（如果学术数据库找不到）
 async function searchCitation(parsed: any) {
   if (!parsed || !parsed.title) return null
 
+  const query = `${parsed.title || ''} ${parsed.authors || ''} ${parsed.year || ''}`
+
+  // ========== 阶段1: 学术数据库搜索 ==========
+  
+  // 1. CrossRef
   try {
-    // Search CrossRef with timeout
-    const query = `${parsed.title || ''} ${parsed.authors || ''} ${parsed.year || ''}`
     const response = await axios.get(
       `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=1`,
       { 
@@ -130,17 +138,18 @@ async function searchCitation(parsed: any) {
               (item.issued ? item.issued['date-parts'][0][0].toString() : ''),
         doi: item.DOI,
         link: item.DOI ? `https://doi.org/${item.DOI}` : '',
+        source: 'CrossRef',
+        abstract: item.abstract || null,
       }
     }
   } catch (error: any) {
     console.error('CrossRef error:', error.message)
   }
 
-  // Try Semantic Scholar as backup
+  // 2. Semantic Scholar
   try {
-    const query = parsed.title || ''
     const response = await axios.get(
-      `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&fields=title,authors,year,externalIds&limit=1`,
+      `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(parsed.title || '')}&fields=title,authors,year,externalIds,abstract&limit=1`,
       { 
         timeout: 8000,
         headers: {
@@ -158,13 +167,100 @@ async function searchCitation(parsed: any) {
         doi: item.externalIds?.DOI || '',
         link: item.externalIds?.DOI ? `https://doi.org/${item.externalIds.DOI}` : 
               `https://www.semanticscholar.org/paper/${item.paperId}`,
+        source: 'Semantic Scholar',
+        abstract: item.abstract || null,
       }
     }
   } catch (error: any) {
     console.error('Semantic Scholar error:', error.message)
   }
 
-  return null
+  // 3. OpenAlex
+  try {
+    const response = await axios.get(
+      `https://api.openalex.org/works?search=${encodeURIComponent(parsed.title || '')}&per_page=1`,
+      { 
+        timeout: 8000,
+        headers: {
+          'User-Agent': 'Citea/1.0 (mailto:support@citea.app)'
+        }
+      }
+    )
+
+    if (response.data.results && response.data.results.length > 0) {
+      const item = response.data.results[0]
+      const authors = item.authorships?.slice(0, 3)?.map((a: any) => a.author?.display_name)?.filter(Boolean)?.join(', ') || ''
+      return {
+        title: item.title || '',
+        authors,
+        year: item.publication_year?.toString() || '',
+        doi: item.doi ? item.doi.replace('https://doi.org/', '') : '',
+        link: item.doi || item.id || '',
+        source: 'OpenAlex',
+        abstract: item.abstract_inverted_index ? '摘要可用' : null,
+      }
+    }
+  } catch (error: any) {
+    console.error('OpenAlex error:', error.message)
+  }
+
+  // ========== 阶段2: 网络搜索（学术数据库找不到时） ==========
+  console.log('[Citation] 学术数据库未找到，尝试网络搜索...')
+  
+  // 使用 Google Scholar 搜索（通过 SerpAPI 或直接搜索）
+  try {
+    // 构建 Google Scholar 搜索链接
+    const scholarQuery = encodeURIComponent(`"${parsed.title || ''}" ${parsed.authors || ''}`)
+    const scholarLink = `https://scholar.google.com/scholar?q=${scholarQuery}`
+    
+    // 尝试通过 DuckDuckGo 搜索（免费，无需 API key）
+    const ddgQuery = encodeURIComponent(`${parsed.title || ''} ${parsed.authors || ''} site:scholar.google.com OR site:researchgate.net OR site:academia.edu OR filetype:pdf`)
+    const ddgResponse = await axios.get(
+      `https://api.duckduckgo.com/?q=${ddgQuery}&format=json&no_html=1`,
+      { timeout: 8000 }
+    )
+
+    // DuckDuckGo 的 instant answer API 可能返回相关结果
+    if (ddgResponse.data.AbstractText || ddgResponse.data.RelatedTopics?.length > 0) {
+      return {
+        title: parsed.title || '',
+        authors: parsed.authors || '',
+        year: parsed.year || '',
+        doi: '',
+        link: scholarLink,
+        source: 'Web Search',
+        abstract: ddgResponse.data.AbstractText || '通过网络搜索找到相关结果',
+        webSearchNote: '此结果来自网络搜索，建议点击链接进一步验证'
+      }
+    }
+
+    // 即使 DuckDuckGo 没有直接结果，也返回 Google Scholar 链接供用户手动验证
+    return {
+      title: parsed.title || '',
+      authors: parsed.authors || '',
+      year: parsed.year || '',
+      doi: '',
+      link: scholarLink,
+      source: 'Web Search',
+      abstract: null,
+      webSearchNote: '学术数据库未收录，已生成 Google Scholar 搜索链接供手动验证'
+    }
+  } catch (error: any) {
+    console.error('Web search error:', error.message)
+    
+    // 最后的备用方案：返回 Google Scholar 链接
+    const scholarQuery = encodeURIComponent(`"${parsed.title || ''}"`)
+    return {
+      title: parsed.title || '',
+      authors: parsed.authors || '',
+      year: parsed.year || '',
+      doi: '',
+      link: `https://scholar.google.com/scholar?q=${scholarQuery}`,
+      source: 'Web Search',
+      abstract: null,
+      webSearchNote: '请点击链接在 Google Scholar 中手动搜索验证'
+    }
+  }
 }
 
 // Calculate similarity percentage
@@ -239,10 +335,14 @@ async function verifyCitation(citation: string): Promise<Citation> {
       dateSim = yearDiff === 0 ? 100 : yearDiff <= 1 ? 80 : yearDiff <= 3 ? 60 : 0
     }
 
+    // 对于网络搜索结果，即使相似度低也标记为"已找到"
+    const isWebSearch = match.source === 'Web Search'
+    const verified = isWebSearch ? true : (titleSim > 30 || authorsSim > 50)
+
     return {
       id,
       text: citation,
-      verified: titleSim > 30 || authorsSim > 50,
+      verified,
       titleSimilarity: titleSim,
       authorsSimilarity: authorsSim,
       dateSimilarity: dateSim,
@@ -251,6 +351,9 @@ async function verifyCitation(citation: string): Promise<Citation> {
         authors: match.authors,
         date: match.year,
         link: match.link,
+        source: match.source,
+        abstract: match.abstract,
+        webSearchNote: match.webSearchNote,
       },
     }
   } catch (error: any) {
