@@ -5,7 +5,7 @@ import { verifyJwt } from '@/lib/auth'
 import { getUserByEmail } from '@/lib/userStore'
 import { consumeCredit, checkWordLimit, getPlanLimits } from '@/lib/credits'
 
-const TONGYI_API_KEY = process.env.TONGYI_API_KEY || 'sk-9bf19547ddbd4be1a87a7a43cf251097'
+const TONGYI_API_KEY = process.env.TONGYI_API_KEY || ''
 const TONGYI_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
 
 // 检查 API key 是否配置

@@ -4,7 +4,7 @@ import { verifyJwt } from '@/lib/auth'
 import { getUserByEmail } from '@/lib/userStore'
 import { consumeCredit, getPlanLimits } from '@/lib/credits'
 
-const TONGYI_API_KEY = process.env.TONGYI_API_KEY || 'sk-9bf19547ddbd4be1a87a7a43cf251097'
+const TONGYI_API_KEY = process.env.TONGYI_API_KEY || ''
 
 // 获取当前用户
 async function getCurrentUser(request: NextRequest) {

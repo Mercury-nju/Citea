@@ -5,8 +5,8 @@ export async function GET() {
     // 检查环境变量
     const hasRedis = !!process.env.REDIS_URL
     const hasKV = !!process.env.KV_REST_API_URL
-    const hasBrevo = !!process.env.BREVO_API_KEY
-    const hasBrevoEmail = !!process.env.BREVO_FROM_EMAIL
+    const hasSupabase = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
+    const hasTongyiKey = !!process.env.TONGYI_API_KEY
     
     // 检查 Redis URL 格式
     let redisUrlType = 'NOT SET'
@@ -66,11 +66,13 @@ export async function GET() {
         hasKV,
       },
       email: {
-        hasBrevo,
-        hasBrevoEmail,
-        brevoKeyPrefix: process.env.BREVO_API_KEY ? process.env.BREVO_API_KEY.substring(0, 15) + '...' : 'NOT SET',
-        brevoKeyFormat: process.env.BREVO_API_KEY?.startsWith('xkeysib-') ? '✅ 正确' : process.env.BREVO_API_KEY ? '❌ 可能不正确' : 'NOT SET',
-        fromEmail: process.env.BREVO_FROM_EMAIL || 'lihongyangnju@gmail.com (默认)',
+        hasSupabase,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ 已配置' : '❌ 未配置',
+        serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ 已配置' : '❌ 未配置',
+      },
+      ai: {
+        hasTongyiKey,
+        tongyiKeyPrefix: process.env.TONGYI_API_KEY ? process.env.TONGYI_API_KEY.substring(0, 10) + '...' : 'NOT SET',
       },
       diagnosis: getDiagnosis(hasRedis, hasKV, redisUrlType, redisConnectionTest),
     })
@@ -106,4 +108,3 @@ function getDiagnosis(hasRedis: boolean, hasKV: boolean, redisUrlType: string, c
   
   return '⚠️ UNKNOWN STATE - Please check configuration'
 }
-

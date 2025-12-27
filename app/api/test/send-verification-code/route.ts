@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       }, { status: 401 })
     }
     
-    const testEmail = email || 'lihongyangnju@gmail.com'
+    const testEmail = email || process.env.TEST_EMAIL || 'test@example.com'
     const testCode = generateVerificationCode()
     const testName = 'Test User'
     
